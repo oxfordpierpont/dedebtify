@@ -211,17 +211,188 @@
         background: #f9f9f9;
     }
 
+    /* Action Plan Specific Styles */
+    .dedebtify-action-plan .dedebtify-form-container {
+        display: none;
+    }
+
+    .dedebtify-timeline-item {
+        border: 1px solid #000;
+        padding: 10pt;
+        margin-bottom: 10pt;
+        page-break-inside: avoid;
+    }
+
+    .dedebtify-timeline-number {
+        display: inline-block;
+        width: 30pt;
+        height: 30pt;
+        border: 2px solid #000;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 30pt;
+        font-weight: bold;
+        margin-right: 10pt;
+    }
+
+    .dedebtify-timeline-content {
+        border: none;
+        padding: 0;
+    }
+
+    .dedebtify-timeline-item::after {
+        display: none;
+    }
+
+    .payoff-badge {
+        border: 1px solid #000;
+        padding: 3pt 8pt;
+        font-size: 9pt;
+    }
+
+    .dedebtify-action-number {
+        display: inline-block;
+        width: 25pt;
+        height: 25pt;
+        border: 2px solid #000;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 25pt;
+        font-weight: bold;
+        margin-right: 10pt;
+    }
+
+    .dedebtify-comparison-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10pt;
+        page-break-inside: avoid;
+    }
+
+    .dedebtify-comparison-vs {
+        display: none;
+    }
+
+    /* Snapshots Specific Styles */
+    .dedebtify-snapshot-actions {
+        display: none;
+    }
+
+    .dedebtify-snapshot-item {
+        border: 1px solid #000;
+        padding: 10pt;
+        margin-bottom: 10pt;
+        page-break-inside: avoid;
+    }
+
+    .dedebtify-snapshots-timeline::before {
+        display: none;
+    }
+
+    .snapshot-marker {
+        display: none;
+    }
+
+    .snapshot-badge {
+        border: 1px solid #000;
+        padding: 2pt 6pt;
+        font-size: 8pt;
+    }
+
+    .dedebtify-snapshot-metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8pt;
+    }
+
+    .dedebtify-comparison-selector {
+        display: none;
+    }
+
+    .chart-bars {
+        display: none;
+    }
+
+    /* Hide interactive elements */
+    button,
+    .dedebtify-btn,
+    .dedebtify-action-btn,
+    .dedebtify-action-card button {
+        display: none !important;
+    }
+
+    /* Show print-specific elements */
+    .print-only {
+        display: block !important;
+    }
+
+    /* Payment Schedule Table */
+    .dedebtify-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9pt;
+    }
+
+    .dedebtify-table th {
+        background: #e0e0e0 !important;
+        border: 1px solid #000 !important;
+        padding: 5pt;
+    }
+
+    .dedebtify-table td {
+        border: 1px solid #000 !important;
+        padding: 5pt;
+    }
+
+    .schedule-gap {
+        background: #f5f5f5 !important;
+    }
+
     /* Ensure black and white friendly */
     * {
         color: #000 !important;
         background: #fff !important;
     }
 
-    /* But allow borders */
+    /* But allow borders and light backgrounds */
     .dedebtify-stat-card,
     .dedebtify-card-item,
-    .dedebtify-message {
+    .dedebtify-message,
+    .dedebtify-timeline-item,
+    .dedebtify-snapshot-item {
         background: #fff !important;
         border-color: #000 !important;
+    }
+
+    .dedebtify-table th,
+    .schedule-gap {
+        background: #f0f0f0 !important;
+    }
+
+    /* Print header/footer */
+    @page {
+        margin: 1.5cm;
+
+        @top-right {
+            content: "DeDebtify Report - Page " counter(page);
+            font-size: 9pt;
+            color: #666;
+        }
+
+        @bottom-left {
+            content: "Generated: " string(current-date);
+            font-size: 8pt;
+            color: #666;
+        }
+    }
+
+    /* Add print timestamp */
+    .dedebtify-dashboard::before {
+        content: "Printed: " attr(data-print-date);
+        display: block;
+        font-size: 8pt;
+        color: #666;
+        text-align: right;
+        margin-bottom: 10pt;
     }
 }
