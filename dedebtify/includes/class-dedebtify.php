@@ -101,6 +101,7 @@ class Dedebtify {
         add_shortcode( 'dedebtify_loans', array( $this, 'render_loans_shortcode' ) );
         add_shortcode( 'dedebtify_bills', array( $this, 'render_bills_shortcode' ) );
         add_shortcode( 'dedebtify_goals', array( $this, 'render_goals_shortcode' ) );
+        add_shortcode( 'dedebtify_action_plan', array( $this, 'render_action_plan_shortcode' ) );
     }
 
     /**
@@ -385,6 +386,21 @@ class Dedebtify {
 
         ob_start();
         require_once DEDEBTIFY_PLUGIN_DIR . 'templates/goals.php';
+        return ob_get_clean();
+    }
+
+    /**
+     * Render action plan shortcode.
+     *
+     * @since    1.0.0
+     */
+    public function render_action_plan_shortcode( $atts ) {
+        if ( ! is_user_logged_in() ) {
+            return '<p>' . __( 'Please log in to view your debt action plan.', 'dedebtify' ) . '</p>';
+        }
+
+        ob_start();
+        require_once DEDEBTIFY_PLUGIN_DIR . 'templates/action-plan.php';
         return ob_get_clean();
     }
 }

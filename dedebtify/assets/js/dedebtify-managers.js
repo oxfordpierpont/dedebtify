@@ -1308,9 +1308,466 @@ var dedebtifyL10n = dedebtifyL10n || {
             });
         });
 
+        // ===========================
+        // DEBT ACTION PLAN
+        // ===========================
+
+        /**
+         * Initialize Action Plan
+         */
+        function initActionPlanManager() {
+            if ($('.dedebtify-action-plan').length) {
+                initActionPlanForm();
+            }
+        }
+
+        /**
+         * Initialize action plan form
+         */
+        function initActionPlanForm() {
+            const $form = $('#dedebtify-action-plan-form');
+            if (!$form.length) return;
+
+            // Update strategy help text
+            $('#payoff_strategy').on('change', function() {
+                const strategy = $(this).val();
+                let helpText = '';
+                if (strategy === 'avalanche') {
+                    helpText = 'Avalanche method pays highest interest rates first, saving the most money overall.';
+                } else {
+                    helpText = 'Snowball method pays smallest balances first, providing quick psychological wins.';
+                }
+                $('#strategy-help').text(helpText);
+            });
+
+            // Form submission
+            $form.on('submit', function(e) {
+                e.preventDefault();
+                generateActionPlan();
+            });
+
+            // Toggle schedule details
+            $('#toggle-schedule').on('click', function() {
+                const $details = $('#dedebtify-schedule-details');
+                const $btn = $(this);
+
+                if ($details.is(':visible')) {
+                    $details.slideUp();
+                    $btn.text('Show Details');
+                } else {
+                    $details.slideDown();
+                    $btn.text('Hide Details');
+                }
+            });
+
+            // Print plan
+            $('#print-plan').on('click', function() {
+                window.print();
+            });
+
+            // Regenerate plan
+            $('#regenerate-plan').on('click', function() {
+                hideAllPlanSections();
+                $('html, body').animate({ scrollTop: 0 }, 300);
+            });
+        }
+
+        /**
+         * Generate action plan
+         */
+        function generateActionPlan() {
+            const strategy = $('#payoff_strategy').val();
+            const extraPayment = parseFloat($('#extra_payment').val()) || 0;
+
+            showPlanLoading();
+
+            // Fetch all debts
+            Promise.all([
+                fetchAllCreditCards(),
+                fetchAllLoans()
+            ]).then(function(results) {
+                const creditCards = results[0];
+                const loans = results[1];
+                const allDebts = combineDebts(creditCards, loans);
+
+                if (allDebts.length === 0) {
+                    hidePlanLoading();
+                    $('#plan-empty-state').show();
+                    return;
+                }
+
+                // Calculate both strategies for comparison
+                const avalanchePlan = calculatePayoffPlan(allDebts, 'avalanche', extraPayment);
+                const snowballPlan = calculatePayoffPlan(allDebts, 'snowball', extraPayment);
+
+                // Use selected strategy for display
+                const selectedPlan = strategy === 'avalanche' ? avalanchePlan : snowballPlan;
+
+                // Display the plan
+                displayPlanSummary(selectedPlan, avalanchePlan, snowballPlan);
+                displayPayoffTimeline(selectedPlan);
+                displayPaymentSchedule(selectedPlan);
+                displayActionItems(selectedPlan);
+
+                hidePlanLoading();
+                showAllPlanSections();
+
+            }).catch(function(error) {
+                console.error('Failed to generate action plan:', error);
+                hidePlanLoading();
+                showMessage('Failed to generate action plan', 'error');
+            });
+        }
+
+        /**
+         * Fetch all credit cards
+         */
+        function fetchAllCreditCards() {
+            return new Promise(function(resolve, reject) {
+                $.ajax({
+                    url: dedebtify.restUrl + 'credit-cards',
+                    method: 'GET',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                    },
+                    success: function(response) {
+                        resolve(response);
+                    },
+                    error: function(xhr, status, error) {
+                        reject(error);
+                    }
+                });
+            });
+        }
+
+        /**
+         * Fetch all loans
+         */
+        function fetchAllLoans() {
+            return new Promise(function(resolve, reject) {
+                $.ajax({
+                    url: dedebtify.restUrl + 'loans',
+                    method: 'GET',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                    },
+                    success: function(response) {
+                        resolve(response);
+                    },
+                    error: function(xhr, status, error) {
+                        reject(error);
+                    }
+                });
+            });
+        }
+
+        /**
+         * Combine debts into unified format
+         */
+        function combineDebts(creditCards, loans) {
+            const debts = [];
+
+            // Add credit cards
+            creditCards.forEach(function(card) {
+                if (card.balance > 0) {
+                    debts.push({
+                        id: card.id,
+                        name: card.name,
+                        type: 'credit_card',
+                        balance: parseFloat(card.balance),
+                        interest_rate: parseFloat(card.interest_rate),
+                        minimum_payment: parseFloat(card.minimum_payment) || calculateMinimumPayment(card.balance)
+                    });
+                }
+            });
+
+            // Add loans
+            loans.forEach(function(loan) {
+                if (loan.balance > 0) {
+                    debts.push({
+                        id: loan.id,
+                        name: loan.name,
+                        type: 'loan',
+                        balance: parseFloat(loan.balance),
+                        interest_rate: parseFloat(loan.interest_rate),
+                        minimum_payment: parseFloat(loan.monthly_payment)
+                    });
+                }
+            });
+
+            return debts;
+        }
+
+        /**
+         * Calculate minimum payment for credit card
+         */
+        function calculateMinimumPayment(balance) {
+            // Typically 2-3% of balance or $25, whichever is greater
+            return Math.max(balance * 0.02, 25);
+        }
+
+        /**
+         * Calculate payoff plan
+         */
+        function calculatePayoffPlan(debts, strategy, extraPayment) {
+            // Create a copy of debts to avoid mutating original
+            const workingDebts = JSON.parse(JSON.stringify(debts));
+
+            // Sort based on strategy
+            if (strategy === 'avalanche') {
+                workingDebts.sort(function(a, b) {
+                    return b.interest_rate - a.interest_rate;
+                });
+            } else {
+                workingDebts.sort(function(a, b) {
+                    return a.balance - b.balance;
+                });
+            }
+
+            // Calculate total minimum payment
+            let totalMinimumPayment = 0;
+            workingDebts.forEach(function(debt) {
+                totalMinimumPayment += debt.minimum_payment;
+            });
+
+            const totalAvailable = totalMinimumPayment + extraPayment;
+            const schedule = [];
+            let month = 0;
+            let totalInterestPaid = 0;
+
+            // Simulate month by month
+            while (workingDebts.some(function(d) { return d.balance > 0; })) {
+                month++;
+                let remainingPayment = totalAvailable;
+                let monthlyInterest = 0;
+
+                // Pay minimum on all debts first
+                workingDebts.forEach(function(debt) {
+                    if (debt.balance > 0) {
+                        const monthlyRate = debt.interest_rate / 100 / 12;
+                        const interest = debt.balance * monthlyRate;
+                        monthlyInterest += interest;
+                        totalInterestPaid += interest;
+
+                        const minPayment = Math.min(debt.minimum_payment, debt.balance + interest);
+                        const principal = minPayment - interest;
+
+                        debt.balance = Math.max(0, debt.balance + interest - minPayment);
+                        remainingPayment -= minPayment;
+                    }
+                });
+
+                // Apply extra payment to first unpaid debt
+                for (let i = 0; i < workingDebts.length; i++) {
+                    if (workingDebts[i].balance > 0 && remainingPayment > 0) {
+                        const extraApplied = Math.min(remainingPayment, workingDebts[i].balance);
+                        workingDebts[i].balance -= extraApplied;
+                        remainingPayment -= extraApplied;
+                        break;
+                    }
+                }
+
+                // Record this month
+                schedule.push({
+                    month: month,
+                    debts: JSON.parse(JSON.stringify(workingDebts)),
+                    totalBalance: workingDebts.reduce(function(sum, d) { return sum + d.balance; }, 0),
+                    monthlyInterest: monthlyInterest
+                });
+
+                // Safety break after 600 months (50 years)
+                if (month >= 600) break;
+            }
+
+            return {
+                strategy: strategy,
+                debts: debts,
+                order: workingDebts,
+                schedule: schedule,
+                totalMonths: month,
+                totalInterest: totalInterestPaid,
+                totalDebt: debts.reduce(function(sum, d) { return sum + d.balance; }, 0),
+                monthlyPayment: totalAvailable
+            };
+        }
+
+        /**
+         * Display plan summary
+         */
+        function displayPlanSummary(plan, avalanchePlan, snowballPlan) {
+            $('#plan-total-debt').text(formatCurrency(plan.totalDebt));
+            $('#plan-total-interest').text(formatCurrency(plan.totalInterest));
+            $('#plan-time-to-freedom').text(plan.totalMonths + ' months');
+
+            // Calculate freedom date
+            const freedomDate = new Date();
+            freedomDate.setMonth(freedomDate.getMonth() + plan.totalMonths);
+            $('#plan-freedom-date').text(freedomDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short'
+            }));
+
+            // Display comparison
+            const avalancheSavings = snowballPlan.totalInterest - avalanchePlan.totalInterest;
+            const avalancheTimeSavings = snowballPlan.totalMonths - avalanchePlan.totalMonths;
+
+            $('#avalanche-summary').html(
+                avalanchePlan.totalMonths + ' months, ' + formatCurrency(avalanchePlan.totalInterest) + ' interest<br>' +
+                '<span class="success">Saves ' + formatCurrency(avalancheSavings) + ' and ' +
+                avalancheTimeSavings + ' months vs Snowball</span>'
+            );
+
+            $('#snowball-summary').html(
+                snowballPlan.totalMonths + ' months, ' + formatCurrency(snowballPlan.totalInterest) + ' interest<br>' +
+                '<span class="info">First debt paid off in ' +
+                findFirstPayoffMonth(snowballPlan) + ' months (quick win!)</span>'
+            );
+        }
+
+        /**
+         * Find when first debt is paid off
+         */
+        function findFirstPayoffMonth(plan) {
+            for (let i = 0; i < plan.schedule.length; i++) {
+                const month = plan.schedule[i];
+                const paidOffCount = month.debts.filter(function(d) { return d.balance === 0; }).length;
+                if (paidOffCount > 0) {
+                    return i + 1;
+                }
+            }
+            return plan.totalMonths;
+        }
+
+        /**
+         * Display payoff timeline
+         */
+        function displayPayoffTimeline(plan) {
+            let html = '';
+            let currentMonth = 1;
+
+            plan.order.forEach(function(debt, index) {
+                // Find when this debt gets paid off
+                let payoffMonth = currentMonth;
+                for (let i = 0; i < plan.schedule.length; i++) {
+                    const scheduleDebt = plan.schedule[i].debts.find(function(d) { return d.id === debt.id; });
+                    if (scheduleDebt && scheduleDebt.balance === 0) {
+                        payoffMonth = i + 1;
+                        break;
+                    }
+                }
+
+                const monthsToPayoff = payoffMonth - currentMonth + 1;
+                const payoffDate = new Date();
+                payoffDate.setMonth(payoffDate.getMonth() + payoffMonth);
+
+                html += '<div class="dedebtify-timeline-item">';
+                html += '  <div class="dedebtify-timeline-number">' + (index + 1) + '</div>';
+                html += '  <div class="dedebtify-timeline-content">';
+                html += '    <h4>' + escapeHtml(debt.name) + '</h4>';
+                html += '    <div class="dedebtify-timeline-details">';
+                html += '      <span><strong>Balance:</strong> ' + formatCurrency(debt.balance) + '</span>';
+                html += '      <span><strong>APR:</strong> ' + formatPercentage(debt.interest_rate) + '</span>';
+                html += '      <span><strong>Min Payment:</strong> ' + formatCurrency(debt.minimum_payment) + '</span>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-timeline-payoff">';
+                html += '      <span class="payoff-badge">Paid off in ' + monthsToPayoff + ' months</span>';
+                html += '      <span class="payoff-date">' + payoffDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) + '</span>';
+                html += '    </div>';
+                html += '  </div>';
+                html += '</div>';
+
+                currentMonth = payoffMonth;
+            });
+
+            $('#dedebtify-timeline-items').html(html);
+        }
+
+        /**
+         * Display payment schedule
+         */
+        function displayPaymentSchedule(plan) {
+            let html = '';
+
+            // Show first 12 months and last month
+            const monthsToShow = plan.schedule.length > 12 ?
+                plan.schedule.slice(0, 12).concat([plan.schedule[plan.schedule.length - 1]]) :
+                plan.schedule;
+
+            monthsToShow.forEach(function(monthData, index) {
+                if (index === 12 && plan.schedule.length > 13) {
+                    html += '<tr class="schedule-gap"><td colspan="6">... (' + (plan.schedule.length - 13) + ' more months) ...</td></tr>';
+                }
+
+                // Find which debt is being focused on
+                const focusDebt = monthData.debts.find(function(d) { return d.balance > 0; }) || monthData.debts[0];
+
+                const monthDate = new Date();
+                monthDate.setMonth(monthDate.getMonth() + monthData.month);
+
+                html += '<tr>';
+                html += '  <td>' + monthData.month + ' (' + monthDate.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) + ')</td>';
+                html += '  <td>' + escapeHtml(focusDebt.name) + '</td>';
+                html += '  <td>' + formatCurrency(plan.monthlyPayment) + '</td>';
+                html += '  <td>' + formatCurrency(plan.monthlyPayment - monthData.monthlyInterest) + '</td>';
+                html += '  <td>' + formatCurrency(monthData.monthlyInterest) + '</td>';
+                html += '  <td>' + formatCurrency(monthData.totalBalance) + '</td>';
+                html += '</tr>';
+            });
+
+            $('#payment-schedule-table tbody').html(html);
+        }
+
+        /**
+         * Display action items
+         */
+        function displayActionItems(plan) {
+            const firstDebt = plan.order[0];
+            const strategy = plan.strategy;
+
+            let focusText = 'Apply all extra payments to <strong>' + escapeHtml(firstDebt.name) + '</strong>';
+            if (strategy === 'avalanche') {
+                focusText += ' (highest interest rate at ' + formatPercentage(firstDebt.interest_rate) + ')';
+            } else {
+                focusText += ' (lowest balance at ' + formatCurrency(firstDebt.balance) + ')';
+            }
+            focusText += '. Once paid off, roll that payment to the next debt.';
+
+            $('#action-focus-text').html(focusText);
+        }
+
+        /**
+         * Show/hide plan sections
+         */
+        function showAllPlanSections() {
+            $('#dedebtify-plan-summary').slideDown();
+            $('#dedebtify-payoff-timeline').slideDown();
+            $('#dedebtify-payment-schedule').slideDown();
+            $('#dedebtify-action-items').slideDown();
+            $('#dedebtify-plan-actions').slideDown();
+        }
+
+        function hideAllPlanSections() {
+            $('#dedebtify-plan-summary').hide();
+            $('#dedebtify-payoff-timeline').hide();
+            $('#dedebtify-payment-schedule').hide();
+            $('#dedebtify-action-items').hide();
+            $('#dedebtify-plan-actions').hide();
+            $('#plan-empty-state').hide();
+        }
+
+        function showPlanLoading() {
+            hideAllPlanSections();
+            $('#plan-loading').show();
+        }
+
+        function hidePlanLoading() {
+            $('#plan-loading').hide();
+        }
+
         // Initialize all managers
         initCreditCardManager();
         initLoansManager();
         initBillsManager();
         initGoalsManager();
+        initActionPlanManager();
 
