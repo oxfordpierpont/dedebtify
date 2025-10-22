@@ -955,4 +955,432 @@
     .dedebtify-table td {
         padding: 8px;
     }
+
+    /* Snapshots Responsive */
+    .dedebtify-snapshots-timeline {
+        padding-left: 20px;
+    }
+
+    .dedebtify-snapshot-card {
+        min-width: 100%;
+    }
+
+    .dedebtify-comparison-selector {
+        flex-direction: column;
+    }
+
+    .dedebtify-comparison-vs {
+        transform: rotate(90deg);
+        margin: 10px 0;
+    }
+
+    .chart-bars {
+        gap: 15px;
+    }
+
+    .chart-bar-value {
+        font-size: 0.7rem;
+    }
 }
+
+/* ========================================
+   SNAPSHOTS STYLES
+   ======================================== */
+
+/* Snapshot Actions */
+.dedebtify-snapshot-actions {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.dedebtify-snapshot-actions .dedebtify-help-text {
+    margin-top: 10px;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+/* Snapshots Timeline */
+.dedebtify-snapshots-timeline {
+    position: relative;
+    padding-left: 40px;
+}
+
+.dedebtify-snapshots-timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, #2271b1 0%, #e0e0e0 100%);
+}
+
+.dedebtify-snapshot-item {
+    position: relative;
+    margin-bottom: 30px;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.snapshot-marker {
+    position: absolute;
+    left: -33px;
+    top: 10px;
+    width: 16px;
+    height: 16px;
+    background: #2271b1;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px #2271b1;
+    z-index: 1;
+}
+
+.dedebtify-snapshot-item.latest .snapshot-marker {
+    width: 20px;
+    height: 20px;
+    left: -35px;
+    background: linear-gradient(135deg, #00a32a 0%, #007d21 100%);
+    box-shadow: 0 0 0 3px #00a32a;
+}
+
+.snapshot-content {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 3px solid #2271b1;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.snapshot-content:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.snapshot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.snapshot-header h4 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #1d2327;
+}
+
+.snapshot-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.snapshot-badge.latest {
+    background: linear-gradient(135deg, #00a32a 0%, #007d21 100%);
+    color: #fff;
+}
+
+.snapshot-badge.first {
+    background: #2271b1;
+    color: #fff;
+}
+
+.snapshot-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.snapshot-metric {
+    display: flex;
+    flex-direction: column;
+}
+
+.snapshot-metric .metric-label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.snapshot-metric .metric-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.snapshot-change {
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.snapshot-change.positive {
+    background: #d4edda;
+    color: #155724;
+}
+
+.snapshot-change.negative {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.snapshot-change .change-icon {
+    font-size: 1.2rem;
+}
+
+/* Comparison Selector */
+.dedebtify-comparison-selector {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.dedebtify-comparison-selector .dedebtify-form-group {
+    flex: 1;
+}
+
+.dedebtify-comparison-vs {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #2271b1 0%, #135e96 100%);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+}
+
+/* Comparison Header */
+.dedebtify-comparison-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.dedebtify-comparison-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #1d2327;
+}
+
+/* Snapshot Cards in Comparison */
+.dedebtify-snapshot-card {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 8px;
+    border-top: 4px solid #2271b1;
+}
+
+.dedebtify-snapshot-header h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.3rem;
+    color: #1d2327;
+}
+
+.dedebtify-snapshot-date {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.dedebtify-snapshot-metrics {
+    margin-top: 20px;
+    display: grid;
+    gap: 15px;
+}
+
+.dedebtify-metric {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: #fff;
+    border-radius: 6px;
+}
+
+.dedebtify-metric .metric-label {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.dedebtify-metric .metric-value {
+    font-weight: 600;
+    color: #1d2327;
+}
+
+/* Change Indicators */
+.dedebtify-snapshot-changes {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 40px;
+    padding: 20px;
+}
+
+.dedebtify-change-item {
+    text-align: center;
+    padding: 15px;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.dedebtify-change-item.positive {
+    background: #d4edda;
+    border-left: 4px solid #00a32a;
+}
+
+.dedebtify-change-item.negative {
+    background: #f8d7da;
+    border-left: 4px solid #dc3232;
+}
+
+.dedebtify-change-item.neutral {
+    background: #e8f0fe;
+    border-left: 4px solid #2271b1;
+}
+
+.dedebtify-change-item .change-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.dedebtify-change-item .change-value {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.dedebtify-change-item .change-icon {
+    font-size: 1.5rem;
+}
+
+.dedebtify-change-item.positive .change-icon {
+    color: #00a32a;
+}
+
+.dedebtify-change-item.negative .change-icon {
+    color: #dc3232;
+}
+
+/* Comparison Summary */
+.dedebtify-comparison-summary {
+    background: #e8f0fe;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #2271b1;
+    margin-top: 30px;
+}
+
+.dedebtify-comparison-summary h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    color: #1d2327;
+}
+
+.dedebtify-comparison-summary p {
+    margin: 0;
+    line-height: 1.6;
+    color: #1d2327;
+}
+
+.dedebtify-comparison-summary .success {
+    color: #00a32a;
+}
+
+.dedebtify-comparison-summary .warning {
+    color: #dba617;
+}
+
+/* Chart Styles */
+.dedebtify-chart-container {
+    margin-top: 30px;
+}
+
+.dedebtify-chart-container h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    color: #1d2327;
+}
+
+.dedebtify-chart {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.chart-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    height: 300px;
+    padding: 20px 0;
+}
+
+.chart-bar-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.chart-bar {
+    width: 100%;
+    max-width: 80px;
+    background: linear-gradient(to top, #2271b1 0%, #72aee6 100%);
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 10px;
+}
+
+.chart-bar:hover {
+    background: linear-gradient(to top, #135e96 0%, #2271b1 100%);
+    transform: translateY(-5px);
+}
+
+.chart-bar-value {
+    position: absolute;
+    top: -25px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1d2327;
+    white-space: nowrap;
+}
+
+.chart-label {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: #666;
+    text-align: center;
+}
+

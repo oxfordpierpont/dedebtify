@@ -1764,10 +1764,447 @@ var dedebtifyL10n = dedebtifyL10n || {
             $('#plan-loading').hide();
         }
 
+        // ===========================
+        // SNAPSHOTS MANAGER
+        // ===========================
+
+        /**
+         * Initialize Snapshots Manager
+         */
+        function initSnapshotsManager() {
+            if ($('.dedebtify-snapshots').length) {
+                loadSnapshotsList();
+                initSnapshotsControls();
+            }
+        }
+
+        /**
+         * Initialize snapshots controls
+         */
+        function initSnapshotsControls() {
+            // Create snapshot buttons
+            $('#create-snapshot, #create-first-snapshot').on('click', function() {
+                createSnapshot();
+            });
+
+            // Snapshot selectors change
+            $('#snapshot-select-1, #snapshot-select-2').on('change', function() {
+                const snapshot1 = $('#snapshot-select-1').val();
+                const snapshot2 = $('#snapshot-select-2').val();
+
+                if (snapshot1 && snapshot2 && snapshot1 !== snapshot2) {
+                    $('#compare-snapshots').prop('disabled', false);
+                } else {
+                    $('#compare-snapshots').prop('disabled', true);
+                }
+            });
+
+            // Compare button
+            $('#compare-snapshots').on('click', function() {
+                const snapshot1Id = $('#snapshot-select-1').val();
+                const snapshot2Id = $('#snapshot-select-2').val();
+
+                if (snapshot1Id && snapshot2Id) {
+                    compareSnapshots(snapshot1Id, snapshot2Id);
+                }
+            });
+
+            // Clear comparison
+            $('#clear-comparison').on('click', function() {
+                $('#snapshot-select-1').val('');
+                $('#snapshot-select-2').val('');
+                $('#comparison-results').slideUp();
+                $('#compare-snapshots').prop('disabled', true);
+            });
+        }
+
+        /**
+         * Create new snapshot
+         */
+        function createSnapshot() {
+            if (confirm('Create a snapshot of your current financial state?')) {
+                $.ajax({
+                    url: dedebtify.restUrl + 'snapshot',
+                    method: 'POST',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                    },
+                    success: function(response) {
+                        showMessage('Snapshot created successfully!', 'success');
+                        loadSnapshotsList();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Failed to create snapshot:', error);
+                        showMessage('Failed to create snapshot', 'error');
+                    }
+                });
+            }
+        }
+
+        /**
+         * Load snapshots list
+         */
+        function loadSnapshotsList() {
+            $.ajax({
+                url: dedebtify.restUrl + 'snapshots',
+                method: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    if (response.length === 0) {
+                        $('#snapshots-list-container').hide();
+                        $('#dedebtify-snapshot-comparison').hide();
+                        $('#dedebtify-progress-overview').hide();
+                        $('#snapshots-empty-state').show();
+                    } else {
+                        renderSnapshotsList(response);
+                        populateSnapshotSelectors(response);
+                        calculateProgressOverview(response);
+                        $('#snapshots-empty-state').hide();
+                        $('#snapshots-list-container').show();
+                        $('#dedebtify-snapshot-comparison').show();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to load snapshots:', error);
+                    $('#snapshots-list-container').html('<p class="dedebtify-message error">Failed to load snapshots</p>');
+                }
+            });
+        }
+
+        /**
+         * Render snapshots list
+         */
+        function renderSnapshotsList(snapshots) {
+            let html = '<div class="dedebtify-snapshots-timeline">';
+
+            snapshots.forEach(function(snapshot, index) {
+                const date = new Date(snapshot.date);
+                const isFirst = index === snapshots.length - 1;
+                const isLatest = index === 0;
+
+                html += '<div class="dedebtify-snapshot-item ' + (isLatest ? 'latest' : '') + '">';
+                html += '  <div class="snapshot-marker"></div>';
+                html += '  <div class="snapshot-content">';
+                html += '    <div class="snapshot-header">';
+                html += '      <h4>' + date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) + '</h4>';
+                if (isLatest) {
+                    html += '      <span class="snapshot-badge latest">Latest</span>';
+                } else if (isFirst) {
+                    html += '      <span class="snapshot-badge first">First</span>';
+                }
+                html += '    </div>';
+                html += '    <div class="snapshot-metrics-grid">';
+                html += '      <div class="snapshot-metric">';
+                html += '        <span class="metric-label">Total Debt</span>';
+                html += '        <span class="metric-value">' + formatCurrency(snapshot.total_debt) + '</span>';
+                html += '      </div>';
+                html += '      <div class="snapshot-metric">';
+                html += '        <span class="metric-label">Monthly Payments</span>';
+                html += '        <span class="metric-value">' + formatCurrency(snapshot.monthly_payments) + '</span>';
+                html += '      </div>';
+                html += '      <div class="snapshot-metric">';
+                html += '        <span class="metric-label">DTI Ratio</span>';
+                html += '        <span class="metric-value">' + formatPercentage(snapshot.dti_ratio) + '</span>';
+                html += '      </div>';
+                html += '      <div class="snapshot-metric">';
+                html += '        <span class="metric-label">Credit Utilization</span>';
+                html += '        <span class="metric-value">' + formatPercentage(snapshot.credit_utilization) + '</span>';
+                html += '      </div>';
+                html += '    </div>';
+
+                // Show change from previous if not first
+                if (index < snapshots.length - 1) {
+                    const previous = snapshots[index + 1];
+                    const debtChange = snapshot.total_debt - previous.total_debt;
+                    const changeClass = debtChange < 0 ? 'positive' : 'negative';
+
+                    html += '    <div class="snapshot-change ' + changeClass + '">';
+                    if (debtChange < 0) {
+                        html += '      <span class="change-icon">↓</span> Reduced debt by ' + formatCurrency(Math.abs(debtChange));
+                    } else if (debtChange > 0) {
+                        html += '      <span class="change-icon">↑</span> Debt increased by ' + formatCurrency(debtChange);
+                    } else {
+                        html += '      <span>No change</span>';
+                    }
+                    html += '    </div>';
+                }
+
+                html += '  </div>';
+                html += '</div>';
+            });
+
+            html += '</div>';
+
+            $('#snapshots-list-container').html(html);
+        }
+
+        /**
+         * Populate snapshot selectors
+         */
+        function populateSnapshotSelectors(snapshots) {
+            let options = '<option value="">Select a snapshot...</option>';
+
+            snapshots.forEach(function(snapshot) {
+                const date = new Date(snapshot.date);
+                const dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                options += '<option value="' + snapshot.id + '">' + dateStr + ' - ' + formatCurrency(snapshot.total_debt) + '</option>';
+            });
+
+            $('#snapshot-select-1, #snapshot-select-2').html(options);
+        }
+
+        /**
+         * Calculate progress overview
+         */
+        function calculateProgressOverview(snapshots) {
+            if (snapshots.length < 2) return;
+
+            const latest = snapshots[0];
+            const first = snapshots[snapshots.length - 1];
+
+            const debtReduced = first.total_debt - latest.total_debt;
+            const debtReductionPercent = (debtReduced / first.total_debt) * 100;
+            const dtiChange = latest.dti_ratio - first.dti_ratio;
+
+            // Calculate months between
+            const firstDate = new Date(first.date);
+            const latestDate = new Date(latest.date);
+            const monthsDiff = Math.round((latestDate - firstDate) / (1000 * 60 * 60 * 24 * 30));
+
+            const avgMonthlyReduction = monthsDiff > 0 ? debtReduced / monthsDiff : 0;
+
+            // Update UI
+            $('#progress-debt-reduced').text(formatCurrency(debtReduced));
+            $('#progress-debt-percent').text(formatPercentage(debtReductionPercent) + ' reduction');
+            $('#progress-dti-change').text(formatPercentage(Math.abs(dtiChange)));
+            $('#progress-dti-change').removeClass('success warning danger');
+            if (dtiChange < 0) {
+                $('#progress-dti-change').addClass('success');
+            } else if (dtiChange > 0) {
+                $('#progress-dti-change').addClass('danger');
+            }
+
+            $('#progress-months').text(monthsDiff);
+            $('#progress-date-range').text(
+                firstDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) + ' - ' +
+                latestDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+            );
+            $('#progress-avg-monthly').text(formatCurrency(avgMonthlyReduction));
+
+            // Show progress overview
+            $('#dedebtify-progress-overview').show();
+
+            // Render simple chart
+            renderDebtChart(snapshots);
+        }
+
+        /**
+         * Render simple debt progress chart
+         */
+        function renderDebtChart(snapshots) {
+            const $chart = $('#debt-progress-chart');
+            $chart.empty();
+
+            // Get min and max values
+            const values = snapshots.map(function(s) { return s.total_debt; });
+            const maxValue = Math.max.apply(null, values);
+            const minValue = Math.min.apply(null, values);
+            const range = maxValue - minValue;
+
+            // Reverse to show oldest first
+            const reversed = snapshots.slice().reverse();
+
+            let html = '<div class="chart-bars">';
+
+            reversed.forEach(function(snapshot, index) {
+                const date = new Date(snapshot.date);
+                const heightPercent = range > 0 ? ((snapshot.total_debt - minValue) / range) * 100 : 100;
+
+                html += '<div class="chart-bar-container">';
+                html += '  <div class="chart-bar" style="height: ' + heightPercent + '%">';
+                html += '    <span class="chart-bar-value">' + formatCurrency(snapshot.total_debt) + '</span>';
+                html += '  </div>';
+                html += '  <div class="chart-label">' + date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) + '</div>';
+                html += '</div>';
+            });
+
+            html += '</div>';
+
+            $chart.html(html);
+        }
+
+        /**
+         * Compare two snapshots
+         */
+        function compareSnapshots(id1, id2) {
+            Promise.all([
+                fetchSnapshot(id1),
+                fetchSnapshot(id2)
+            ]).then(function(results) {
+                const snapshot1 = results[0];
+                const snapshot2 = results[1];
+
+                displayComparison(snapshot1, snapshot2);
+            }).catch(function(error) {
+                console.error('Failed to compare snapshots:', error);
+                showMessage('Failed to load snapshots for comparison', 'error');
+            });
+        }
+
+        /**
+         * Fetch single snapshot
+         */
+        function fetchSnapshot(id) {
+            return new Promise(function(resolve, reject) {
+                $.ajax({
+                    url: dedebtify.restUrl + 'snapshots',
+                    method: 'GET',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                    },
+                    success: function(response) {
+                        const snapshot = response.find(function(s) { return s.id == id; });
+                        if (snapshot) {
+                            resolve(snapshot);
+                        } else {
+                            reject('Snapshot not found');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        reject(error);
+                    }
+                });
+            });
+        }
+
+        /**
+         * Display snapshot comparison
+         */
+        function displayComparison(snapshot1, snapshot2) {
+            // Determine which is older
+            const date1 = new Date(snapshot1.date);
+            const date2 = new Date(snapshot2.date);
+
+            let older, newer;
+            if (date1 < date2) {
+                older = snapshot1;
+                newer = snapshot2;
+            } else {
+                older = snapshot2;
+                newer = snapshot1;
+            }
+
+            // Update Snapshot 1 (older)
+            $('#snapshot1-title').text('Older Snapshot');
+            $('#snapshot1-date').text(new Date(older.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+            $('#snapshot1-debt').text(formatCurrency(older.total_debt));
+            $('#snapshot1-payments').text(formatCurrency(older.monthly_payments));
+            $('#snapshot1-dti').text(formatPercentage(older.dti_ratio));
+            $('#snapshot1-util').text(formatPercentage(older.credit_utilization));
+            $('#snapshot1-cards').text(older.credit_cards_count);
+            $('#snapshot1-loans').text(older.loans_count);
+
+            // Update Snapshot 2 (newer)
+            $('#snapshot2-title').text('Newer Snapshot');
+            $('#snapshot2-date').text(new Date(newer.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+            $('#snapshot2-debt').text(formatCurrency(newer.total_debt));
+            $('#snapshot2-payments').text(formatCurrency(newer.monthly_payments));
+            $('#snapshot2-dti').text(formatPercentage(newer.dti_ratio));
+            $('#snapshot2-util').text(formatPercentage(newer.credit_utilization));
+            $('#snapshot2-cards').text(newer.credit_cards_count);
+            $('#snapshot2-loans').text(newer.loans_count);
+
+            // Calculate changes
+            const debtChange = newer.total_debt - older.total_debt;
+            const paymentsChange = newer.monthly_payments - older.monthly_payments;
+            const dtiChange = newer.dti_ratio - older.dti_ratio;
+            const utilChange = newer.credit_utilization - older.credit_utilization;
+
+            // Update change indicators
+            updateChangeIndicator('#change-debt', debtChange, true);
+            updateChangeIndicator('#change-payments', paymentsChange, true);
+            updateChangeIndicator('#change-dti', dtiChange, false);
+            updateChangeIndicator('#change-util', utilChange, false);
+
+            // Generate summary
+            generateComparisonSummary(older, newer, debtChange, dtiChange);
+
+            // Show results
+            $('#comparison-results').slideDown();
+        }
+
+        /**
+         * Update change indicator
+         */
+        function updateChangeIndicator(selector, change, isCurrency) {
+            const $item = $(selector);
+            const $value = $item.find('.change-value');
+            const $icon = $item.find('.change-icon');
+
+            const formattedChange = isCurrency ? formatCurrency(Math.abs(change)) : formatPercentage(Math.abs(change));
+
+            $item.removeClass('positive negative neutral');
+
+            if (change < 0) {
+                $item.addClass('positive');
+                $value.text('↓ ' + formattedChange);
+                $icon.html('✓');
+            } else if (change > 0) {
+                $item.addClass('negative');
+                $value.text('↑ ' + formattedChange);
+                $icon.html('✗');
+            } else {
+                $item.addClass('neutral');
+                $value.text('No change');
+                $icon.html('—');
+            }
+        }
+
+        /**
+         * Generate comparison summary
+         */
+        function generateComparisonSummary(older, newer, debtChange, dtiChange) {
+            let summary = '<p>';
+
+            const date1 = new Date(older.date);
+            const date2 = new Date(newer.date);
+            const monthsDiff = Math.round((date2 - date1) / (1000 * 60 * 60 * 24 * 30));
+
+            if (debtChange < 0) {
+                const reduction = Math.abs(debtChange);
+                const reductionPercent = (reduction / older.total_debt) * 100;
+                const avgMonthly = monthsDiff > 0 ? reduction / monthsDiff : 0;
+
+                summary += '<strong class="success">Great progress!</strong> ';
+                summary += 'You reduced your debt by <strong>' + formatCurrency(reduction) + '</strong> ';
+                summary += '(' + formatPercentage(reductionPercent) + ') ';
+                summary += 'over ' + monthsDiff + ' months. ';
+                summary += 'That\'s an average of <strong>' + formatCurrency(avgMonthly) + ' per month</strong>!';
+            } else if (debtChange > 0) {
+                summary += '<strong class="warning">Debt increased</strong> by ' + formatCurrency(debtChange) + '. ';
+                summary += 'Consider reviewing your action plan and budget.';
+            } else {
+                summary += 'Your debt remained the same during this period.';
+            }
+
+            if (dtiChange < 0) {
+                summary += ' Your DTI ratio improved by ' + formatPercentage(Math.abs(dtiChange)) + '.';
+            } else if (dtiChange > 0) {
+                summary += ' Your DTI ratio increased by ' + formatPercentage(dtiChange) + '.';
+            }
+
+            summary += '</p>';
+
+            $('#comparison-summary-text').html(summary);
+        }
+
         // Initialize all managers
         initCreditCardManager();
         initLoansManager();
         initBillsManager();
         initGoalsManager();
         initActionPlanManager();
+        initSnapshotsManager();
 
