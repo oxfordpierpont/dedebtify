@@ -97,6 +97,10 @@ class Dedebtify {
 
         // Add shortcode support
         add_shortcode( 'dedebtify_dashboard', array( $this, 'render_dashboard_shortcode' ) );
+        add_shortcode( 'dedebtify_credit_cards', array( $this, 'render_credit_cards_shortcode' ) );
+        add_shortcode( 'dedebtify_loans', array( $this, 'render_loans_shortcode' ) );
+        add_shortcode( 'dedebtify_bills', array( $this, 'render_bills_shortcode' ) );
+        add_shortcode( 'dedebtify_goals', array( $this, 'render_goals_shortcode' ) );
     }
 
     /**
@@ -209,6 +213,14 @@ class Dedebtify {
             true
         );
 
+        wp_enqueue_script(
+            $this->plugin_name . '-managers',
+            DEDEBTIFY_PLUGIN_URL . 'assets/js/dedebtify-managers.js',
+            array( 'jquery', $this->plugin_name . '-calculator' ),
+            $this->version,
+            true
+        );
+
         // Localize script for AJAX
         wp_localize_script(
             $this->plugin_name . '-public',
@@ -219,6 +231,20 @@ class Dedebtify {
                 'restUrl' => rest_url( 'dedebtify/v1/' ),
                 'restNonce' => wp_create_nonce( 'wp_rest' ),
                 'userId' => get_current_user_id(),
+            )
+        );
+
+        // Localize script for managers with translations
+        wp_localize_script(
+            $this->plugin_name . '-managers',
+            'dedebtifyL10n',
+            array(
+                'edit' => __( 'Edit', 'dedebtify' ),
+                'delete' => __( 'Delete', 'dedebtify' ),
+                'confirm_delete' => __( 'Are you sure you want to delete this item?', 'dedebtify' ),
+                'saving' => __( 'Saving...', 'dedebtify' ),
+                'loading' => __( 'Loading...', 'dedebtify' ),
+                'error' => __( 'An error occurred. Please try again.', 'dedebtify' ),
             )
         );
     }
@@ -299,6 +325,66 @@ class Dedebtify {
 
         ob_start();
         require_once DEDEBTIFY_PLUGIN_DIR . 'templates/dashboard.php';
+        return ob_get_clean();
+    }
+
+    /**
+     * Render credit cards manager shortcode.
+     *
+     * @since    1.0.0
+     */
+    public function render_credit_cards_shortcode( $atts ) {
+        if ( ! is_user_logged_in() ) {
+            return '<p>' . __( 'Please log in to manage your credit cards.', 'dedebtify' ) . '</p>';
+        }
+
+        ob_start();
+        require_once DEDEBTIFY_PLUGIN_DIR . 'templates/credit-cards.php';
+        return ob_get_clean();
+    }
+
+    /**
+     * Render loans manager shortcode.
+     *
+     * @since    1.0.0
+     */
+    public function render_loans_shortcode( $atts ) {
+        if ( ! is_user_logged_in() ) {
+            return '<p>' . __( 'Please log in to manage your loans.', 'dedebtify' ) . '</p>';
+        }
+
+        ob_start();
+        require_once DEDEBTIFY_PLUGIN_DIR . 'templates/loans.php';
+        return ob_get_clean();
+    }
+
+    /**
+     * Render bills manager shortcode.
+     *
+     * @since    1.0.0
+     */
+    public function render_bills_shortcode( $atts ) {
+        if ( ! is_user_logged_in() ) {
+            return '<p>' . __( 'Please log in to manage your bills.', 'dedebtify' ) . '</p>';
+        }
+
+        ob_start();
+        require_once DEDEBTIFY_PLUGIN_DIR . 'templates/bills.php';
+        return ob_get_clean();
+    }
+
+    /**
+     * Render goals manager shortcode.
+     *
+     * @since    1.0.0
+     */
+    public function render_goals_shortcode( $atts ) {
+        if ( ! is_user_logged_in() ) {
+            return '<p>' . __( 'Please log in to manage your goals.', 'dedebtify' ) . '</p>';
+        }
+
+        ob_start();
+        require_once DEDEBTIFY_PLUGIN_DIR . 'templates/goals.php';
         return ob_get_clean();
     }
 }

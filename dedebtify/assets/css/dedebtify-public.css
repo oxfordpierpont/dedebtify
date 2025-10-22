@@ -383,3 +383,252 @@
         padding: 20px 15px;
     }
 }
+
+/* Manager-Specific Styles */
+
+/* Manager Header */
+.dedebtify-manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dedebtify-manager-stats {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.dedebtify-stat-summary {
+    display: flex;
+    flex-direction: column;
+}
+
+.dedebtify-stat-summary .stat-label {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.dedebtify-stat-summary .stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1d2327;
+}
+
+/* Manager Controls */
+.dedebtify-manager-controls {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dedebtify-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dedebtify-filter-group label {
+    font-weight: 600;
+    color: #1d2327;
+}
+
+/* Form Container */
+.dedebtify-form-container {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.dedebtify-form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e5e5e5;
+}
+
+.dedebtify-form-header h2 {
+    margin: 0;
+    font-size: 1.75rem;
+    color: #1d2327;
+}
+
+/* Form Rows */
+.dedebtify-form-row {
+    margin-bottom: 25px;
+}
+
+.dedebtify-form-row-2col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.dedebtify-form-row-3col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+/* Required indicator */
+.required {
+    color: #dc3232;
+    font-weight: bold;
+}
+
+/* Form Actions */
+.dedebtify-form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #e5e5e5;
+}
+
+/* Payoff Preview */
+.dedebtify-payoff-preview {
+    margin-top: 30px;
+    padding: 25px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border-left: 4px solid #2271b1;
+}
+
+.dedebtify-payoff-preview h3 {
+    margin: 0 0 20px 0;
+    font-size: 1.25rem;
+    color: #1d2327;
+}
+
+/* Items List */
+.dedebtify-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Card Actions */
+.dedebtify-card-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.dedebtify-btn-small {
+    padding: 8px 16px;
+    font-size: 0.875rem;
+}
+
+/* Card Payoff Info */
+.dedebtify-card-payoff {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f0f9ff;
+    border-radius: 4px;
+    border-left: 4px solid #2271b1;
+}
+
+.dedebtify-card-payoff.warning {
+    background: #fff8e5;
+    border-left-color: #f0b849;
+}
+
+.dedebtify-payoff-info {
+    margin: 5px 0;
+    font-size: 0.9375rem;
+}
+
+/* Empty State */
+.dedebtify-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dedebtify-empty-state h3 {
+    font-size: 1.5rem;
+    margin: 0 0 10px 0;
+    color: #1d2327;
+}
+
+.dedebtify-empty-state p {
+    font-size: 1.1rem;
+    color: #666;
+    margin: 0 0 25px 0;
+}
+
+/* Color coding for values */
+.dedebtify-card-detail-value.success {
+    color: #46b450;
+}
+
+.dedebtify-card-detail-value.warning {
+    color: #f0b849;
+}
+
+.dedebtify-card-detail-value.danger {
+    color: #dc3232;
+}
+
+/* Status badges */
+.dedebtify-card-badge.paid-off {
+    background: #e5f5e7;
+    color: #2d8c34;
+}
+
+.dedebtify-card-badge.closed {
+    background: #f0f0f1;
+    color: #666;
+}
+
+/* Responsive adjustments for managers */
+@media screen and (max-width: 782px) {
+    .dedebtify-manager-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .dedebtify-manager-stats {
+        width: 100%;
+    }
+
+    .dedebtify-manager-controls {
+        flex-direction: column;
+    }
+
+    .dedebtify-form-row-2col,
+    .dedebtify-form-row-3col {
+        grid-template-columns: 1fr;
+    }
+
+    .dedebtify-form-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .dedebtify-card-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .dedebtify-card-actions .dedebtify-btn {
+        width: 100%;
+    }
+}
