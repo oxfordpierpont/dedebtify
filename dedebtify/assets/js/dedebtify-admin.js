@@ -14,7 +14,16 @@
          * Initialize admin dashboard
          */
         function initAdminDashboard() {
-            loadDashboardStats();
+            if ($('.dedebtify-admin-dashboard').length) {
+                loadDashboardStats();
+                loadRecentActivity();
+
+                // Refresh button
+                $('#refresh-activity').on('click', function(e) {
+                    e.preventDefault();
+                    loadRecentActivity();
+                });
+            }
         }
 
         /**
@@ -25,7 +34,7 @@
             if (!$container.length) return;
 
             $.ajax({
-                url: dedebtifyAdmin.restUrl + 'dashboard',
+                url: dedebtifyAdmin.restUrl + 'stats',
                 method: 'GET',
                 beforeSend: function(xhr) {
                     xhr.setRequestHeader('X-WP-Nonce', dedebtifyAdmin.restNonce);
@@ -35,7 +44,6 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Failed to load dashboard data:', error);
-                    showNotice('Failed to load dashboard data', 'error');
                 }
             });
         }
@@ -44,21 +52,117 @@
          * Update dashboard UI with data
          */
         function updateDashboardUI(data) {
-            // Update total debt
-            $('#dedebtify-total-debt').text(formatCurrency(data.total_debt));
+            // Update widgets
+            $('#total-users').text(data.total_users || 0);
+            $('#total-debt').text(formatCurrency(data.total_debt || 0));
+            $('#total-cards').text(data.total_credit_cards || 0);
+            $('#total-loans').text(data.total_loans || 0);
+            $('#total-goals').text(data.total_goals || 0);
+            $('#total-snapshots').text(data.total_snapshots || 0);
 
-            // Update monthly payments
-            $('#dedebtify-monthly-payments').text(formatCurrency(data.monthly_payments));
+            // Update system statistics
+            $('#stat-credit-cards').text(data.total_credit_cards || 0);
+            $('#stat-loans').text(data.total_loans || 0);
+            $('#stat-bills').text(data.total_bills || 0);
+            $('#stat-goals').text(data.total_goals || 0);
+            $('#stat-snapshots').text(data.total_snapshots || 0);
 
-            // Update DTI
-            $('#dedebtify-dti').text(formatPercentage(data.dti_ratio));
+            const totalItems = (data.total_credit_cards || 0) +
+                              (data.total_loans || 0) +
+                              (data.total_bills || 0) +
+                              (data.total_goals || 0) +
+                              (data.total_snapshots || 0);
+            $('#stat-total-items').text(totalItems);
+        }
 
-            // Update credit utilization
-            $('#dedebtify-credit-util').text(formatPercentage(data.credit_utilization));
+        /**
+         * Load recent activity
+         */
+        function loadRecentActivity() {
+            const $container = $('#recent-activity-container');
 
-            // Apply color coding
-            applyCreditUtilizationColor(data.credit_utilization);
-            applyDTIColor(data.dti_ratio);
+            $container.html('<div class="dedebtify-loading"><span class="spinner is-active"></span><p>Loading recent activity...</p></div>');
+
+            $.ajax({
+                url: dedebtifyAdmin.restUrl + 'activity',
+                method: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtifyAdmin.restNonce);
+                },
+                success: function(response) {
+                    renderRecentActivity(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to load recent activity:', error);
+                    $container.html('<p class="description">Failed to load recent activity</p>');
+                }
+            });
+        }
+
+        /**
+         * Render recent activity
+         */
+        function renderRecentActivity(activities) {
+            const $container = $('#recent-activity-container');
+
+            if (!activities || activities.length === 0) {
+                $container.html('<p class="description">No recent activity</p>');
+                return;
+            }
+
+            let html = '<table class="wp-list-table widefat fixed striped">';
+            html += '<thead><tr>';
+            html += '<th>Type</th>';
+            html += '<th>Item</th>';
+            html += '<th>User</th>';
+            html += '<th>Action</th>';
+            html += '<th>Date</th>';
+            html += '</tr></thead>';
+            html += '<tbody>';
+
+            activities.forEach(function(activity) {
+                html += '<tr>';
+                html += '<td><span class="dashicons dashicons-' + getActivityIcon(activity.type) + '"></span> ' + activity.type + '</td>';
+                html += '<td>' + escapeHtml(activity.title) + '</td>';
+                html += '<td>' + escapeHtml(activity.author) + '</td>';
+                html += '<td>' + activity.action + '</td>';
+                html += '<td>' + formatDate(activity.date) + '</td>';
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            $container.html(html);
+        }
+
+        /**
+         * Get icon for activity type
+         */
+        function getActivityIcon(type) {
+            const icons = {
+                'credit_card': 'admin-page',
+                'loan': 'money-alt',
+                'bill': 'clipboard',
+                'goal': 'flag',
+                'snapshot': 'camera'
+            };
+            return icons[type] || 'marker';
+        }
+
+        /**
+         * Format date
+         */
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        }
+
+        /**
+         * Escape HTML
+         */
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         /**

@@ -278,6 +278,15 @@ class Dedebtify {
 
         add_submenu_page(
             'dedebtify',
+            __( 'Reports', 'dedebtify' ),
+            __( 'Reports', 'dedebtify' ),
+            'manage_options',
+            'dedebtify-reports',
+            array( $this, 'render_reports_page' )
+        );
+
+        add_submenu_page(
+            'dedebtify',
             __( 'Settings', 'dedebtify' ),
             __( 'Settings', 'dedebtify' ),
             'manage_options',
@@ -292,7 +301,16 @@ class Dedebtify {
      * @since    1.0.0
      */
     public function render_admin_dashboard() {
-        require_once DEDEBTIFY_PLUGIN_DIR . 'admin/settings-page.php';
+        require_once DEDEBTIFY_PLUGIN_DIR . 'admin/dashboard.php';
+    }
+
+    /**
+     * Render reports page.
+     *
+     * @since    1.0.0
+     */
+    public function render_reports_page() {
+        require_once DEDEBTIFY_PLUGIN_DIR . 'admin/reports-page.php';
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Settings and Dashboard Page
+ * Settings Page
  *
  * @since      1.0.0
  * @package    Dedebtify
@@ -12,189 +12,199 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// Get current page
-$current_page = isset( $_GET['page'] ) ? $_GET['page'] : 'dedebtify';
+// Handle form submission
+if ( isset( $_POST['dedebtify_settings_submit'] ) && check_admin_referer( 'dedebtify_settings_nonce' ) ) {
+    // Save settings
+    update_option( 'dedebtify_currency_symbol', sanitize_text_field( $_POST['currency_symbol'] ) );
+    update_option( 'dedebtify_default_interest_rate', floatval( $_POST['default_interest_rate'] ) );
+    update_option( 'dedebtify_notifications_enabled', isset( $_POST['notifications_enabled'] ) ? 1 : 0 );
+    update_option( 'dedebtify_notification_email', sanitize_email( $_POST['notification_email'] ) );
+    update_option( 'dedebtify_snapshot_frequency', sanitize_text_field( $_POST['snapshot_frequency'] ) );
+    update_option( 'dedebtify_default_payoff_strategy', sanitize_text_field( $_POST['default_payoff_strategy'] ) );
 
+    echo '<div class="notice notice-success is-dismissible"><p>' . __( 'Settings saved successfully!', 'dedebtify' ) . '</p></div>';
+}
+
+// Get current settings
+$currency_symbol = get_option( 'dedebtify_currency_symbol', '$' );
+$default_interest_rate = get_option( 'dedebtify_default_interest_rate', 18.0 );
+$notifications_enabled = get_option( 'dedebtify_notifications_enabled', 0 );
+$notification_email = get_option( 'dedebtify_notification_email', get_option( 'admin_email' ) );
+$snapshot_frequency = get_option( 'dedebtify_snapshot_frequency', 'monthly' );
+$default_payoff_strategy = get_option( 'dedebtify_default_payoff_strategy', 'avalanche' );
 ?>
 
-<div class="wrap dedebtify-admin-dashboard">
+<div class="wrap dedebtify-settings-page">
+    <h1><?php _e( 'DeDebtify Settings', 'dedebtify' ); ?></h1>
+    <p class="description"><?php _e( 'Configure your debt management system settings', 'dedebtify' ); ?></p>
 
-    <div class="dedebtify-admin-header">
-        <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-        <p><?php _e( 'Manage your debt tracking plugin settings and view system overview.', 'dedebtify' ); ?></p>
-    </div>
+    <form method="post" action="">
+        <?php wp_nonce_field( 'dedebtify_settings_nonce' ); ?>
 
-    <?php if ( $current_page === 'dedebtify' ) : ?>
-        <!-- Dashboard View -->
-        <div id="dedebtify-dashboard-stats">
-            <div class="dedebtify-stats-grid">
-                <div class="dedebtify-stat-card">
-                    <h3><?php _e( 'Total Users', 'dedebtify' ); ?></h3>
-                    <div class="dedebtify-stat-value"><?php echo count_users()['total_users']; ?></div>
-                    <p><?php _e( 'Registered users', 'dedebtify' ); ?></p>
+        <!-- General Settings -->
+        <div class="dedebtify-settings-section">
+            <h3><?php _e( 'General Settings', 'dedebtify' ); ?></h3>
+
+            <div class="dedebtify-settings-row">
+                <div class="dedebtify-settings-label">
+                    <label for="currency_symbol"><?php _e( 'Currency Symbol', 'dedebtify' ); ?></label>
                 </div>
-
-                <div class="dedebtify-stat-card">
-                    <h3><?php _e( 'Credit Cards', 'dedebtify' ); ?></h3>
-                    <div class="dedebtify-stat-value"><?php echo wp_count_posts( 'dd_credit_card' )->publish; ?></div>
-                    <p><?php _e( 'Total tracked', 'dedebtify' ); ?></p>
+                <div class="dedebtify-settings-field">
+                    <input type="text" id="currency_symbol" name="currency_symbol" value="<?php echo esc_attr( $currency_symbol ); ?>" class="regular-text">
+                    <span class="description"><?php _e( 'The currency symbol to display (e.g., $, €, £)', 'dedebtify' ); ?></span>
                 </div>
+            </div>
 
-                <div class="dedebtify-stat-card">
-                    <h3><?php _e( 'Loans', 'dedebtify' ); ?></h3>
-                    <div class="dedebtify-stat-value"><?php echo wp_count_posts( 'dd_loan' )->publish; ?></div>
-                    <p><?php _e( 'Total tracked', 'dedebtify' ); ?></p>
+            <div class="dedebtify-settings-row">
+                <div class="dedebtify-settings-label">
+                    <label for="default_interest_rate"><?php _e( 'Default Interest Rate', 'dedebtify' ); ?></label>
                 </div>
-
-                <div class="dedebtify-stat-card">
-                    <h3><?php _e( 'Bills', 'dedebtify' ); ?></h3>
-                    <div class="dedebtify-stat-value"><?php echo wp_count_posts( 'dd_bill' )->publish; ?></div>
-                    <p><?php _e( 'Total tracked', 'dedebtify' ); ?></p>
+                <div class="dedebtify-settings-field">
+                    <input type="number" id="default_interest_rate" name="default_interest_rate" value="<?php echo esc_attr( $default_interest_rate ); ?>" step="0.01" min="0" max="100" class="regular-text">
+                    <span class="description"><?php _e( 'Default annual interest rate (%) for new credit cards', 'dedebtify' ); ?></span>
                 </div>
+            </div>
 
-                <div class="dedebtify-stat-card">
-                    <h3><?php _e( 'Goals', 'dedebtify' ); ?></h3>
-                    <div class="dedebtify-stat-value"><?php echo wp_count_posts( 'dd_goal' )->publish; ?></div>
-                    <p><?php _e( 'Total tracked', 'dedebtify' ); ?></p>
+            <div class="dedebtify-settings-row">
+                <div class="dedebtify-settings-label">
+                    <label for="default_payoff_strategy"><?php _e( 'Default Payoff Strategy', 'dedebtify' ); ?></label>
                 </div>
-
-                <div class="dedebtify-stat-card">
-                    <h3><?php _e( 'Snapshots', 'dedebtify' ); ?></h3>
-                    <div class="dedebtify-stat-value"><?php echo wp_count_posts( 'dd_snapshot' )->publish; ?></div>
-                    <p><?php _e( 'Total created', 'dedebtify' ); ?></p>
+                <div class="dedebtify-settings-field">
+                    <select id="default_payoff_strategy" name="default_payoff_strategy" class="regular-text">
+                        <option value="avalanche" <?php selected( $default_payoff_strategy, 'avalanche' ); ?>><?php _e( 'Avalanche (Highest Interest First)', 'dedebtify' ); ?></option>
+                        <option value="snowball" <?php selected( $default_payoff_strategy, 'snowball' ); ?>><?php _e( 'Snowball (Lowest Balance First)', 'dedebtify' ); ?></option>
+                    </select>
+                    <span class="description"><?php _e( 'Default debt payoff strategy for new users', 'dedebtify' ); ?></span>
                 </div>
             </div>
         </div>
 
-        <div class="dedebtify-quick-actions">
-            <h2><?php _e( 'Quick Actions', 'dedebtify' ); ?></h2>
-            <div class="dedebtify-actions-grid">
-                <a href="<?php echo admin_url( 'post-new.php?post_type=dd_credit_card' ); ?>" class="dedebtify-action-btn">
-                    <?php _e( 'Add Credit Card', 'dedebtify' ); ?>
-                </a>
-                <a href="<?php echo admin_url( 'post-new.php?post_type=dd_loan' ); ?>" class="dedebtify-action-btn">
-                    <?php _e( 'Add Loan', 'dedebtify' ); ?>
-                </a>
-                <a href="<?php echo admin_url( 'post-new.php?post_type=dd_bill' ); ?>" class="dedebtify-action-btn">
-                    <?php _e( 'Add Bill', 'dedebtify' ); ?>
-                </a>
-                <a href="<?php echo admin_url( 'post-new.php?post_type=dd_goal' ); ?>" class="dedebtify-action-btn">
-                    <?php _e( 'Add Goal', 'dedebtify' ); ?>
-                </a>
-                <a href="#" id="dedebtify-create-snapshot" class="dedebtify-action-btn">
-                    <?php _e( 'Create Snapshot', 'dedebtify' ); ?>
-                </a>
-                <a href="<?php echo admin_url( 'admin.php?page=dedebtify-settings' ); ?>" class="dedebtify-action-btn">
-                    <?php _e( 'Settings', 'dedebtify' ); ?>
-                </a>
+        <!-- Snapshot Settings -->
+        <div class="dedebtify-settings-section">
+            <h3><?php _e( 'Snapshot Settings', 'dedebtify' ); ?></h3>
+
+            <div class="dedebtify-settings-row">
+                <div class="dedebtify-settings-label">
+                    <label for="snapshot_frequency"><?php _e( 'Snapshot Reminder Frequency', 'dedebtify' ); ?></label>
+                </div>
+                <div class="dedebtify-settings-field">
+                    <select id="snapshot_frequency" name="snapshot_frequency" class="regular-text">
+                        <option value="weekly" <?php selected( $snapshot_frequency, 'weekly' ); ?>><?php _e( 'Weekly', 'dedebtify' ); ?></option>
+                        <option value="monthly" <?php selected( $snapshot_frequency, 'monthly' ); ?>><?php _e( 'Monthly', 'dedebtify' ); ?></option>
+                        <option value="quarterly" <?php selected( $snapshot_frequency, 'quarterly' ); ?>><?php _e( 'Quarterly', 'dedebtify' ); ?></option>
+                    </select>
+                    <span class="description"><?php _e( 'How often to remind users to create snapshots', 'dedebtify' ); ?></span>
+                </div>
             </div>
         </div>
 
-        <div class="dedebtify-info-box">
-            <h2><?php _e( 'Plugin Information', 'dedebtify' ); ?></h2>
-            <table class="widefat">
+        <!-- Notification Settings -->
+        <div class="dedebtify-settings-section">
+            <h3><?php _e( 'Notification Settings', 'dedebtify' ); ?></h3>
+
+            <div class="dedebtify-settings-row">
+                <div class="dedebtify-settings-label">
+                    <label for="notifications_enabled"><?php _e( 'Enable Notifications', 'dedebtify' ); ?></label>
+                </div>
+                <div class="dedebtify-settings-field">
+                    <label>
+                        <input type="checkbox" id="notifications_enabled" name="notifications_enabled" value="1" <?php checked( $notifications_enabled, 1 ); ?>>
+                        <?php _e( 'Enable email notifications', 'dedebtify' ); ?>
+                    </label>
+                    <span class="description"><?php _e( 'Send email notifications for important events', 'dedebtify' ); ?></span>
+                </div>
+            </div>
+
+            <div class="dedebtify-settings-row">
+                <div class="dedebtify-settings-label">
+                    <label for="notification_email"><?php _e( 'Notification Email', 'dedebtify' ); ?></label>
+                </div>
+                <div class="dedebtify-settings-field">
+                    <input type="email" id="notification_email" name="notification_email" value="<?php echo esc_attr( $notification_email ); ?>" class="regular-text">
+                    <span class="description"><?php _e( 'Email address for admin notifications', 'dedebtify' ); ?></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shortcodes Reference -->
+        <div class="dedebtify-settings-section">
+            <h3><?php _e( 'Available Shortcodes', 'dedebtify' ); ?></h3>
+            <p><?php _e( 'Use these shortcodes in your pages to display various components:', 'dedebtify' ); ?></p>
+
+            <table class="widefat" style="max-width: 800px;">
+                <thead>
+                    <tr>
+                        <th><?php _e( 'Shortcode', 'dedebtify' ); ?></th>
+                        <th><?php _e( 'Description', 'dedebtify' ); ?></th>
+                    </tr>
+                </thead>
                 <tbody>
                     <tr>
-                        <td><strong><?php _e( 'Version:', 'dedebtify' ); ?></strong></td>
-                        <td><?php echo DEDEBTIFY_VERSION; ?></td>
+                        <td><code>[dedebtify_dashboard]</code></td>
+                        <td><?php _e( 'Display the complete user dashboard', 'dedebtify' ); ?></td>
                     </tr>
                     <tr>
-                        <td><strong><?php _e( 'PHP Version:', 'dedebtify' ); ?></strong></td>
-                        <td><?php echo PHP_VERSION; ?></td>
+                        <td><code>[dedebtify_credit_cards]</code></td>
+                        <td><?php _e( 'Display credit card manager interface', 'dedebtify' ); ?></td>
                     </tr>
                     <tr>
-                        <td><strong><?php _e( 'WordPress Version:', 'dedebtify' ); ?></strong></td>
-                        <td><?php echo get_bloginfo( 'version' ); ?></td>
+                        <td><code>[dedebtify_loans]</code></td>
+                        <td><?php _e( 'Display loans manager interface', 'dedebtify' ); ?></td>
                     </tr>
                     <tr>
-                        <td><strong><?php _e( 'Elementor:', 'dedebtify' ); ?></strong></td>
-                        <td><?php echo defined( 'ELEMENTOR_VERSION' ) ? ELEMENTOR_VERSION : __( 'Not installed', 'dedebtify' ); ?></td>
+                        <td><code>[dedebtify_bills]</code></td>
+                        <td><?php _e( 'Display bills manager interface', 'dedebtify' ); ?></td>
                     </tr>
                     <tr>
-                        <td><strong><?php _e( 'JetEngine:', 'dedebtify' ); ?></strong></td>
-                        <td><?php echo defined( 'JET_ENGINE_VERSION' ) ? JET_ENGINE_VERSION : __( 'Not installed', 'dedebtify' ); ?></td>
+                        <td><code>[dedebtify_goals]</code></td>
+                        <td><?php _e( 'Display financial goals manager interface', 'dedebtify' ); ?></td>
+                    </tr>
+                    <tr>
+                        <td><code>[dedebtify_action_plan]</code></td>
+                        <td><?php _e( 'Display debt action plan generator', 'dedebtify' ); ?></td>
+                    </tr>
+                    <tr>
+                        <td><code>[dedebtify_snapshots]</code></td>
+                        <td><?php _e( 'Display financial snapshots and progress tracking', 'dedebtify' ); ?></td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-    <?php elseif ( $current_page === 'dedebtify-settings' ) : ?>
-        <!-- Settings View -->
-        <form method="post" action="options.php">
-            <?php
-            settings_fields( 'dedebtify_settings_group' );
-            do_settings_sections( 'dedebtify_settings_group' );
+        <!-- Save Button -->
+        <p class="submit">
+            <button type="submit" name="dedebtify_settings_submit" class="button button-primary">
+                <?php _e( 'Save Settings', 'dedebtify' ); ?>
+            </button>
+        </p>
+    </form>
 
-            $settings = get_option( 'dedebtify_settings', array() );
-            ?>
+    <!-- System Information -->
+    <div class="dedebtify-settings-section">
+        <h3><?php _e( 'System Information', 'dedebtify' ); ?></h3>
 
-            <table class="form-table">
-                <tr>
-                    <th scope="row">
-                        <label for="dedebtify_currency"><?php _e( 'Currency', 'dedebtify' ); ?></label>
-                    </th>
-                    <td>
-                        <select id="dedebtify_currency" name="dedebtify_settings[currency]" class="regular-text">
-                            <option value="USD" <?php selected( $settings['currency'] ?? 'USD', 'USD' ); ?>>USD ($)</option>
-                            <option value="EUR" <?php selected( $settings['currency'] ?? 'USD', 'EUR' ); ?>>EUR (€)</option>
-                            <option value="GBP" <?php selected( $settings['currency'] ?? 'USD', 'GBP' ); ?>>GBP (£)</option>
-                            <option value="CAD" <?php selected( $settings['currency'] ?? 'USD', 'CAD' ); ?>>CAD ($)</option>
-                            <option value="AUD" <?php selected( $settings['currency'] ?? 'USD', 'AUD' ); ?>>AUD ($)</option>
-                        </select>
-                        <p class="description"><?php _e( 'Select your preferred currency', 'dedebtify' ); ?></p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th scope="row">
-                        <label for="dedebtify_date_format"><?php _e( 'Date Format', 'dedebtify' ); ?></label>
-                    </th>
-                    <td>
-                        <input type="text" id="dedebtify_date_format" name="dedebtify_settings[date_format]" value="<?php echo esc_attr( $settings['date_format'] ?? 'F j, Y' ); ?>" class="regular-text">
-                        <p class="description"><?php _e( 'PHP date format for displaying dates', 'dedebtify' ); ?></p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th scope="row">
-                        <label for="dedebtify_payoff_method"><?php _e( 'Default Payoff Method', 'dedebtify' ); ?></label>
-                    </th>
-                    <td>
-                        <select id="dedebtify_payoff_method" name="dedebtify_settings[default_payoff_method]" class="regular-text">
-                            <option value="avalanche" <?php selected( $settings['default_payoff_method'] ?? 'avalanche', 'avalanche' ); ?>><?php _e( 'Avalanche (Highest Interest First)', 'dedebtify' ); ?></option>
-                            <option value="snowball" <?php selected( $settings['default_payoff_method'] ?? 'avalanche', 'snowball' ); ?>><?php _e( 'Snowball (Smallest Balance First)', 'dedebtify' ); ?></option>
-                        </select>
-                        <p class="description"><?php _e( 'Default debt payoff strategy for new users', 'dedebtify' ); ?></p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th scope="row">
-                        <label for="dedebtify_notifications"><?php _e( 'Enable Notifications', 'dedebtify' ); ?></label>
-                    </th>
-                    <td>
-                        <input type="checkbox" id="dedebtify_notifications" name="dedebtify_settings[enable_notifications]" value="1" <?php checked( $settings['enable_notifications'] ?? false, 1 ); ?>>
-                        <label for="dedebtify_notifications"><?php _e( 'Enable push notifications (requires OneSignal)', 'dedebtify' ); ?></label>
-                    </td>
-                </tr>
-            </table>
-
-            <?php submit_button(); ?>
-        </form>
-
-        <hr>
-
-        <h2><?php _e( 'Shortcodes', 'dedebtify' ); ?></h2>
-        <p><?php _e( 'Use these shortcodes in your pages:', 'dedebtify' ); ?></p>
-        <ul>
-            <li><code>[dedebtify_dashboard]</code> - <?php _e( 'Display the full dashboard', 'dedebtify' ); ?></li>
-        </ul>
-
-        <hr>
-
-        <h2><?php _e( 'Documentation', 'dedebtify' ); ?></h2>
-        <p><?php _e( 'For detailed documentation, visit:', 'dedebtify' ); ?> <a href="https://yoursite.com/docs" target="_blank">https://yoursite.com/docs</a></p>
-
-    <?php endif; ?>
+        <table class="widefat" style="max-width: 600px;">
+            <tr>
+                <th style="width: 250px;"><?php _e( 'Plugin Version', 'dedebtify' ); ?></th>
+                <td><?php echo DEDEBTIFY_VERSION; ?></td>
+            </tr>
+            <tr>
+                <th><?php _e( 'WordPress Version', 'dedebtify' ); ?></th>
+                <td><?php echo get_bloginfo( 'version' ); ?></td>
+            </tr>
+            <tr>
+                <th><?php _e( 'PHP Version', 'dedebtify' ); ?></th>
+                <td><?php echo PHP_VERSION; ?></td>
+            </tr>
+            <tr>
+                <th><?php _e( 'Database Version', 'dedebtify' ); ?></th>
+                <td><?php global $wpdb; echo $wpdb->db_version(); ?></td>
+            </tr>
+            <tr>
+                <th><?php _e( 'Server Software', 'dedebtify' ); ?></th>
+                <td><?php echo $_SERVER['SERVER_SOFTWARE']; ?></td>
+            </tr>
+        </table>
+    </div>
 
 </div>

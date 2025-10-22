@@ -102,6 +102,20 @@ class Dedebtify_API {
             'callback' => array( $this, 'get_snapshots' ),
             'permission_callback' => array( $this, 'check_user_permission' ),
         ));
+
+        // Admin stats endpoint
+        register_rest_route( $namespace, '/stats', array(
+            'methods' => 'GET',
+            'callback' => array( $this, 'get_admin_stats' ),
+            'permission_callback' => array( $this, 'check_admin_permission' ),
+        ));
+
+        // Recent activity endpoint
+        register_rest_route( $namespace, '/activity', array(
+            'methods' => 'GET',
+            'callback' => array( $this, 'get_recent_activity' ),
+            'permission_callback' => array( $this, 'check_admin_permission' ),
+        ));
     }
 
     /**
@@ -112,6 +126,16 @@ class Dedebtify_API {
      */
     public function check_user_permission() {
         return is_user_logged_in();
+    }
+
+    /**
+     * Check if user has admin permission.
+     *
+     * @since    1.0.0
+     * @return   bool
+     */
+    public function check_admin_permission() {
+        return current_user_can( 'manage_options' );
     }
 
     /**
@@ -437,5 +461,99 @@ class Dedebtify_API {
         }
 
         return rest_ensure_response( $snapshots_data );
+    }
+
+    /**
+     * Get admin statistics.
+     *
+     * @since    1.0.0
+     * @param    WP_REST_Request    $request
+     * @return   WP_REST_Response
+     */
+    public function get_admin_stats( $request ) {
+        $stats = array(
+            'total_users' => count_users()['total_users'],
+            'total_credit_cards' => wp_count_posts('dd_credit_card')->publish,
+            'total_loans' => wp_count_posts('dd_loan')->publish,
+            'total_bills' => wp_count_posts('dd_bill')->publish,
+            'total_goals' => wp_count_posts('dd_goal')->publish,
+            'total_snapshots' => wp_count_posts('dd_snapshot')->publish,
+        );
+
+        // Calculate total debt across all users
+        $total_debt = 0;
+
+        // Get all credit card balances
+        $cards = get_posts(array(
+            'post_type' => 'dd_credit_card',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+        foreach ($cards as $card) {
+            $balance = get_post_meta($card->ID, 'balance', true);
+            $total_debt += floatval($balance);
+        }
+
+        // Get all loan balances
+        $loans = get_posts(array(
+            'post_type' => 'dd_loan',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+        foreach ($loans as $loan) {
+            $balance = get_post_meta($loan->ID, 'balance', true);
+            $total_debt += floatval($balance);
+        }
+
+        $stats['total_debt'] = $total_debt;
+
+        return rest_ensure_response( $stats );
+    }
+
+    /**
+     * Get recent activity.
+     *
+     * @since    1.0.0
+     * @param    WP_REST_Request    $request
+     * @return   WP_REST_Response
+     */
+    public function get_recent_activity( $request ) {
+        $activities = array();
+        $post_types = array('dd_credit_card', 'dd_loan', 'dd_bill', 'dd_goal', 'dd_snapshot');
+
+        foreach ($post_types as $post_type) {
+            $posts = get_posts(array(
+                'post_type' => $post_type,
+                'posts_per_page' => 5,
+                'post_status' => 'publish',
+                'orderby' => 'modified',
+                'order' => 'DESC'
+            ));
+
+            foreach ($posts as $post) {
+                $author = get_userdata($post->post_author);
+                $type_label = str_replace('dd_', '', $post_type);
+                $type_label = str_replace('_', ' ', $type_label);
+
+                $activities[] = array(
+                    'id' => $post->ID,
+                    'type' => $type_label,
+                    'title' => $post->post_title,
+                    'author' => $author ? $author->display_name : 'Unknown',
+                    'action' => 'Updated',
+                    'date' => $post->post_modified,
+                );
+            }
+        }
+
+        // Sort by date descending
+        usort($activities, function($a, $b) {
+            return strtotime($b['date']) - strtotime($a['date']);
+        });
+
+        // Return top 20
+        $activities = array_slice($activities, 0, 20);
+
+        return rest_ensure_response( $activities );
     }
 }
