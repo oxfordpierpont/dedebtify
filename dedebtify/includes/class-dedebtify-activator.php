@@ -53,6 +53,9 @@ class Dedebtify_Activator {
         // Set default options
         self::set_default_options();
 
+        // Create plugin pages
+        self::create_plugin_pages();
+
         // Add activation timestamp
         update_option( 'dedebtify_activated_time', current_time( 'timestamp' ) );
     }
@@ -74,5 +77,100 @@ class Dedebtify_Activator {
         );
 
         add_option( 'dedebtify_settings', $defaults );
+
+        // Additional individual settings
+        add_option( 'dedebtify_currency_symbol', '$' );
+        add_option( 'dedebtify_default_interest_rate', 18.0 );
+        add_option( 'dedebtify_notifications_enabled', 0 );
+        add_option( 'dedebtify_notification_email', get_option( 'admin_email' ) );
+        add_option( 'dedebtify_snapshot_frequency', 'monthly' );
+        add_option( 'dedebtify_default_payoff_strategy', 'avalanche' );
+    }
+
+    /**
+     * Create plugin pages.
+     *
+     * @since    1.0.0
+     * @access   private
+     */
+    private static function create_plugin_pages() {
+        // Check if pages already exist
+        $pages_created = get_option( 'dedebtify_pages_created', false );
+        if ( $pages_created ) {
+            return;
+        }
+
+        $pages = array(
+            'dashboard' => array(
+                'title' => __( 'My Debt Dashboard', 'dedebtify' ),
+                'content' => '[dedebtify_dashboard]',
+                'slug' => 'debt-dashboard',
+            ),
+            'credit_cards' => array(
+                'title' => __( 'Credit Cards', 'dedebtify' ),
+                'content' => '[dedebtify_credit_cards]',
+                'slug' => 'credit-cards',
+            ),
+            'loans' => array(
+                'title' => __( 'Loans', 'dedebtify' ),
+                'content' => '[dedebtify_loans]',
+                'slug' => 'loans',
+            ),
+            'bills' => array(
+                'title' => __( 'Bills & Expenses', 'dedebtify' ),
+                'content' => '[dedebtify_bills]',
+                'slug' => 'bills',
+            ),
+            'goals' => array(
+                'title' => __( 'Financial Goals', 'dedebtify' ),
+                'content' => '[dedebtify_goals]',
+                'slug' => 'financial-goals',
+            ),
+            'action_plan' => array(
+                'title' => __( 'Debt Action Plan', 'dedebtify' ),
+                'content' => '[dedebtify_action_plan]',
+                'slug' => 'debt-action-plan',
+            ),
+            'snapshots' => array(
+                'title' => __( 'Progress Tracking', 'dedebtify' ),
+                'content' => '[dedebtify_snapshots]',
+                'slug' => 'progress-tracking',
+            ),
+        );
+
+        $page_ids = array();
+
+        foreach ( $pages as $key => $page_data ) {
+            // Check if page already exists
+            $existing_page = get_page_by_path( $page_data['slug'] );
+
+            if ( ! $existing_page ) {
+                // Create the page
+                $page_id = wp_insert_post( array(
+                    'post_title' => $page_data['title'],
+                    'post_content' => $page_data['content'],
+                    'post_name' => $page_data['slug'],
+                    'post_status' => 'publish',
+                    'post_type' => 'page',
+                    'comment_status' => 'closed',
+                    'ping_status' => 'closed',
+                ) );
+
+                if ( $page_id && ! is_wp_error( $page_id ) ) {
+                    $page_ids[$key] = $page_id;
+                }
+            } else {
+                $page_ids[$key] = $existing_page->ID;
+            }
+        }
+
+        // Save page IDs for future reference
+        update_option( 'dedebtify_page_ids', $page_ids );
+        update_option( 'dedebtify_pages_created', true );
+
+        // Set the dashboard as the main page
+        if ( isset( $page_ids['dashboard'] ) ) {
+            update_option( 'dedebtify_dashboard_page_id', $page_ids['dashboard'] );
+        }
     }
 }

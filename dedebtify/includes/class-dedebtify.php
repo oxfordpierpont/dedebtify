@@ -276,6 +276,18 @@ class Dedebtify {
             array( $this, 'render_admin_dashboard' )
         );
 
+        // Show setup page if not hidden
+        if ( ! get_option( 'dedebtify_hide_setup_page', false ) ) {
+            add_submenu_page(
+                'dedebtify',
+                __( 'Setup Guide', 'dedebtify' ),
+                __( 'Setup Guide', 'dedebtify' ) . ' <span class="dashicons dashicons-star-filled" style="color: #f0b849; font-size: 14px;"></span>',
+                'manage_options',
+                'dedebtify-setup',
+                array( $this, 'render_setup_page' )
+            );
+        }
+
         add_submenu_page(
             'dedebtify',
             __( 'Reports', 'dedebtify' ),
@@ -302,6 +314,15 @@ class Dedebtify {
      */
     public function render_admin_dashboard() {
         require_once DEDEBTIFY_PLUGIN_DIR . 'admin/dashboard.php';
+    }
+
+    /**
+     * Render setup guide page.
+     *
+     * @since    1.0.0
+     */
+    public function render_setup_page() {
+        require_once DEDEBTIFY_PLUGIN_DIR . 'admin/setup-page.php';
     }
 
     /**
