@@ -1,0 +1,737 @@
+/**
+ * DeDebtify Design System
+ * WordPress-compatible components inspired by Shadcn
+ *
+ * @since      1.0.0
+ * @package    Dedebtify
+ */
+
+/* ======================================
+   CSS CUSTOM PROPERTIES (Design Tokens)
+   ====================================== */
+
+:root {
+    /* Colors - Light Theme */
+    --dd-background: 0 0% 100%;
+    --dd-foreground: 222.2 84% 4.9%;
+
+    --dd-card: 0 0% 100%;
+    --dd-card-foreground: 222.2 84% 4.9%;
+
+    --dd-popover: 0 0% 100%;
+    --dd-popover-foreground: 222.2 84% 4.9%;
+
+    --dd-primary: 221.2 83.2% 53.3%;
+    --dd-primary-foreground: 210 40% 98%;
+
+    --dd-secondary: 210 40% 96.1%;
+    --dd-secondary-foreground: 222.2 47.4% 11.2%;
+
+    --dd-muted: 210 40% 96.1%;
+    --dd-muted-foreground: 215.4 16.3% 46.9%;
+
+    --dd-accent: 210 40% 96.1%;
+    --dd-accent-foreground: 222.2 47.4% 11.2%;
+
+    --dd-destructive: 0 84.2% 60.2%;
+    --dd-destructive-foreground: 210 40% 98%;
+
+    --dd-success: 142.1 76.2% 36.3%;
+    --dd-success-foreground: 355.7 100% 97.3%;
+
+    --dd-warning: 38 92% 50%;
+    --dd-warning-foreground: 48 96% 89%;
+
+    --dd-border: 214.3 31.8% 91.4%;
+    --dd-input: 214.3 31.8% 91.4%;
+    --dd-ring: 221.2 83.2% 53.3%;
+
+    --dd-radius: 0.5rem;
+
+    /* Shadows */
+    --dd-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --dd-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --dd-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --dd-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --dd-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+    /* Spacing Scale */
+    --dd-space-1: 0.25rem;
+    --dd-space-2: 0.5rem;
+    --dd-space-3: 0.75rem;
+    --dd-space-4: 1rem;
+    --dd-space-5: 1.25rem;
+    --dd-space-6: 1.5rem;
+    --dd-space-8: 2rem;
+    --dd-space-10: 2.5rem;
+    --dd-space-12: 3rem;
+
+    /* Font Sizes */
+    --dd-text-xs: 0.75rem;
+    --dd-text-sm: 0.875rem;
+    --dd-text-base: 1rem;
+    --dd-text-lg: 1.125rem;
+    --dd-text-xl: 1.25rem;
+    --dd-text-2xl: 1.5rem;
+    --dd-text-3xl: 1.875rem;
+    --dd-text-4xl: 2.25rem;
+}
+
+/* ======================================
+   BASE STYLES
+   ====================================== */
+
+.dd-component {
+    box-sizing: border-box;
+}
+
+.dd-component *,
+.dd-component *::before,
+.dd-component *::after {
+    box-sizing: inherit;
+}
+
+/* ======================================
+   BUTTON COMPONENTS
+   ====================================== */
+
+.dd-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dd-space-2);
+    white-space: nowrap;
+    border-radius: var(--dd-radius);
+    font-size: var(--dd-text-sm);
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: 1px solid transparent;
+    outline: none;
+    text-decoration: none;
+    line-height: 1.5;
+
+    /* Default size */
+    height: 2.5rem;
+    padding: 0 var(--dd-space-4);
+}
+
+.dd-btn:focus-visible {
+    outline: 2px solid hsl(var(--dd-ring));
+    outline-offset: 2px;
+}
+
+.dd-btn:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Button Variants */
+.dd-btn-default {
+    background-color: hsl(var(--dd-primary));
+    color: hsl(var(--dd-primary-foreground));
+    box-shadow: var(--dd-shadow-sm);
+}
+
+.dd-btn-default:hover {
+    background-color: hsl(var(--dd-primary) / 0.9);
+    box-shadow: var(--dd-shadow);
+}
+
+.dd-btn-default:active {
+    box-shadow: var(--dd-shadow-sm);
+    transform: translateY(1px);
+}
+
+.dd-btn-destructive {
+    background-color: hsl(var(--dd-destructive));
+    color: hsl(var(--dd-destructive-foreground));
+    box-shadow: var(--dd-shadow-sm);
+}
+
+.dd-btn-destructive:hover {
+    background-color: hsl(var(--dd-destructive) / 0.9);
+    box-shadow: var(--dd-shadow);
+}
+
+.dd-btn-outline {
+    border: 1px solid hsl(var(--dd-input));
+    background-color: hsl(var(--dd-background));
+    color: hsl(var(--dd-foreground));
+}
+
+.dd-btn-outline:hover {
+    background-color: hsl(var(--dd-accent));
+    color: hsl(var(--dd-accent-foreground));
+}
+
+.dd-btn-secondary {
+    background-color: hsl(var(--dd-secondary));
+    color: hsl(var(--dd-secondary-foreground));
+}
+
+.dd-btn-secondary:hover {
+    background-color: hsl(var(--dd-secondary) / 0.8);
+}
+
+.dd-btn-ghost {
+    background-color: transparent;
+    color: hsl(var(--dd-foreground));
+}
+
+.dd-btn-ghost:hover {
+    background-color: hsl(var(--dd-accent));
+    color: hsl(var(--dd-accent-foreground));
+}
+
+.dd-btn-success {
+    background-color: hsl(var(--dd-success));
+    color: hsl(var(--dd-success-foreground));
+    box-shadow: var(--dd-shadow-sm);
+}
+
+.dd-btn-success:hover {
+    background-color: hsl(var(--dd-success) / 0.9);
+}
+
+/* Button Sizes */
+.dd-btn-sm {
+    height: 2rem;
+    padding: 0 var(--dd-space-3);
+    font-size: var(--dd-text-xs);
+}
+
+.dd-btn-lg {
+    height: 3rem;
+    padding: 0 var(--dd-space-8);
+    font-size: var(--dd-text-base);
+}
+
+.dd-btn-icon {
+    height: 2.5rem;
+    width: 2.5rem;
+    padding: 0;
+}
+
+.dd-btn-icon.dd-btn-sm {
+    height: 2rem;
+    width: 2rem;
+}
+
+/* ======================================
+   CARD COMPONENTS
+   ====================================== */
+
+.dd-card {
+    border-radius: calc(var(--dd-radius) + 2px);
+    border: 1px solid hsl(var(--dd-border));
+    background-color: hsl(var(--dd-card));
+    color: hsl(var(--dd-card-foreground));
+    box-shadow: var(--dd-shadow-sm);
+}
+
+.dd-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dd-space-2);
+    padding: var(--dd-space-6);
+}
+
+.dd-card-title {
+    font-size: var(--dd-text-2xl);
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.dd-card-description {
+    font-size: var(--dd-text-sm);
+    color: hsl(var(--dd-muted-foreground));
+    margin: 0;
+}
+
+.dd-card-content {
+    padding: var(--dd-space-6);
+    padding-top: 0;
+}
+
+.dd-card-footer {
+    display: flex;
+    align-items: center;
+    padding: var(--dd-space-6);
+    padding-top: 0;
+}
+
+/* ======================================
+   FORM COMPONENTS
+   ====================================== */
+
+.dd-label {
+    font-size: var(--dd-text-sm);
+    font-weight: 500;
+    line-height: 1.5;
+    color: hsl(var(--dd-foreground));
+    margin-bottom: var(--dd-space-2);
+    display: inline-block;
+}
+
+.dd-label-required::after {
+    content: " *";
+    color: hsl(var(--dd-destructive));
+}
+
+.dd-input {
+    display: flex;
+    height: 2.5rem;
+    width: 100%;
+    border-radius: var(--dd-radius);
+    border: 1px solid hsl(var(--dd-input));
+    background-color: hsl(var(--dd-background));
+    padding: 0 var(--dd-space-3);
+    font-size: var(--dd-text-sm);
+    line-height: 1.5;
+    color: hsl(var(--dd-foreground));
+    transition: all 0.2s;
+}
+
+.dd-input::placeholder {
+    color: hsl(var(--dd-muted-foreground));
+}
+
+.dd-input:focus {
+    outline: none;
+    border-color: hsl(var(--dd-ring));
+    box-shadow: 0 0 0 3px hsl(var(--dd-ring) / 0.1);
+}
+
+.dd-input:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.dd-textarea {
+    min-height: 5rem;
+    padding: var(--dd-space-3);
+    resize: vertical;
+}
+
+.dd-select {
+    display: flex;
+    height: 2.5rem;
+    width: 100%;
+    appearance: none;
+    border-radius: var(--dd-radius);
+    border: 1px solid hsl(var(--dd-input));
+    background-color: hsl(var(--dd-background));
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right var(--dd-space-2) center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding: 0 var(--dd-space-8) 0 var(--dd-space-3);
+    font-size: var(--dd-text-sm);
+    line-height: 1.5;
+    color: hsl(var(--dd-foreground));
+    transition: all 0.2s;
+}
+
+.dd-select:focus {
+    outline: none;
+    border-color: hsl(var(--dd-ring));
+    box-shadow: 0 0 0 3px hsl(var(--dd-ring) / 0.1);
+}
+
+.dd-checkbox {
+    height: 1rem;
+    width: 1rem;
+    flex-shrink: 0;
+    border-radius: calc(var(--dd-radius) - 2px);
+    border: 1px solid hsl(var(--dd-primary));
+    cursor: pointer;
+}
+
+.dd-checkbox:checked {
+    background-color: hsl(var(--dd-primary));
+    border-color: hsl(var(--dd-primary));
+}
+
+.dd-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dd-space-2);
+    margin-bottom: var(--dd-space-4);
+}
+
+.dd-form-description {
+    font-size: var(--dd-text-sm);
+    color: hsl(var(--dd-muted-foreground));
+}
+
+.dd-form-error {
+    font-size: var(--dd-text-sm);
+    font-weight: 500;
+    color: hsl(var(--dd-destructive));
+}
+
+/* ======================================
+   BADGE COMPONENTS
+   ====================================== */
+
+.dd-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0 var(--dd-space-2);
+    font-size: var(--dd-text-xs);
+    font-weight: 600;
+    line-height: 1.5;
+    height: 1.25rem;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.dd-badge-default {
+    border-color: hsl(var(--dd-border));
+    background-color: hsl(var(--dd-secondary));
+    color: hsl(var(--dd-foreground));
+}
+
+.dd-badge-primary {
+    background-color: hsl(var(--dd-primary));
+    color: hsl(var(--dd-primary-foreground));
+}
+
+.dd-badge-secondary {
+    background-color: hsl(var(--dd-secondary));
+    color: hsl(var(--dd-secondary-foreground));
+}
+
+.dd-badge-destructive {
+    background-color: hsl(var(--dd-destructive));
+    color: hsl(var(--dd-destructive-foreground));
+}
+
+.dd-badge-success {
+    background-color: hsl(var(--dd-success));
+    color: hsl(var(--dd-success-foreground));
+}
+
+.dd-badge-warning {
+    background-color: hsl(var(--dd-warning));
+    color: hsl(var(--dd-warning-foreground));
+}
+
+.dd-badge-outline {
+    color: hsl(var(--dd-foreground));
+    border: 1px solid hsl(var(--dd-border));
+    background-color: transparent;
+}
+
+/* ======================================
+   ALERT COMPONENTS
+   ====================================== */
+
+.dd-alert {
+    position: relative;
+    width: 100%;
+    border-radius: var(--dd-radius);
+    border: 1px solid hsl(var(--dd-border));
+    padding: var(--dd-space-4);
+    font-size: var(--dd-text-sm);
+}
+
+.dd-alert-default {
+    background-color: hsl(var(--dd-background));
+    color: hsl(var(--dd-foreground));
+}
+
+.dd-alert-destructive {
+    border-color: hsl(var(--dd-destructive) / 0.5);
+    color: hsl(var(--dd-destructive));
+    background-color: hsl(var(--dd-destructive) / 0.1);
+}
+
+.dd-alert-success {
+    border-color: hsl(var(--dd-success) / 0.5);
+    color: hsl(var(--dd-success));
+    background-color: hsl(var(--dd-success) / 0.1);
+}
+
+.dd-alert-warning {
+    border-color: hsl(var(--dd-warning) / 0.5);
+    color: hsl(var(--dd-warning-foreground));
+    background-color: hsl(var(--dd-warning) / 0.1);
+}
+
+.dd-alert-title {
+    margin-bottom: var(--dd-space-1);
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.dd-alert-description {
+    font-size: var(--dd-text-sm);
+    line-height: 1.5;
+}
+
+/* ======================================
+   PROGRESS COMPONENTS
+   ====================================== */
+
+.dd-progress {
+    position: relative;
+    height: 1rem;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 9999px;
+    background-color: hsl(var(--dd-secondary));
+}
+
+.dd-progress-indicator {
+    height: 100%;
+    width: 100%;
+    flex: 1;
+    background-color: hsl(var(--dd-primary));
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dd-progress-success .dd-progress-indicator {
+    background-color: hsl(var(--dd-success));
+}
+
+.dd-progress-warning .dd-progress-indicator {
+    background-color: hsl(var(--dd-warning));
+}
+
+.dd-progress-destructive .dd-progress-indicator {
+    background-color: hsl(var(--dd-destructive));
+}
+
+/* ======================================
+   TABLE COMPONENTS
+   ====================================== */
+
+.dd-table-wrapper {
+    width: 100%;
+    overflow: auto;
+    border-radius: var(--dd-radius);
+    border: 1px solid hsl(var(--dd-border));
+}
+
+.dd-table {
+    width: 100%;
+    caption-side: bottom;
+    font-size: var(--dd-text-sm);
+}
+
+.dd-table-header {
+    border-bottom: 1px solid hsl(var(--dd-border));
+}
+
+.dd-table-header-row {
+    border-bottom: 1px solid hsl(var(--dd-border));
+    transition: background-color 0.2s;
+}
+
+.dd-table-header-row:hover {
+    background-color: hsl(var(--dd-muted) / 0.5);
+}
+
+.dd-table-head {
+    height: 3rem;
+    padding: 0 var(--dd-space-4);
+    text-align: left;
+    align-items: center;
+    font-weight: 600;
+    color: hsl(var(--dd-muted-foreground));
+}
+
+.dd-table-body {
+
+}
+
+.dd-table-row {
+    border-bottom: 1px solid hsl(var(--dd-border));
+    transition: background-color 0.2s;
+}
+
+.dd-table-row:hover {
+    background-color: hsl(var(--dd-muted) / 0.5);
+}
+
+.dd-table-cell {
+    padding: var(--dd-space-4);
+    align-items: center;
+}
+
+.dd-table-caption {
+    margin-top: var(--dd-space-4);
+    font-size: var(--dd-text-sm);
+    color: hsl(var(--dd-muted-foreground));
+}
+
+/* ======================================
+   SEPARATOR
+   ====================================== */
+
+.dd-separator {
+    flex-shrink: 0;
+    background-color: hsl(var(--dd-border));
+    height: 1px;
+    width: 100%;
+    margin: var(--dd-space-4) 0;
+}
+
+.dd-separator-vertical {
+    height: 100%;
+    width: 1px;
+}
+
+/* ======================================
+   SKELETON (Loading State)
+   ====================================== */
+
+.dd-skeleton {
+    animation: dd-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    border-radius: var(--dd-radius);
+    background-color: hsl(var(--dd-muted));
+}
+
+@keyframes dd-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* ======================================
+   UTILITY CLASSES
+   ====================================== */
+
+.dd-text-muted {
+    color: hsl(var(--dd-muted-foreground));
+}
+
+.dd-text-sm {
+    font-size: var(--dd-text-sm);
+}
+
+.dd-text-lg {
+    font-size: var(--dd-text-lg);
+}
+
+.dd-font-semibold {
+    font-weight: 600;
+}
+
+.dd-font-bold {
+    font-weight: 700;
+}
+
+.dd-flex {
+    display: flex;
+}
+
+.dd-flex-col {
+    flex-direction: column;
+}
+
+.dd-gap-2 {
+    gap: var(--dd-space-2);
+}
+
+.dd-gap-4 {
+    gap: var(--dd-space-4);
+}
+
+.dd-gap-6 {
+    gap: var(--dd-space-6);
+}
+
+.dd-grid {
+    display: grid;
+}
+
+.dd-grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dd-grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dd-grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.dd-rounded {
+    border-radius: var(--dd-radius);
+}
+
+.dd-shadow {
+    box-shadow: var(--dd-shadow);
+}
+
+.dd-shadow-md {
+    box-shadow: var(--dd-shadow-md);
+}
+
+.dd-shadow-lg {
+    box-shadow: var(--dd-shadow-lg);
+}
+
+/* ======================================
+   RESPONSIVE UTILITIES
+   ====================================== */
+
+@media (max-width: 768px) {
+    .dd-grid-cols-2,
+    .dd-grid-cols-3,
+    .dd-grid-cols-4 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ======================================
+   ANIMATIONS
+   ====================================== */
+
+@keyframes dd-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes dd-slide-in-from-top {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes dd-slide-in-from-bottom {
+    from {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.dd-animate-fade-in {
+    animation: dd-fade-in 0.3s ease-out;
+}
+
+.dd-animate-slide-in {
+    animation: dd-slide-in-from-bottom 0.3s ease-out;
+}

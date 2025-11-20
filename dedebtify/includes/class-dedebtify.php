@@ -156,10 +156,20 @@ class Dedebtify {
      * @since    1.0.0
      */
     public function enqueue_admin_assets() {
+        // Enqueue design system first (base components)
+        wp_enqueue_style(
+            $this->plugin_name . '-design-system',
+            DEDEBTIFY_PLUGIN_URL . 'assets/css/dedebtify-design-system.css',
+            array(),
+            $this->version,
+            'all'
+        );
+
+        // Enqueue admin styles (depends on design system)
         wp_enqueue_style(
             $this->plugin_name . '-admin',
             DEDEBTIFY_PLUGIN_URL . 'assets/css/dedebtify-admin.css',
-            array(),
+            array( $this->plugin_name . '-design-system' ),
             $this->version,
             'all'
         );
@@ -191,10 +201,29 @@ class Dedebtify {
      * @since    1.0.0
      */
     public function enqueue_public_assets() {
+        // Enqueue design system first (base components)
+        wp_enqueue_style(
+            $this->plugin_name . '-design-system',
+            DEDEBTIFY_PLUGIN_URL . 'assets/css/dedebtify-design-system.css',
+            array(),
+            $this->version,
+            'all'
+        );
+
+        // Enqueue public styles (depends on design system)
         wp_enqueue_style(
             $this->plugin_name . '-public',
             DEDEBTIFY_PLUGIN_URL . 'assets/css/dedebtify-public.css',
-            array(),
+            array( $this->plugin_name . '-design-system' ),
+            $this->version,
+            'all'
+        );
+
+        // Enqueue enhanced styles (integrates design system with components)
+        wp_enqueue_style(
+            $this->plugin_name . '-enhanced',
+            DEDEBTIFY_PLUGIN_URL . 'assets/css/dedebtify-enhanced.css',
+            array( $this->plugin_name . '-design-system', $this->plugin_name . '-public' ),
             $this->version,
             'all'
         );
