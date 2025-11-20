@@ -130,6 +130,34 @@ class Dedebtify_API {
             'callback' => array( $this, 'get_recent_activity' ),
             'permission_callback' => array( $this, 'check_admin_permission' ),
         ));
+
+        // AI Coach endpoint
+        register_rest_route( $namespace, '/ai-coach', array(
+            'methods' => 'POST',
+            'callback' => array( $this, 'ai_coach_message' ),
+            'permission_callback' => array( $this, 'check_user_permission' ),
+            'args' => array(
+                'message' => array(
+                    'required' => true,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                ),
+                'include_context' => array(
+                    'required' => false,
+                    'type' => 'boolean',
+                    'default' => false,
+                ),
+                'context' => array(
+                    'required' => false,
+                    'type' => 'object',
+                ),
+                'history' => array(
+                    'required' => false,
+                    'type' => 'array',
+                    'default' => array(),
+                ),
+            ),
+        ));
     }
 
     /**
@@ -695,5 +723,36 @@ class Dedebtify_API {
         $activities = array_slice($activities, 0, 20);
 
         return rest_ensure_response( $activities );
+    }
+
+    /**
+     * AI Coach message endpoint
+     *
+     * @since    1.0.0
+     * @param    WP_REST_Request    $request
+     * @return   WP_REST_Response
+     */
+    public function ai_coach_message( $request ) {
+        $message = $request->get_param( 'message' );
+        $include_context = $request->get_param( 'include_context' );
+        $context = $request->get_param( 'context' );
+        $history = $request->get_param( 'history' );
+
+        // Load the AI Coach class
+        require_once DEDEBTIFY_PLUGIN_DIR . 'includes/class-dedebtify-ai-coach.php';
+
+        $ai_coach = new Dedebtify_AI_Coach();
+
+        // Get AI response
+        $response = $ai_coach->get_response(
+            $message,
+            $include_context ? $context : null,
+            $history
+        );
+
+        return rest_ensure_response( array(
+            'success' => true,
+            'message' => $response
+        ) );
     }
 }

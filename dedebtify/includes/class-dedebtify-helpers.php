@@ -58,6 +58,10 @@ class Dedebtify_Helpers {
                 'title' => __( 'Dashboard', 'dedebtify' ),
                 'icon' => 'dashboard'
             ),
+            'ai_coach' => array(
+                'title' => __( 'AI Coach', 'dedebtify' ),
+                'icon' => 'welcome-learn-more'
+            ),
             'credit_cards' => array(
                 'title' => __( 'Credit Cards', 'dedebtify' ),
                 'icon' => 'credit-card'

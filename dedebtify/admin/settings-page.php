@@ -30,6 +30,11 @@ if ( isset( $_POST['dedebtify_settings_submit'] ) && check_admin_referer( 'dedeb
     update_option( 'dedebtify_font_family', sanitize_text_field( $_POST['font_family'] ) );
     update_option( 'dedebtify_border_radius', intval( $_POST['border_radius'] ) );
 
+    // Save AI settings
+    update_option( 'dedebtify_ai_provider', sanitize_text_field( $_POST['ai_provider'] ) );
+    update_option( 'dedebtify_ai_api_key', sanitize_text_field( $_POST['ai_api_key'] ) );
+    update_option( 'dedebtify_ai_model', sanitize_text_field( $_POST['ai_model'] ) );
+
     echo '<div class="notice notice-success is-dismissible"><p>' . __( 'Settings saved successfully!', 'dedebtify' ) . '</p></div>';
 }
 
@@ -62,6 +67,11 @@ $warning_color = get_option( 'dedebtify_warning_color', '#f59e0b' );
 $danger_color = get_option( 'dedebtify_danger_color', '#ef4444' );
 $font_family = get_option( 'dedebtify_font_family', 'System Default' );
 $border_radius = get_option( 'dedebtify_border_radius', 8 );
+
+// Get AI settings
+$ai_provider = get_option( 'dedebtify_ai_provider', 'openai' );
+$ai_api_key = get_option( 'dedebtify_ai_api_key', '' );
+$ai_model = get_option( 'dedebtify_ai_model', 'gpt-4o' );
 
 // Check if user has dummy data
 $has_dummy_data = get_user_meta( get_current_user_id(), 'dd_has_dummy_data', true );
@@ -317,6 +327,92 @@ $has_dummy_data = get_user_meta( get_current_user_id(), 'dd_has_dummy_data', tru
                 </p>
             </form>
         <?php endif; ?>
+    </div>
+
+    <!-- AI Coach Settings -->
+    <div class="dedebtify-settings-section" id="ai-coach">
+        <h3><?php _e( 'AI Financial Coach Settings', 'dedebtify' ); ?></h3>
+        <p class="description">
+            <?php _e( 'Configure your AI provider to enable the AI Financial Coach feature. The AI Coach provides personalized financial advice and insights based on your data.', 'dedebtify' ); ?>
+        </p>
+
+        <table class="form-table">
+            <tr>
+                <th scope="row">
+                    <label for="ai_provider"><?php _e( 'AI Provider', 'dedebtify' ); ?></label>
+                </th>
+                <td>
+                    <select name="ai_provider" id="ai_provider" class="regular-text">
+                        <option value="openai" <?php selected( $ai_provider, 'openai' ); ?>>OpenAI (ChatGPT)</option>
+                        <option value="anthropic" <?php selected( $ai_provider, 'anthropic' ); ?>>Anthropic (Claude)</option>
+                    </select>
+                    <p class="description">
+                        <?php _e( 'Choose your preferred AI provider. Both providers offer high-quality financial coaching.', 'dedebtify' ); ?>
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="ai_api_key"><?php _e( 'API Key', 'dedebtify' ); ?></label>
+                </th>
+                <td>
+                    <input type="password" id="ai_api_key" name="ai_api_key" value="<?php echo esc_attr( $ai_api_key ); ?>" class="regular-text" autocomplete="off">
+                    <p class="description">
+                        <?php _e( 'Get your API key from:', 'dedebtify' ); ?><br>
+                        <strong>OpenAI:</strong> <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a><br>
+                        <strong>Anthropic:</strong> <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="ai_model"><?php _e( 'AI Model', 'dedebtify' ); ?></label>
+                </th>
+                <td>
+                    <select name="ai_model" id="ai_model" class="regular-text">
+                        <!-- OpenAI Models -->
+                        <optgroup label="OpenAI Models" id="openai-models">
+                            <option value="gpt-4o" <?php selected( $ai_model, 'gpt-4o' ); ?>>GPT-4o (Recommended)</option>
+                            <option value="gpt-4o-mini" <?php selected( $ai_model, 'gpt-4o-mini' ); ?>>GPT-4o Mini (Faster & Cheaper)</option>
+                            <option value="gpt-4-turbo" <?php selected( $ai_model, 'gpt-4-turbo' ); ?>>GPT-4 Turbo</option>
+                        </optgroup>
+                        <!-- Anthropic Models -->
+                        <optgroup label="Anthropic Models" id="anthropic-models">
+                            <option value="claude-3-5-sonnet-20241022" <?php selected( $ai_model, 'claude-3-5-sonnet-20241022' ); ?>>Claude 3.5 Sonnet (Recommended)</option>
+                            <option value="claude-3-5-haiku-20241022" <?php selected( $ai_model, 'claude-3-5-haiku-20241022' ); ?>>Claude 3.5 Haiku (Faster & Cheaper)</option>
+                            <option value="claude-3-opus-20240229" <?php selected( $ai_model, 'claude-3-opus-20240229' ); ?>>Claude 3 Opus</option>
+                        </optgroup>
+                    </select>
+                    <p class="description">
+                        <?php _e( 'Select which AI model to use. More advanced models provide better responses but may cost more.', 'dedebtify' ); ?>
+                    </p>
+                </td>
+            </tr>
+        </table>
+
+        <div class="dedebtify-ai-status" style="background: #f0f0f1; padding: 15px; margin: 20px 0; border-radius: 4px;">
+            <h4 style="margin-top: 0;"><?php _e( 'AI Coach Status', 'dedebtify' ); ?></h4>
+            <?php if ( !empty( $ai_api_key ) ) : ?>
+                <p>
+                    <span class="dashicons dashicons-yes-alt" style="color: #00a32a;"></span>
+                    <?php _e( 'API key configured. AI Coach is ready to help your users!', 'dedebtify' ); ?>
+                </p>
+            <?php else : ?>
+                <p>
+                    <span class="dashicons dashicons-warning" style="color: #dba617;"></span>
+                    <?php _e( 'No API key configured. Users will see setup instructions when they visit the AI Coach page.', 'dedebtify' ); ?>
+                </p>
+            <?php endif; ?>
+        </div>
+
+        <div class="dedebtify-info-box" style="background: #e7f5fe; border-left: 4px solid #2271b1; padding: 12px; margin-top: 20px;">
+            <p style="margin: 0;">
+                <strong><?php _e( 'Privacy Note:', 'dedebtify' ); ?></strong>
+                <?php _e( 'When users attach their financial data to conversations, it is sent to the selected AI provider for analysis. Ensure your privacy policy reflects this. No data is stored by DeDebtify beyond the user\'s browser.', 'dedebtify' ); ?>
+            </p>
+        </div>
     </div>
 
     <!-- System Information -->

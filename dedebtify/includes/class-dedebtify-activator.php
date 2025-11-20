@@ -157,6 +157,12 @@ class Dedebtify_Activator {
                 'slug' => 'progress-tracking',
                 'template' => 'page-templates/template-snapshots.php',
             ),
+            'ai_coach' => array(
+                'title' => __( 'AI Financial Coach', 'dedebtify' ),
+                'content' => '[dedebtify_ai_coach]',
+                'slug' => 'ai-coach',
+                'template' => 'page-templates/template-ai-coach.php',
+            ),
         );
 
         $page_ids = array();

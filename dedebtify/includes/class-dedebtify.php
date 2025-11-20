@@ -119,6 +119,7 @@ class Dedebtify {
         add_shortcode( 'dedebtify_goals', array( $this, 'render_goals_shortcode' ) );
         add_shortcode( 'dedebtify_action_plan', array( $this, 'render_action_plan_shortcode' ) );
         add_shortcode( 'dedebtify_snapshots', array( $this, 'render_snapshots_shortcode' ) );
+        add_shortcode( 'dedebtify_ai_coach', array( $this, 'render_ai_coach_shortcode' ) );
     }
 
     /**
@@ -253,6 +254,15 @@ class Dedebtify {
             'all'
         );
 
+        // Enqueue AI Coach styles
+        wp_enqueue_style(
+            $this->plugin_name . '-ai-coach',
+            DEDEBTIFY_PLUGIN_URL . 'assets/css/dedebtify-ai-coach.css',
+            array( $this->plugin_name . '-mobile-app' ),
+            $this->version,
+            'all'
+        );
+
         wp_enqueue_script(
             $this->plugin_name . '-public',
             DEDEBTIFY_PLUGIN_URL . 'assets/js/dedebtify-public.js',
@@ -288,6 +298,14 @@ class Dedebtify {
         wp_enqueue_script(
             $this->plugin_name . '-mortgages',
             DEDEBTIFY_PLUGIN_URL . 'assets/js/dedebtify-mortgages.js',
+            array( 'jquery', $this->plugin_name . '-public' ),
+            $this->version,
+            true
+        );
+
+        wp_enqueue_script(
+            $this->plugin_name . '-ai-coach',
+            DEDEBTIFY_PLUGIN_URL . 'assets/js/dedebtify-ai-coach.js',
             array( 'jquery', $this->plugin_name . '-public' ),
             $this->version,
             true
@@ -630,6 +648,21 @@ class Dedebtify {
 
         ob_start();
         require_once DEDEBTIFY_PLUGIN_DIR . 'templates/snapshots.php';
+        return ob_get_clean();
+    }
+
+    /**
+     * Render AI Coach shortcode
+     *
+     * @since    1.0.0
+     */
+    public function render_ai_coach_shortcode( $atts ) {
+        if ( ! is_user_logged_in() ) {
+            return '<p>' . __( 'Please log in to chat with your AI Financial Coach.', 'dedebtify' ) . '</p>';
+        }
+
+        ob_start();
+        require_once DEDEBTIFY_PLUGIN_DIR . 'templates/ai-coach.php';
         return ob_get_clean();
     }
 }
