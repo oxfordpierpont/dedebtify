@@ -46,6 +46,11 @@ class Dedebtify_AI_Coach {
                 $this->model = get_option( 'dedebtify_ai_model', 'claude-3-5-sonnet-20241022' );
                 break;
 
+            case 'openrouter':
+                $this->api_endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+                $this->model = get_option( 'dedebtify_ai_model', 'anthropic/claude-3.5-sonnet' );
+                break;
+
             case 'openai':
             default:
                 $this->api_endpoint = 'https://api.openai.com/v1/chat/completions';
@@ -118,6 +123,8 @@ Format your responses with:
         // Make API request
         if ( $provider === 'anthropic' ) {
             return $this->call_anthropic_api( $messages );
+        } elseif ( $provider === 'openrouter' ) {
+            return $this->call_openrouter_api( $messages );
         } else {
             return $this->call_openai_api( $messages );
         }
@@ -286,6 +293,59 @@ Format your responses with:
     }
 
     /**
+     * Call OpenRouter API
+     */
+    private function call_openrouter_api( $messages ) {
+        $request_body = array(
+            'model' => $this->model,
+            'messages' => array_merge(
+                array(
+                    array(
+                        'role' => 'system',
+                        'content' => $this->system_prompt
+                    )
+                ),
+                $messages
+            ),
+            'temperature' => 0.7,
+            'max_tokens' => 2000
+        );
+
+        // Get site URL for OpenRouter headers
+        $site_url = get_site_url();
+        $site_name = get_bloginfo( 'name' );
+
+        $response = wp_remote_post( $this->api_endpoint, array(
+            'headers' => array(
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $this->api_key,
+                'HTTP-Referer' => $site_url,
+                'X-Title' => $site_name . ' - DeDebtify AI Coach'
+            ),
+            'body' => json_encode( $request_body ),
+            'timeout' => 60
+        ) );
+
+        if ( is_wp_error( $response ) ) {
+            error_log( 'DeDebtify AI Coach Error: ' . $response->get_error_message() );
+            return 'I apologize, but I\'m having trouble connecting to my AI service right now. Please try again in a moment.';
+        }
+
+        $body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+        if ( isset( $body['error'] ) ) {
+            error_log( 'DeDebtify AI Coach API Error: ' . json_encode( $body['error'] ) );
+            return 'I encountered an error while processing your request. Please make sure the API key is configured correctly in settings.';
+        }
+
+        if ( isset( $body['choices'][0]['message']['content'] ) ) {
+            return $body['choices'][0]['message']['content'];
+        }
+
+        return 'I apologize, but I couldn\'t generate a response. Please try again.';
+    }
+
+    /**
      * Get setup message when API is not configured
      */
     private function get_setup_message() {
@@ -295,13 +355,14 @@ Format your responses with:
                "To start using the AI Financial Coach, you'll need to configure your AI provider settings.\n\n" .
                "**Setup Steps:**\n" .
                "1. Go to DeDebtify Settings > AI Coach\n" .
-               "2. Choose your AI provider (OpenAI or Anthropic)\n" .
+               "2. Choose your AI provider (OpenAI, Anthropic, or OpenRouter)\n" .
                "3. Enter your API key\n" .
                "4. Select your preferred model\n" .
                "5. Save settings\n\n" .
                "**Need an API key?**\n" .
                "- OpenAI: Visit platform.openai.com/api-keys\n" .
-               "- Anthropic: Visit console.anthropic.com\n\n" .
+               "- Anthropic: Visit console.anthropic.com\n" .
+               "- OpenRouter: Visit openrouter.ai/keys\n\n" .
                "Once configured, I'll be ready to help you with personalized financial advice!";
     }
 

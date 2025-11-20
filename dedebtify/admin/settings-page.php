@@ -345,9 +345,10 @@ $has_dummy_data = get_user_meta( get_current_user_id(), 'dd_has_dummy_data', tru
                     <select name="ai_provider" id="ai_provider" class="regular-text">
                         <option value="openai" <?php selected( $ai_provider, 'openai' ); ?>>OpenAI (ChatGPT)</option>
                         <option value="anthropic" <?php selected( $ai_provider, 'anthropic' ); ?>>Anthropic (Claude)</option>
+                        <option value="openrouter" <?php selected( $ai_provider, 'openrouter' ); ?>>OpenRouter (Multi-Provider)</option>
                     </select>
                     <p class="description">
-                        <?php _e( 'Choose your preferred AI provider. Both providers offer high-quality financial coaching.', 'dedebtify' ); ?>
+                        <?php _e( 'Choose your preferred AI provider. OpenRouter provides access to multiple AI models through a single API key.', 'dedebtify' ); ?>
                     </p>
                 </td>
             </tr>
@@ -361,7 +362,8 @@ $has_dummy_data = get_user_meta( get_current_user_id(), 'dd_has_dummy_data', tru
                     <p class="description">
                         <?php _e( 'Get your API key from:', 'dedebtify' ); ?><br>
                         <strong>OpenAI:</strong> <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a><br>
-                        <strong>Anthropic:</strong> <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
+                        <strong>Anthropic:</strong> <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a><br>
+                        <strong>OpenRouter:</strong> <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a>
                     </p>
                 </td>
             </tr>
@@ -384,9 +386,28 @@ $has_dummy_data = get_user_meta( get_current_user_id(), 'dd_has_dummy_data', tru
                             <option value="claude-3-5-haiku-20241022" <?php selected( $ai_model, 'claude-3-5-haiku-20241022' ); ?>>Claude 3.5 Haiku (Faster & Cheaper)</option>
                             <option value="claude-3-opus-20240229" <?php selected( $ai_model, 'claude-3-opus-20240229' ); ?>>Claude 3 Opus</option>
                         </optgroup>
+                        <!-- OpenRouter Models -->
+                        <optgroup label="OpenRouter - Claude" id="openrouter-anthropic-models">
+                            <option value="anthropic/claude-3.5-sonnet" <?php selected( $ai_model, 'anthropic/claude-3.5-sonnet' ); ?>>Claude 3.5 Sonnet (Recommended)</option>
+                            <option value="anthropic/claude-3.5-haiku" <?php selected( $ai_model, 'anthropic/claude-3.5-haiku' ); ?>>Claude 3.5 Haiku</option>
+                            <option value="anthropic/claude-3-opus" <?php selected( $ai_model, 'anthropic/claude-3-opus' ); ?>>Claude 3 Opus</option>
+                        </optgroup>
+                        <optgroup label="OpenRouter - OpenAI" id="openrouter-openai-models">
+                            <option value="openai/gpt-4o" <?php selected( $ai_model, 'openai/gpt-4o' ); ?>>GPT-4o</option>
+                            <option value="openai/gpt-4o-mini" <?php selected( $ai_model, 'openai/gpt-4o-mini' ); ?>>GPT-4o Mini (Faster & Cheaper)</option>
+                            <option value="openai/gpt-4-turbo" <?php selected( $ai_model, 'openai/gpt-4-turbo' ); ?>>GPT-4 Turbo</option>
+                        </optgroup>
+                        <optgroup label="OpenRouter - Google" id="openrouter-google-models">
+                            <option value="google/gemini-pro-1.5" <?php selected( $ai_model, 'google/gemini-pro-1.5' ); ?>>Gemini 1.5 Pro</option>
+                            <option value="google/gemini-flash-1.5" <?php selected( $ai_model, 'google/gemini-flash-1.5' ); ?>>Gemini 1.5 Flash (Faster)</option>
+                        </optgroup>
+                        <optgroup label="OpenRouter - Meta" id="openrouter-meta-models">
+                            <option value="meta-llama/llama-3.1-70b-instruct" <?php selected( $ai_model, 'meta-llama/llama-3.1-70b-instruct' ); ?>>Llama 3.1 70B</option>
+                            <option value="meta-llama/llama-3.1-405b-instruct" <?php selected( $ai_model, 'meta-llama/llama-3.1-405b-instruct' ); ?>>Llama 3.1 405B</option>
+                        </optgroup>
                     </select>
                     <p class="description">
-                        <?php _e( 'Select which AI model to use. More advanced models provide better responses but may cost more.', 'dedebtify' ); ?>
+                        <?php _e( 'Select which AI model to use. OpenRouter provides access to models from multiple providers through a single API key. More advanced models provide better responses but may cost more.', 'dedebtify' ); ?>
                     </p>
                 </td>
             </tr>
