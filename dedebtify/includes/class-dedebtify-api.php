@@ -96,11 +96,18 @@ class Dedebtify_API {
             'permission_callback' => array( $this, 'check_user_permission' ),
         ));
 
-        // Get snapshots history
+        // Snapshots endpoint - GET and POST
         register_rest_route( $namespace, '/snapshots', array(
-            'methods' => 'GET',
-            'callback' => array( $this, 'get_snapshots' ),
-            'permission_callback' => array( $this, 'check_user_permission' ),
+            array(
+                'methods' => 'GET',
+                'callback' => array( $this, 'get_snapshots' ),
+                'permission_callback' => array( $this, 'check_user_permission' ),
+            ),
+            array(
+                'methods' => 'POST',
+                'callback' => array( $this, 'create_snapshot_with_data' ),
+                'permission_callback' => array( $this, 'check_user_permission' ),
+            ),
         ));
 
         // Admin stats endpoint
@@ -186,6 +193,72 @@ class Dedebtify_API {
             'success' => true,
             'message' => __( 'Snapshot created successfully', 'dedebtify' ),
             'post_id' => $post_id,
+        ));
+    }
+
+    /**
+     * Create financial snapshot with custom data.
+     *
+     * @since    1.0.0
+     * @param    WP_REST_Request    $request
+     * @return   WP_REST_Response
+     */
+    public function create_snapshot_with_data( $request ) {
+        $user_id = get_current_user_id();
+        $params = $request->get_json_params();
+
+        if ( empty( $params ) ) {
+            return new WP_Error(
+                'missing_data',
+                __( 'Snapshot data is required', 'dedebtify' ),
+                array( 'status' => 400 )
+            );
+        }
+
+        // Create snapshot post
+        $post_data = array(
+            'post_title' => 'Snapshot ' . date( 'Y-m-d H:i:s' ),
+            'post_type' => 'dd_snapshot',
+            'post_status' => 'publish',
+            'post_author' => $user_id,
+        );
+
+        $post_id = wp_insert_post( $post_data );
+
+        if ( is_wp_error( $post_id ) ) {
+            return new WP_Error(
+                'snapshot_creation_failed',
+                __( 'Failed to create snapshot', 'dedebtify' ),
+                array( 'status' => 500 )
+            );
+        }
+
+        // Save snapshot data as post meta
+        $meta_fields = array(
+            'snapshot_date',
+            'total_debt',
+            'total_credit_card_debt',
+            'total_loan_debt',
+            'total_mortgage_debt',
+            'total_monthly_payments',
+            'total_monthly_bills',
+            'debt_to_income_ratio',
+            'credit_utilization',
+            'credit_card_count',
+            'loan_count',
+            'mortgage_count',
+        );
+
+        foreach ( $meta_fields as $field ) {
+            if ( isset( $params[ $field ] ) ) {
+                update_post_meta( $post_id, $field, sanitize_text_field( $params[ $field ] ) );
+            }
+        }
+
+        return rest_ensure_response( array(
+            'success' => true,
+            'message' => __( 'Snapshot created successfully', 'dedebtify' ),
+            'id' => $post_id,
         ));
     }
 
@@ -448,15 +521,17 @@ class Dedebtify_API {
         foreach ( $snapshots as $snapshot ) {
             $snapshots_data[] = array(
                 'id' => $snapshot->ID,
-                'date' => get_post_meta( $snapshot->ID, 'snapshot_date', true ),
+                'snapshot_date' => get_post_meta( $snapshot->ID, 'snapshot_date', true ),
                 'total_debt' => floatval( get_post_meta( $snapshot->ID, 'total_debt', true ) ),
-                'credit_card_debt' => floatval( get_post_meta( $snapshot->ID, 'total_credit_card_debt', true ) ),
-                'loan_debt' => floatval( get_post_meta( $snapshot->ID, 'total_loan_debt', true ) ),
-                'mortgage_debt' => floatval( get_post_meta( $snapshot->ID, 'total_mortgage_debt', true ) ),
-                'monthly_payments' => floatval( get_post_meta( $snapshot->ID, 'total_monthly_payments', true ) ),
-                'monthly_bills' => floatval( get_post_meta( $snapshot->ID, 'total_monthly_bills', true ) ),
-                'dti_ratio' => floatval( get_post_meta( $snapshot->ID, 'debt_to_income_ratio', true ) ),
+                'total_credit_card_debt' => floatval( get_post_meta( $snapshot->ID, 'total_credit_card_debt', true ) ),
+                'total_loan_debt' => floatval( get_post_meta( $snapshot->ID, 'total_loan_debt', true ) ),
+                'total_mortgage_debt' => floatval( get_post_meta( $snapshot->ID, 'total_mortgage_debt', true ) ),
+                'total_monthly_payments' => floatval( get_post_meta( $snapshot->ID, 'total_monthly_payments', true ) ),
+                'total_monthly_bills' => floatval( get_post_meta( $snapshot->ID, 'total_monthly_bills', true ) ),
+                'debt_to_income_ratio' => floatval( get_post_meta( $snapshot->ID, 'debt_to_income_ratio', true ) ),
                 'credit_utilization' => floatval( get_post_meta( $snapshot->ID, 'credit_utilization', true ) ),
+                'credit_card_count' => intval( get_post_meta( $snapshot->ID, 'credit_card_count', true ) ),
+                'loan_count' => intval( get_post_meta( $snapshot->ID, 'loan_count', true ) ),
             );
         }
 
