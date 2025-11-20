@@ -53,6 +53,9 @@ class Dedebtify {
      * @access   private
      */
     private function load_dependencies() {
+        // Load helper functions
+        require_once DEDEBTIFY_PLUGIN_DIR . 'includes/class-dedebtify-helpers.php';
+
         // Load CPT registration class
         require_once DEDEBTIFY_PLUGIN_DIR . 'includes/class-dedebtify-cpt.php';
 
@@ -237,6 +240,15 @@ class Dedebtify {
             $this->plugin_name . '-enhanced',
             DEDEBTIFY_PLUGIN_URL . 'assets/css/dedebtify-enhanced.css',
             array( $this->plugin_name . '-design-system', $this->plugin_name . '-public' ),
+            $this->version,
+            'all'
+        );
+
+        // Enqueue mobile app styles (modern Shadcn-inspired UI)
+        wp_enqueue_style(
+            $this->plugin_name . '-mobile-app',
+            DEDEBTIFY_PLUGIN_URL . 'assets/css/dedebtify-mobile-app.css',
+            array( $this->plugin_name . '-enhanced' ),
             $this->version,
             'all'
         );

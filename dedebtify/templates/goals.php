@@ -25,6 +25,9 @@ $edit_id = isset( $_GET['edit'] ) ? intval( $_GET['edit'] ) : 0;
 $action = isset( $_GET['action'] ) ? sanitize_text_field( $_GET['action'] ) : 'list';
 ?>
 
+<!-- Navigation -->
+<?php Dedebtify_Helpers::render_navigation( 'goals' ); ?>
+
 <div class="dedebtify-dashboard dedebtify-goals-manager">
 
     <div class="dedebtify-dashboard-header">

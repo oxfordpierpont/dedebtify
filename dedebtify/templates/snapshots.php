@@ -23,6 +23,9 @@ if ( ! is_user_logged_in() ) {
 $user_id = get_current_user_id();
 ?>
 
+<!-- Navigation -->
+<?php Dedebtify_Helpers::render_navigation( 'snapshots' ); ?>
+
 <div class="dedebtify-dashboard dedebtify-snapshots">
 
     <div class="dedebtify-dashboard-header">

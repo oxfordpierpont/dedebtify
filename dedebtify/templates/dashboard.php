@@ -24,6 +24,9 @@ $user_id = get_current_user_id();
 $user_info = get_userdata( $user_id );
 ?>
 
+<!-- Navigation -->
+<?php Dedebtify_Helpers::render_navigation( 'dashboard' ); ?>
+
 <div class="dedebtify-dashboard">
 
     <div class="dedebtify-dashboard-header">
@@ -98,18 +101,26 @@ $user_info = get_userdata( $user_id );
         <button class="dedebtify-btn dedebtify-create-snapshot">
             <?php _e( 'Create Snapshot', 'dedebtify' ); ?>
         </button>
-        <a href="<?php echo get_permalink(); ?>?view=credit-cards" class="dedebtify-btn dedebtify-btn-secondary">
-            <?php _e( 'View Credit Cards', 'dedebtify' ); ?>
-        </a>
-        <a href="<?php echo get_permalink(); ?>?view=loans" class="dedebtify-btn dedebtify-btn-secondary">
-            <?php _e( 'View Loans', 'dedebtify' ); ?>
-        </a>
-        <a href="<?php echo get_permalink(); ?>?view=bills" class="dedebtify-btn dedebtify-btn-secondary">
-            <?php _e( 'View Bills', 'dedebtify' ); ?>
-        </a>
-        <a href="<?php echo get_permalink(); ?>?view=goals" class="dedebtify-btn dedebtify-btn-secondary">
-            <?php _e( 'View Goals', 'dedebtify' ); ?>
-        </a>
+        <?php if ( $credit_cards_url = Dedebtify_Helpers::get_page_url( 'credit_cards' ) ) : ?>
+            <a href="<?php echo esc_url( $credit_cards_url ); ?>" class="dedebtify-btn dedebtify-btn-secondary">
+                <?php _e( 'View Credit Cards', 'dedebtify' ); ?>
+            </a>
+        <?php endif; ?>
+        <?php if ( $loans_url = Dedebtify_Helpers::get_page_url( 'loans' ) ) : ?>
+            <a href="<?php echo esc_url( $loans_url ); ?>" class="dedebtify-btn dedebtify-btn-secondary">
+                <?php _e( 'View Loans', 'dedebtify' ); ?>
+            </a>
+        <?php endif; ?>
+        <?php if ( $bills_url = Dedebtify_Helpers::get_page_url( 'bills' ) ) : ?>
+            <a href="<?php echo esc_url( $bills_url ); ?>" class="dedebtify-btn dedebtify-btn-secondary">
+                <?php _e( 'View Bills', 'dedebtify' ); ?>
+            </a>
+        <?php endif; ?>
+        <?php if ( $goals_url = Dedebtify_Helpers::get_page_url( 'goals' ) ) : ?>
+            <a href="<?php echo esc_url( $goals_url ); ?>" class="dedebtify-btn dedebtify-btn-secondary">
+                <?php _e( 'View Goals', 'dedebtify' ); ?>
+            </a>
+        <?php endif; ?>
     </div>
 
     <!-- Credit Cards Section -->

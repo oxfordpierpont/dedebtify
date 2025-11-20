@@ -213,7 +213,11 @@ class Dedebtify_Activator {
             require_once DEDEBTIFY_PLUGIN_DIR . 'includes/class-dedebtify-dummy-data.php';
             $admin_users = get_users( array( 'role' => 'administrator', 'number' => 1 ) );
             if ( ! empty( $admin_users ) ) {
-                Dedebtify_Dummy_Data::generate_all( $admin_users[0]->ID );
+                $admin_id = $admin_users[0]->ID;
+                // Only generate if user doesn't have dummy data yet
+                if ( ! get_user_meta( $admin_id, 'dd_has_dummy_data', true ) ) {
+                    Dedebtify_Dummy_Data::generate_all( $admin_id );
+                }
             }
         }
     }
