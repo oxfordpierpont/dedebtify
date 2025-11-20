@@ -82,6 +82,13 @@ class Dedebtify_API {
             'permission_callback' => array( $this, 'check_user_permission' ),
         ));
 
+        // Get all mortgages
+        register_rest_route( $namespace, '/mortgages', array(
+            'methods' => 'GET',
+            'callback' => array( $this, 'get_mortgages' ),
+            'permission_callback' => array( $this, 'check_user_permission' ),
+        ));
+
         // Get all bills
         register_rest_route( $namespace, '/bills', array(
             'methods' => 'GET',
@@ -422,6 +429,64 @@ class Dedebtify_API {
         }
 
         return rest_ensure_response( $loans_data );
+    }
+
+    /**
+     * Get all mortgages with calculated data.
+     *
+     * @since    1.0.0
+     * @param    WP_REST_Request    $request
+     * @return   WP_REST_Response
+     */
+    public function get_mortgages( $request ) {
+        $user_id = get_current_user_id();
+
+        $args = array(
+            'post_type' => 'dd_mortgage',
+            'author' => $user_id,
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+        );
+
+        $mortgages = get_posts( $args );
+        $mortgages_data = array();
+
+        foreach ( $mortgages as $mortgage ) {
+            $balance = floatval( get_post_meta( $mortgage->ID, 'current_balance', true ) );
+            $interest_rate = floatval( get_post_meta( $mortgage->ID, 'interest_rate', true ) );
+            $monthly_payment = floatval( get_post_meta( $mortgage->ID, 'monthly_payment', true ) );
+            $extra_payment = floatval( get_post_meta( $mortgage->ID, 'extra_payment', true ) );
+            $property_tax = floatval( get_post_meta( $mortgage->ID, 'property_tax', true ) );
+            $homeowners_insurance = floatval( get_post_meta( $mortgage->ID, 'homeowners_insurance', true ) );
+            $pmi = floatval( get_post_meta( $mortgage->ID, 'pmi', true ) );
+
+            $total_payment = $monthly_payment + $extra_payment;
+            $months_to_payoff = Dedebtify_Calculations::calculate_months_to_payoff( $balance, $interest_rate, $total_payment );
+
+            // Calculate total monthly payment including taxes, insurance, and PMI
+            $total_monthly_payment = $monthly_payment + ( $property_tax / 12 ) + ( $homeowners_insurance / 12 ) + $pmi;
+
+            $mortgages_data[] = array(
+                'id' => $mortgage->ID,
+                'name' => $mortgage->post_title,
+                'property_address' => get_post_meta( $mortgage->ID, 'property_address', true ),
+                'loan_amount' => floatval( get_post_meta( $mortgage->ID, 'loan_amount', true ) ),
+                'balance' => $balance,
+                'interest_rate' => $interest_rate,
+                'term_years' => intval( get_post_meta( $mortgage->ID, 'term_years', true ) ),
+                'monthly_payment' => $monthly_payment,
+                'extra_payment' => $extra_payment,
+                'property_tax' => $property_tax,
+                'homeowners_insurance' => $homeowners_insurance,
+                'pmi' => $pmi,
+                'total_monthly_payment' => $total_monthly_payment,
+                'months_to_payoff' => $months_to_payoff,
+                'payoff_date' => Dedebtify_Calculations::calculate_payoff_date( $months_to_payoff ),
+                'start_date' => get_post_meta( $mortgage->ID, 'start_date', true ),
+            );
+        }
+
+        return rest_ensure_response( $mortgages_data );
     }
 
     /**

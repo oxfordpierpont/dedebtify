@@ -99,6 +99,7 @@ class Dedebtify {
         add_shortcode( 'dedebtify_dashboard', array( $this, 'render_dashboard_shortcode' ) );
         add_shortcode( 'dedebtify_credit_cards', array( $this, 'render_credit_cards_shortcode' ) );
         add_shortcode( 'dedebtify_loans', array( $this, 'render_loans_shortcode' ) );
+        add_shortcode( 'dedebtify_mortgages', array( $this, 'render_mortgages_shortcode' ) );
         add_shortcode( 'dedebtify_bills', array( $this, 'render_bills_shortcode' ) );
         add_shortcode( 'dedebtify_goals', array( $this, 'render_goals_shortcode' ) );
         add_shortcode( 'dedebtify_action_plan', array( $this, 'render_action_plan_shortcode' ) );
@@ -433,6 +434,21 @@ class Dedebtify {
 
         ob_start();
         require_once DEDEBTIFY_PLUGIN_DIR . 'templates/loans.php';
+        return ob_get_clean();
+    }
+
+    /**
+     * Render mortgages manager shortcode.
+     *
+     * @since    1.0.0
+     */
+    public function render_mortgages_shortcode( $atts ) {
+        if ( ! is_user_logged_in() ) {
+            return '<p>' . __( 'Please log in to manage your mortgage.', 'dedebtify' ) . '</p>';
+        }
+
+        ob_start();
+        require_once DEDEBTIFY_PLUGIN_DIR . 'templates/mortgages.php';
         return ob_get_clean();
     }
 
