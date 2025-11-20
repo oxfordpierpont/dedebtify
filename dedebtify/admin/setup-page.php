@@ -127,6 +127,10 @@ $dashboard_page_id = get_option( 'dedebtify_dashboard_page_id', 0 );
                     <td><?php _e( 'Loans management interface', 'dedebtify' ); ?></td>
                 </tr>
                 <tr>
+                    <td><code>[dedebtify_mortgages]</code></td>
+                    <td><?php _e( 'Mortgage management with payoff projections', 'dedebtify' ); ?></td>
+                </tr>
+                <tr>
                     <td><code>[dedebtify_bills]</code></td>
                     <td><?php _e( 'Bills and recurring expenses tracking', 'dedebtify' ); ?></td>
                 </tr>
