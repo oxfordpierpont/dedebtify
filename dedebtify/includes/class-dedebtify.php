@@ -62,10 +62,19 @@ class Dedebtify {
         // Load REST API class
         require_once DEDEBTIFY_PLUGIN_DIR . 'includes/class-dedebtify-api.php';
 
+        // Load page templates class
+        require_once DEDEBTIFY_PLUGIN_DIR . 'includes/class-dedebtify-page-templates.php';
+
+        // Load dummy data class
+        require_once DEDEBTIFY_PLUGIN_DIR . 'includes/class-dedebtify-dummy-data.php';
+
         // Load Elementor integration class (if Elementor is active)
         if ( did_action( 'elementor/loaded' ) ) {
             require_once DEDEBTIFY_PLUGIN_DIR . 'includes/class-dedebtify-elementor.php';
         }
+
+        // Initialize page templates
+        new Dedebtify_Page_Templates();
     }
 
     /**
@@ -94,6 +103,9 @@ class Dedebtify {
     private function define_public_hooks() {
         // Enqueue public styles and scripts
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_public_assets' ) );
+
+        // Add dynamic custom CSS
+        add_action( 'wp_head', array( $this, 'output_custom_css' ) );
 
         // Add shortcode support
         add_shortcode( 'dedebtify_dashboard', array( $this, 'render_dashboard_shortcode' ) );
@@ -295,6 +307,95 @@ class Dedebtify {
                 'error' => __( 'An error occurred. Please try again.', 'dedebtify' ),
             )
         );
+    }
+
+    /**
+     * Output custom CSS from settings.
+     *
+     * @since    1.0.0
+     */
+    public function output_custom_css() {
+        $primary_color = get_option( 'dedebtify_primary_color', '#3b82f6' );
+        $success_color = get_option( 'dedebtify_success_color', '#10b981' );
+        $warning_color = get_option( 'dedebtify_warning_color', '#f59e0b' );
+        $danger_color = get_option( 'dedebtify_danger_color', '#ef4444' );
+        $font_family = get_option( 'dedebtify_font_family', 'System Default' );
+        $border_radius = get_option( 'dedebtify_border_radius', 8 );
+
+        // Convert hex to HSL for CSS custom properties
+        $primary_hsl = $this->hex_to_hsl( $primary_color );
+        $success_hsl = $this->hex_to_hsl( $success_color );
+        $warning_hsl = $this->hex_to_hsl( $warning_color );
+        $danger_hsl = $this->hex_to_hsl( $danger_color );
+
+        $font_css = '';
+        if ( $font_family !== 'System Default' ) {
+            $font_css = "font-family: {$font_family};";
+        }
+
+        echo '<style id="dedebtify-custom-css">';
+        echo ':root {';
+        echo "--dd-primary: {$primary_hsl};";
+        echo "--dd-success: {$success_hsl};";
+        echo "--dd-warning: {$warning_hsl};";
+        echo "--dd-destructive: {$danger_hsl};";
+        echo "--dd-radius: {$border_radius}px;";
+        echo '}';
+        if ( ! empty( $font_css ) ) {
+            echo ".dedebtify-dashboard,";
+            echo ".dedebtify-card,";
+            echo ".dedebtify-form,";
+            echo ".dd-btn,";
+            echo ".dedebtify-stat-card {";
+            echo $font_css;
+            echo '}';
+        }
+        echo '</style>';
+    }
+
+    /**
+     * Convert hex color to HSL.
+     *
+     * @since    1.0.0
+     * @param    string    $hex
+     * @return   string
+     */
+    private function hex_to_hsl( $hex ) {
+        $hex = str_replace( '#', '', $hex );
+        $r = hexdec( substr( $hex, 0, 2 ) ) / 255;
+        $g = hexdec( substr( $hex, 2, 2 ) ) / 255;
+        $b = hexdec( substr( $hex, 4, 2 ) ) / 255;
+
+        $max = max( $r, $g, $b );
+        $min = min( $r, $g, $b );
+        $l = ( $max + $min ) / 2;
+
+        if ( $max === $min ) {
+            $h = $s = 0;
+        } else {
+            $d = $max - $min;
+            $s = $l > 0.5 ? $d / ( 2 - $max - $min ) : $d / ( $max + $min );
+
+            switch ( $max ) {
+                case $r:
+                    $h = ( $g - $b ) / $d + ( $g < $b ? 6 : 0 );
+                    break;
+                case $g:
+                    $h = ( $b - $r ) / $d + 2;
+                    break;
+                case $b:
+                    $h = ( $r - $g ) / $d + 4;
+                    break;
+            }
+
+            $h /= 6;
+        }
+
+        $h = round( $h * 360 );
+        $s = round( $s * 100 );
+        $l = round( $l * 100 );
+
+        return "{$h} {$s}% {$l}%";
     }
 
     /**

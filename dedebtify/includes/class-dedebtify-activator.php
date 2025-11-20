@@ -85,6 +85,14 @@ class Dedebtify_Activator {
         add_option( 'dedebtify_notification_email', get_option( 'admin_email' ) );
         add_option( 'dedebtify_snapshot_frequency', 'monthly' );
         add_option( 'dedebtify_default_payoff_strategy', 'avalanche' );
+
+        // Styling settings
+        add_option( 'dedebtify_primary_color', '#3b82f6' );
+        add_option( 'dedebtify_success_color', '#10b981' );
+        add_option( 'dedebtify_warning_color', '#f59e0b' );
+        add_option( 'dedebtify_danger_color', '#ef4444' );
+        add_option( 'dedebtify_font_family', 'System Default' );
+        add_option( 'dedebtify_border_radius', 8 );
     }
 
     /**
@@ -105,36 +113,49 @@ class Dedebtify_Activator {
                 'title' => __( 'My Debt Dashboard', 'dedebtify' ),
                 'content' => '[dedebtify_dashboard]',
                 'slug' => 'debt-dashboard',
+                'template' => 'page-templates/template-dashboard.php',
             ),
             'credit_cards' => array(
                 'title' => __( 'Credit Cards', 'dedebtify' ),
                 'content' => '[dedebtify_credit_cards]',
                 'slug' => 'credit-cards',
+                'template' => 'page-templates/template-credit-cards.php',
             ),
             'loans' => array(
                 'title' => __( 'Loans', 'dedebtify' ),
                 'content' => '[dedebtify_loans]',
                 'slug' => 'loans',
+                'template' => 'page-templates/template-loans.php',
+            ),
+            'mortgages' => array(
+                'title' => __( 'Mortgage', 'dedebtify' ),
+                'content' => '[dedebtify_mortgages]',
+                'slug' => 'mortgage',
+                'template' => 'page-templates/template-mortgages.php',
             ),
             'bills' => array(
                 'title' => __( 'Bills & Expenses', 'dedebtify' ),
                 'content' => '[dedebtify_bills]',
                 'slug' => 'bills',
+                'template' => 'page-templates/template-bills.php',
             ),
             'goals' => array(
                 'title' => __( 'Financial Goals', 'dedebtify' ),
                 'content' => '[dedebtify_goals]',
                 'slug' => 'financial-goals',
+                'template' => 'page-templates/template-goals.php',
             ),
             'action_plan' => array(
                 'title' => __( 'Debt Action Plan', 'dedebtify' ),
                 'content' => '[dedebtify_action_plan]',
                 'slug' => 'debt-action-plan',
+                'template' => 'page-templates/template-action-plan.php',
             ),
             'snapshots' => array(
                 'title' => __( 'Progress Tracking', 'dedebtify' ),
                 'content' => '[dedebtify_snapshots]',
                 'slug' => 'progress-tracking',
+                'template' => 'page-templates/template-snapshots.php',
             ),
         );
 
@@ -158,9 +179,22 @@ class Dedebtify_Activator {
 
                 if ( $page_id && ! is_wp_error( $page_id ) ) {
                     $page_ids[$key] = $page_id;
+
+                    // Apply page template if specified
+                    if ( isset( $page_data['template'] ) ) {
+                        update_post_meta( $page_id, '_wp_page_template', $page_data['template'] );
+                    }
                 }
             } else {
                 $page_ids[$key] = $existing_page->ID;
+
+                // Apply template to existing page if not already set
+                if ( isset( $page_data['template'] ) ) {
+                    $current_template = get_post_meta( $existing_page->ID, '_wp_page_template', true );
+                    if ( empty( $current_template ) || $current_template === 'default' ) {
+                        update_post_meta( $existing_page->ID, '_wp_page_template', $page_data['template'] );
+                    }
+                }
             }
         }
 
@@ -172,5 +206,16 @@ class Dedebtify_Activator {
         if ( isset( $page_ids['dashboard'] ) ) {
             update_option( 'dedebtify_dashboard_page_id', $page_ids['dashboard'] );
         }
+
+        // Generate dummy data for admin if enabled
+        $generate_dummy_data = apply_filters( 'dedebtify_generate_dummy_data_on_activation', true );
+        if ( $generate_dummy_data ) {
+            require_once DEDEBTIFY_PLUGIN_DIR . 'includes/class-dedebtify-dummy-data.php';
+            $admin_users = get_users( array( 'role' => 'administrator', 'number' => 1 ) );
+            if ( ! empty( $admin_users ) ) {
+                Dedebtify_Dummy_Data::generate_all( $admin_users[0]->ID );
+            }
+        }
     }
 }
+
