@@ -78,6 +78,21 @@ $user_info = get_userdata( $user_id );
         </div>
     </div>
 
+    <!-- Debt Breakdown Visualization -->
+    <div class="dedebtify-section" id="debt-breakdown-section" style="display: none;">
+        <h2><?php _e( 'Debt Breakdown', 'dedebtify' ); ?></h2>
+        <div class="dd-card">
+            <div class="dd-card-content">
+                <div class="dedebtify-debt-breakdown">
+                    <div class="debt-breakdown-chart">
+                        <div class="debt-breakdown-bars" id="debt-breakdown-bars"></div>
+                    </div>
+                    <div class="debt-breakdown-legend" id="debt-breakdown-legend"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Quick Actions -->
     <div class="dedebtify-btn-group">
         <button class="dedebtify-btn dedebtify-create-snapshot">

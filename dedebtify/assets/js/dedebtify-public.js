@@ -81,6 +81,131 @@
             // Apply color coding
             applyCreditUtilizationColor(data.credit_utilization);
             applyDTIColor(data.dti_ratio);
+
+            // Calculate and display projected debt-free date
+            calculateDebtFreeDate();
+
+            // Render debt breakdown
+            renderDebtBreakdown(data);
+        }
+
+        /**
+         * Calculate projected debt-free date
+         */
+        function calculateDebtFreeDate() {
+            Promise.all([
+                $.ajax({
+                    url: dedebtify.restUrl + 'credit-cards',
+                    method: 'GET',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                    }
+                }),
+                $.ajax({
+                    url: dedebtify.restUrl + 'loans',
+                    method: 'GET',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                    }
+                }),
+                $.ajax({
+                    url: dedebtify.restUrl + 'mortgages',
+                    method: 'GET',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                    }
+                })
+            ]).then(function(results) {
+                const cards = results[0];
+                const loans = results[1];
+                const mortgages = results[2];
+
+                let maxMonths = 0;
+
+                // Find the longest payoff time
+                cards.forEach(function(card) {
+                    if (card.status === 'active' && card.months_to_payoff > maxMonths) {
+                        maxMonths = card.months_to_payoff;
+                    }
+                });
+
+                loans.forEach(function(loan) {
+                    if (loan.months_to_payoff > maxMonths) {
+                        maxMonths = loan.months_to_payoff;
+                    }
+                });
+
+                mortgages.forEach(function(mortgage) {
+                    if (mortgage.months_to_payoff > maxMonths) {
+                        maxMonths = mortgage.months_to_payoff;
+                    }
+                });
+
+                if (maxMonths > 0 && maxMonths < 600) {
+                    const debtFreeDate = new Date();
+                    debtFreeDate.setMonth(debtFreeDate.getMonth() + maxMonths);
+                    $('#dd-debt-free-date').text(debtFreeDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long' }));
+                } else if (maxMonths >= 600) {
+                    $('#dd-debt-free-date').text('N/A');
+                } else {
+                    $('#dd-debt-free-date').text('Debt Free!');
+                }
+            }).catch(function() {
+                $('#dd-debt-free-date').text('—');
+            });
+        }
+
+        /**
+         * Render debt breakdown visualization
+         */
+        function renderDebtBreakdown(data) {
+            const creditCardDebt = parseFloat(data.credit_card_debt) || 0;
+            const loanDebt = parseFloat(data.loan_debt) || 0;
+            const mortgageDebt = parseFloat(data.mortgage_debt) || 0;
+            const totalDebt = creditCardDebt + loanDebt + mortgageDebt;
+
+            if (totalDebt === 0) {
+                $('#debt-breakdown-section').hide();
+                return;
+            }
+
+            const debts = [
+                { label: 'Credit Cards', value: creditCardDebt, color: 'credit-cards' },
+                { label: 'Loans', value: loanDebt, color: 'loans' },
+                { label: 'Mortgage', value: mortgageDebt, color: 'mortgage' }
+            ].filter(d => d.value > 0);
+
+            // Render bars
+            let barsHtml = '';
+            debts.forEach(function(debt) {
+                const percentage = (debt.value / totalDebt * 100).toFixed(1);
+                barsHtml += '<div class="debt-bar debt-color-' + debt.color + '" style="width: ' + percentage + '%">';
+                barsHtml += '  <div class="debt-bar-label">' + debt.label + ': ' + formatCurrency(debt.value) + '</div>';
+                if (percentage > 15) {
+                    barsHtml += percentage + '%';
+                }
+                barsHtml += '</div>';
+            });
+            $('#debt-breakdown-bars').html(barsHtml);
+
+            // Render legend
+            let legendHtml = '';
+            debts.forEach(function(debt) {
+                const percentage = (debt.value / totalDebt * 100).toFixed(1);
+                legendHtml += '<div class="legend-item">';
+                legendHtml += '  <div style="display: flex; align-items: center;">';
+                legendHtml += '    <div class="legend-color debt-color-' + debt.color + '"></div>';
+                legendHtml += '    <span class="legend-label">' + debt.label + '</span>';
+                legendHtml += '  </div>';
+                legendHtml += '  <div>';
+                legendHtml += '    <span class="legend-value">' + formatCurrency(debt.value) + '</span>';
+                legendHtml += '    <span class="legend-percentage">(' + percentage + '%)</span>';
+                legendHtml += '  </div>';
+                legendHtml += '</div>';
+            });
+            $('#debt-breakdown-legend').html(legendHtml);
+
+            $('#debt-breakdown-section').fadeIn();
         }
 
         /**
