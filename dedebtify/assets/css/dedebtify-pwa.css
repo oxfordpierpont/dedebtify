@@ -1,0 +1,495 @@
+/**
+ * DeDebtify PWA Styles
+ * Install prompts, notifications, and offline indicators
+ *
+ * @since      1.0.0
+ * @package    Dedebtify
+ */
+
+/* ============================================
+   Install Banner
+   ============================================ */
+
+.dd-pwa-banner {
+    position: fixed;
+    bottom: -200px;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    transition: bottom 0.3s ease;
+}
+
+.dd-pwa-banner.show {
+    bottom: 0;
+}
+
+.dd-pwa-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: hsl(var(--dd-card));
+    border-top: 1px solid hsl(var(--dd-border));
+    padding: 16px 20px;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dd-pwa-banner-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, hsl(var(--dd-primary)), hsl(var(--dd-primary) / 0.7));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dd-pwa-banner-icon .dashicons {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: white;
+}
+
+.dd-pwa-banner-text {
+    flex: 1;
+}
+
+.dd-pwa-banner-text strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: hsl(var(--dd-foreground));
+    margin-bottom: 4px;
+}
+
+.dd-pwa-banner-text p {
+    font-size: 13px;
+    color: hsl(var(--dd-muted-foreground));
+    margin: 0;
+}
+
+.dd-pwa-banner-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .dd-pwa-banner-content {
+        flex-wrap: wrap;
+    }
+
+    .dd-pwa-banner-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .dd-pwa-banner-actions button {
+        flex: 1;
+    }
+}
+
+/* ============================================
+   Update Banner
+   ============================================ */
+
+.dd-pwa-update-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9998;
+    background: hsl(var(--dd-primary));
+    color: hsl(var(--dd-primary-foreground));
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.dd-update-banner-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.dd-update-banner-content .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.dd-update-banner-content button {
+    background: white;
+    color: hsl(var(--dd-primary));
+    border: none;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.dd-update-banner-content button:hover {
+    background: hsl(var(--dd-background));
+}
+
+/* ============================================
+   Notification Prompt
+   ============================================ */
+
+.dd-pwa-notification-prompt {
+    background: hsl(var(--dd-card));
+    border: 1px solid hsl(var(--dd-border));
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.dd-notification-prompt-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dd-notification-prompt-content > .dashicons {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: hsl(var(--dd-primary));
+    flex-shrink: 0;
+}
+
+.dd-notification-prompt-text {
+    flex: 1;
+}
+
+.dd-notification-prompt-text strong {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: hsl(var(--dd-foreground));
+    margin-bottom: 4px;
+}
+
+.dd-notification-prompt-text p {
+    font-size: 13px;
+    color: hsl(var(--dd-muted-foreground));
+    margin: 0;
+}
+
+/* ============================================
+   Toast Notifications
+   ============================================ */
+
+.dd-toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    padding: 12px 20px;
+    background: hsl(var(--dd-foreground));
+    color: hsl(var(--dd-background));
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+    max-width: 90%;
+    width: max-content;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.dd-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.dd-toast-success {
+    background: hsl(var(--dd-success));
+    color: white;
+}
+
+.dd-toast-warning {
+    background: hsl(var(--dd-warning));
+    color: white;
+}
+
+.dd-toast-error {
+    background: hsl(var(--dd-danger));
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .dd-toast {
+        bottom: 80px;
+        left: 16px;
+        right: 16px;
+        transform: translateY(100px);
+        max-width: none;
+        width: auto;
+    }
+
+    .dd-toast.show {
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   Connection Status Indicator
+   ============================================ */
+
+.dd-connection-status {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    background: hsl(var(--dd-card));
+    border: 1px solid hsl(var(--dd-border));
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+}
+
+.dd-connection-status.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.dd-connection-status.offline {
+    background: hsl(var(--dd-danger));
+    color: white;
+    border-color: hsl(var(--dd-danger));
+}
+
+.dd-connection-status.online {
+    background: hsl(var(--dd-success));
+    color: white;
+    border-color: hsl(var(--dd-success));
+}
+
+.dd-connection-status::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* ============================================
+   Standalone Mode Adjustments
+   ============================================ */
+
+@media (display-mode: standalone) {
+    /* Adjust for notch/safe areas */
+    body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .dd-nav {
+        bottom: env(safe-area-inset-bottom);
+    }
+
+    .dedebtify-dashboard {
+        padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    }
+
+    /* Hide browser-specific elements */
+    .dd-pwa-banner {
+        display: none;
+    }
+}
+
+/* ============================================
+   iOS Standalone Mode
+   ============================================ */
+
+@supports (-webkit-touch-callout: none) {
+    @media (display-mode: standalone) {
+        body {
+            padding-top: max(20px, env(safe-area-inset-top));
+        }
+
+        .dd-nav {
+            padding-bottom: max(0px, env(safe-area-inset-bottom));
+        }
+    }
+}
+
+/* ============================================
+   Loading Skeleton for Offline
+   ============================================ */
+
+.dd-loading-skeleton {
+    background: linear-gradient(90deg,
+        hsl(var(--dd-muted)) 0%,
+        hsl(var(--dd-accent)) 50%,
+        hsl(var(--dd-muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.dd-skeleton-card {
+    height: 120px;
+    margin-bottom: 16px;
+}
+
+.dd-skeleton-line {
+    height: 16px;
+    margin-bottom: 8px;
+}
+
+.dd-skeleton-line.short {
+    width: 60%;
+}
+
+/* ============================================
+   App Badge (for notification count)
+   ============================================ */
+
+.dd-app-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    background: hsl(var(--dd-danger));
+    color: white;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   Share Button (Web Share API)
+   ============================================ */
+
+.dd-share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dd-share-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Hide share button if not supported */
+@supports not ((-webkit-share: none) or (share: none)) {
+    .dd-share-btn {
+        display: none;
+    }
+}
+
+/* ============================================
+   Sync Status Indicator
+   ============================================ */
+
+.dd-sync-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: hsl(var(--dd-muted-foreground));
+    padding: 4px 12px;
+    background: hsl(var(--dd-accent));
+    border-radius: 12px;
+}
+
+.dd-sync-status .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+.dd-sync-status.syncing .dashicons {
+    animation: spin 1s linear infinite;
+}
+
+.dd-sync-status.synced {
+    color: hsl(var(--dd-success));
+}
+
+.dd-sync-status.error {
+    color: hsl(var(--dd-danger));
+}
+
+/* ============================================
+   Responsive Adjustments
+   ============================================ */
+
+@media (max-width: 480px) {
+    .dd-pwa-banner-text strong {
+        font-size: 14px;
+    }
+
+    .dd-pwa-banner-text p {
+        font-size: 12px;
+    }
+
+    .dd-notification-prompt-content {
+        flex-wrap: wrap;
+    }
+
+    .dd-notification-prompt-content button {
+        width: 100%;
+    }
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+    .dd-pwa-banner,
+    .dd-pwa-update-banner,
+    .dd-pwa-notification-prompt,
+    .dd-toast,
+    .dd-connection-status {
+        display: none !important;
+    }
+}

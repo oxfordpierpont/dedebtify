@@ -35,6 +35,12 @@ if ( isset( $_POST['dedebtify_settings_submit'] ) && check_admin_referer( 'dedeb
     update_option( 'dedebtify_ai_api_key', sanitize_text_field( $_POST['ai_api_key'] ) );
     update_option( 'dedebtify_ai_model', sanitize_text_field( $_POST['ai_model'] ) );
 
+    // Save PWA settings
+    update_option( 'dedebtify_pwa_enabled', isset( $_POST['pwa_enabled'] ) ? 1 : 0 );
+    update_option( 'dedebtify_pwa_push_enabled', isset( $_POST['pwa_push_enabled'] ) ? 1 : 0 );
+    update_option( 'dedebtify_pwa_vapid_public_key', sanitize_text_field( $_POST['pwa_vapid_public_key'] ) );
+    update_option( 'dedebtify_pwa_vapid_private_key', sanitize_text_field( $_POST['pwa_vapid_private_key'] ) );
+
     echo '<div class="notice notice-success is-dismissible"><p>' . __( 'Settings saved successfully!', 'dedebtify' ) . '</p></div>';
 }
 

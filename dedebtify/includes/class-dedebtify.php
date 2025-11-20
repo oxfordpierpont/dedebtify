@@ -71,6 +71,9 @@ class Dedebtify {
         // Load dummy data class
         require_once DEDEBTIFY_PLUGIN_DIR . 'includes/class-dedebtify-dummy-data.php';
 
+        // Load PWA class
+        require_once DEDEBTIFY_PLUGIN_DIR . 'includes/class-dedebtify-pwa.php';
+
         // Load Elementor integration class (if Elementor is active)
         if ( did_action( 'elementor/loaded' ) ) {
             require_once DEDEBTIFY_PLUGIN_DIR . 'includes/class-dedebtify-elementor.php';
@@ -78,6 +81,9 @@ class Dedebtify {
 
         // Initialize page templates
         new Dedebtify_Page_Templates();
+
+        // Initialize PWA
+        new Dedebtify_PWA();
     }
 
     /**
@@ -263,6 +269,15 @@ class Dedebtify {
             'all'
         );
 
+        // Enqueue PWA styles
+        wp_enqueue_style(
+            $this->plugin_name . '-pwa',
+            DEDEBTIFY_PLUGIN_URL . 'assets/css/dedebtify-pwa.css',
+            array( $this->plugin_name . '-mobile-app' ),
+            $this->version,
+            'all'
+        );
+
         wp_enqueue_script(
             $this->plugin_name . '-public',
             DEDEBTIFY_PLUGIN_URL . 'assets/js/dedebtify-public.js',
@@ -309,6 +324,27 @@ class Dedebtify {
             array( 'jquery', $this->plugin_name . '-public' ),
             $this->version,
             true
+        );
+
+        wp_enqueue_script(
+            $this->plugin_name . '-pwa',
+            DEDEBTIFY_PLUGIN_URL . 'assets/js/dedebtify-pwa.js',
+            array( 'jquery', $this->plugin_name . '-public' ),
+            $this->version,
+            true
+        );
+
+        // Localize PWA script
+        wp_localize_script(
+            $this->plugin_name . '-pwa',
+            'dedebtifyPWA',
+            array(
+                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+                'nonce' => wp_create_nonce( 'dedebtify_nonce' ),
+                'serviceWorkerUrl' => site_url( '/dedebtify-sw.js' ),
+                'pushEnabled' => get_option( 'dedebtify_pwa_push_enabled', false ),
+                'vapidPublicKey' => get_option( 'dedebtify_pwa_vapid_public_key', '' ),
+            )
         );
 
         // Localize script for AJAX
