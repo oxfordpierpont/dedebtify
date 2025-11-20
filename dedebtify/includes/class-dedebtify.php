@@ -261,6 +261,14 @@ class Dedebtify {
             true
         );
 
+        wp_enqueue_script(
+            $this->plugin_name . '-mortgages',
+            DEDEBTIFY_PLUGIN_URL . 'assets/js/dedebtify-mortgages.js',
+            array( 'jquery', $this->plugin_name . '-public' ),
+            $this->version,
+            true
+        );
+
         // Localize script for AJAX
         wp_localize_script(
             $this->plugin_name . '-public',
