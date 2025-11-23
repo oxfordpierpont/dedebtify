@@ -36,11 +36,13 @@ $plaid_client_id = get_option( 'dedebtify_plaid_client_id', '' );
 
     <?php if ( ! $plaid_enabled || empty( $plaid_client_id ) ) : ?>
         <!-- Plaid Not Configured -->
-        <div class="dedebtify-message warning">
-            <span class="dashicons dashicons-warning"></span>
-            <div>
-                <strong><?php _e( 'Account Sync Not Available', 'dedebtify' ); ?></strong>
-                <p><?php _e( 'The site administrator has not configured account syncing yet. Please contact support or check back later.', 'dedebtify' ); ?></p>
+        <div class="dd-alert dd-alert-warning">
+            <div class="dd-alert-icon">
+                <span class="dashicons dashicons-warning"></span>
+            </div>
+            <div class="dd-alert-content">
+                <h3 class="dd-alert-title"><?php esc_html_e( 'Account Sync Not Available', 'dedebtify' ); ?></h3>
+                <p class="dd-alert-description"><?php esc_html_e( 'The site administrator has not configured account syncing yet. Please contact support or check back later.', 'dedebtify' ); ?></p>
             </div>
         </div>
 
@@ -136,19 +138,73 @@ $plaid_client_id = get_option( 'dedebtify_plaid_client_id', '' );
 </div>
 
 <style>
+/* Alert Component (Shadcn Style) */
+.dd-alert {
+    position: relative;
+    width: 100%;
+    border-radius: var(--dd-radius);
+    border: 1px solid hsl(var(--dd-border));
+    padding: var(--dd-space-4);
+    margin-bottom: var(--dd-space-6);
+    display: flex;
+    gap: var(--dd-space-4);
+}
+
+.dd-alert-warning {
+    border-color: hsl(var(--dd-warning) / 0.5);
+    background-color: hsl(var(--dd-warning) / 0.1);
+}
+
+.dd-alert-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dd-alert-warning .dd-alert-icon {
+    color: hsl(var(--dd-warning));
+}
+
+.dd-alert-content {
+    flex: 1;
+}
+
+.dd-alert-title {
+    font-size: var(--dd-text-sm);
+    font-weight: 600;
+    margin: 0 0 var(--dd-space-1) 0;
+    line-height: 1.5;
+}
+
+.dd-alert-description {
+    font-size: var(--dd-text-sm);
+    line-height: 1.5;
+    margin: 0;
+    color: hsl(var(--dd-muted-foreground));
+}
+
 .dd-linked-accounts-list {
-    margin-top: 20px;
+    margin-top: var(--dd-space-5);
 }
 
 .dd-linked-account-item {
     background: hsl(var(--dd-card));
     border: 1px solid hsl(var(--dd-border));
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 12px;
+    border-radius: var(--dd-radius);
+    padding: var(--dd-space-4);
+    margin-bottom: var(--dd-space-3);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    transition: all 0.2s ease;
+}
+
+.dd-linked-account-item:hover {
+    box-shadow: var(--dd-shadow-md);
+    transform: translateY(-1px);
 }
 
 .dd-account-info {

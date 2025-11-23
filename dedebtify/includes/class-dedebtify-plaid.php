@@ -148,6 +148,54 @@ class Dedebtify_Plaid {
     }
 
     /**
+     * Encrypt sensitive data
+     *
+     * @param string $data Data to encrypt
+     * @return string
+     */
+    private static function encrypt_token( $data ) {
+        if ( ! $data ) {
+            return '';
+        }
+
+        // Use WordPress secret keys for encryption
+        $key = wp_salt( 'auth' );
+        $iv = substr( wp_salt( 'secure_auth' ), 0, 16 );
+
+        // Use OpenSSL for encryption if available
+        if ( function_exists( 'openssl_encrypt' ) ) {
+            return base64_encode( openssl_encrypt( $data, 'AES-256-CBC', $key, 0, $iv ) );
+        }
+
+        // Fallback to base64 (not ideal but better than plaintext)
+        return base64_encode( $data );
+    }
+
+    /**
+     * Decrypt sensitive data
+     *
+     * @param string $data Encrypted data
+     * @return string
+     */
+    private static function decrypt_token( $data ) {
+        if ( ! $data ) {
+            return '';
+        }
+
+        // Use WordPress secret keys for decryption
+        $key = wp_salt( 'auth' );
+        $iv = substr( wp_salt( 'secure_auth' ), 0, 16 );
+
+        // Use OpenSSL for decryption if available
+        if ( function_exists( 'openssl_decrypt' ) ) {
+            return openssl_decrypt( base64_decode( $data ), 'AES-256-CBC', $key, 0, $iv );
+        }
+
+        // Fallback to base64 decode
+        return base64_decode( $data );
+    }
+
+    /**
      * Save linked Plaid account for user
      *
      * @param int $user_id User ID
@@ -160,9 +208,10 @@ class Dedebtify_Plaid {
             $linked_accounts = array();
         }
 
+        // Encrypt access token before storing
         $linked_accounts[] = array(
-            'access_token' => $access_token,
-            'item_id' => $item_id,
+            'access_token' => self::encrypt_token( $access_token ),
+            'item_id' => sanitize_text_field( $item_id ),
             'connected_at' => current_time( 'mysql' ),
             'last_sync' => null
         );
@@ -292,7 +341,13 @@ class Dedebtify_Plaid {
         );
 
         foreach ( $linked_accounts as $index => $account ) {
-            $access_token = $account['access_token'];
+            // Decrypt access token before use
+            $access_token = self::decrypt_token( $account['access_token'] );
+
+            if ( empty( $access_token ) ) {
+                $results['errors']++;
+                continue;
+            }
 
             // Get liabilities
             $liabilities_data = self::get_liabilities( $access_token );
@@ -307,7 +362,7 @@ class Dedebtify_Plaid {
 
             if ( $synced ) {
                 $results['success']++;
-                $results['synced_items'][] = $account['item_id'];
+                $results['synced_items'][] = sanitize_text_field( $account['item_id'] );
 
                 // Update last sync time
                 $linked_accounts[$index]['last_sync'] = current_time( 'mysql' );

@@ -91,10 +91,23 @@ class Dedebtify_REST_API {
     public static function exchange_public_token( $request ) {
         $public_token = $request->get_param( 'public_token' );
 
+        // Validate and sanitize input
         if ( empty( $public_token ) ) {
             return new WP_Error(
                 'missing_token',
                 __( 'Public token is required', 'dedebtify' ),
+                array( 'status' => 400 )
+            );
+        }
+
+        // Sanitize token
+        $public_token = sanitize_text_field( $public_token );
+
+        // Validate token format (Plaid tokens start with public- or access-)
+        if ( ! preg_match( '/^public-[a-z0-9-]+$/i', $public_token ) ) {
+            return new WP_Error(
+                'invalid_token',
+                __( 'Invalid token format', 'dedebtify' ),
                 array( 'status' => 400 )
             );
         }
@@ -106,8 +119,8 @@ class Dedebtify_REST_API {
             return $result;
         }
 
-        // Trigger initial sync
-        Dedebtify_Plaid::sync_user_accounts( $user_id );
+        // Trigger initial sync in background
+        wp_schedule_single_event( time() + 10, 'dedebtify_plaid_initial_sync', array( $user_id ) );
 
         return new WP_REST_Response( array(
             'success' => true,
@@ -167,6 +180,7 @@ class Dedebtify_REST_API {
     public static function disconnect_account( $request ) {
         $item_id = $request->get_param( 'item_id' );
 
+        // Validate input
         if ( empty( $item_id ) ) {
             return new WP_Error(
                 'missing_item_id',
@@ -175,7 +189,29 @@ class Dedebtify_REST_API {
             );
         }
 
+        // Sanitize item ID
+        $item_id = sanitize_text_field( $item_id );
+
+        // Verify user owns this item
         $user_id = get_current_user_id();
+        $linked_accounts = Dedebtify_Plaid::get_linked_accounts( $user_id );
+        $item_exists = false;
+
+        foreach ( $linked_accounts as $account ) {
+            if ( $account['item_id'] === $item_id ) {
+                $item_exists = true;
+                break;
+            }
+        }
+
+        if ( ! $item_exists ) {
+            return new WP_Error(
+                'invalid_item',
+                __( 'Account not found or you do not have permission to disconnect it', 'dedebtify' ),
+                array( 'status' => 403 )
+            );
+        }
+
         Dedebtify_Plaid::disconnect_account( $user_id, $item_id );
 
         return new WP_REST_Response( array(
@@ -184,6 +220,11 @@ class Dedebtify_REST_API {
         ), 200 );
     }
 }
+
+// Register initial sync action
+add_action( 'dedebtify_plaid_initial_sync', function( $user_id ) {
+    Dedebtify_Plaid::sync_user_accounts( $user_id );
+} );
 
 // Register routes on rest_api_init
 add_action( 'rest_api_init', array( 'Dedebtify_REST_API', 'register_routes' ) );
