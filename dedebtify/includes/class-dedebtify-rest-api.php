@@ -15,6 +15,31 @@ class Dedebtify_REST_API {
      * Register REST API routes
      */
     public static function register_routes() {
+        // Financial data endpoints
+        register_rest_route( 'dedebtify/v1', '/credit-cards', array(
+            'methods' => 'GET',
+            'callback' => array( __CLASS__, 'get_credit_cards' ),
+            'permission_callback' => array( __CLASS__, 'check_user_permission' )
+        ) );
+
+        register_rest_route( 'dedebtify/v1', '/loans', array(
+            'methods' => 'GET',
+            'callback' => array( __CLASS__, 'get_loans' ),
+            'permission_callback' => array( __CLASS__, 'check_user_permission' )
+        ) );
+
+        register_rest_route( 'dedebtify/v1', '/bills', array(
+            'methods' => 'GET',
+            'callback' => array( __CLASS__, 'get_bills' ),
+            'permission_callback' => array( __CLASS__, 'check_user_permission' )
+        ) );
+
+        register_rest_route( 'dedebtify/v1', '/goals', array(
+            'methods' => 'GET',
+            'callback' => array( __CLASS__, 'get_goals' ),
+            'permission_callback' => array( __CLASS__, 'check_user_permission' )
+        ) );
+
         // Plaid endpoints
         register_rest_route( 'dedebtify/v1', '/plaid/create-link-token', array(
             'methods' => 'POST',
@@ -54,6 +79,163 @@ class Dedebtify_REST_API {
      */
     public static function check_user_permission() {
         return is_user_logged_in();
+    }
+
+    /**
+     * Get user's credit cards
+     *
+     * @param WP_REST_Request $request
+     * @return WP_REST_Response
+     */
+    public static function get_credit_cards( $request ) {
+        $user_id = get_current_user_id();
+
+        $args = array(
+            'post_type' => 'dd_credit_card',
+            'author' => $user_id,
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        );
+
+        $posts = get_posts( $args );
+        $cards = array();
+
+        foreach ( $posts as $post ) {
+            $cards[] = array(
+                'id' => $post->ID,
+                'name' => $post->post_title,
+                'balance' => (float) get_post_meta( $post->ID, 'balance', true ),
+                'credit_limit' => (float) get_post_meta( $post->ID, 'credit_limit', true ),
+                'interest_rate' => (float) get_post_meta( $post->ID, 'interest_rate', true ),
+                'minimum_payment' => (float) get_post_meta( $post->ID, 'minimum_payment', true ),
+                'extra_payment' => (float) get_post_meta( $post->ID, 'extra_payment', true ),
+                'status' => get_post_meta( $post->ID, 'status', true ),
+                'utilization' => self::calculate_utilization(
+                    get_post_meta( $post->ID, 'balance', true ),
+                    get_post_meta( $post->ID, 'credit_limit', true )
+                )
+            );
+        }
+
+        return new WP_REST_Response( $cards, 200 );
+    }
+
+    /**
+     * Get user's loans
+     *
+     * @param WP_REST_Request $request
+     * @return WP_REST_Response
+     */
+    public static function get_loans( $request ) {
+        $user_id = get_current_user_id();
+
+        $args = array(
+            'post_type' => 'dd_loan',
+            'author' => $user_id,
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        );
+
+        $posts = get_posts( $args );
+        $loans = array();
+
+        foreach ( $posts as $post ) {
+            $loans[] = array(
+                'id' => $post->ID,
+                'name' => $post->post_title,
+                'type' => get_post_meta( $post->ID, 'type', true ),
+                'principal' => (float) get_post_meta( $post->ID, 'principal', true ),
+                'current_balance' => (float) get_post_meta( $post->ID, 'current_balance', true ),
+                'interest_rate' => (float) get_post_meta( $post->ID, 'interest_rate', true ),
+                'monthly_payment' => (float) get_post_meta( $post->ID, 'monthly_payment', true ),
+                'extra_payment' => (float) get_post_meta( $post->ID, 'extra_payment', true ),
+                'start_date' => get_post_meta( $post->ID, 'start_date', true )
+            );
+        }
+
+        return new WP_REST_Response( $loans, 200 );
+    }
+
+    /**
+     * Get user's bills
+     *
+     * @param WP_REST_Request $request
+     * @return WP_REST_Response
+     */
+    public static function get_bills( $request ) {
+        $user_id = get_current_user_id();
+
+        $args = array(
+            'post_type' => 'dd_bill',
+            'author' => $user_id,
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        );
+
+        $posts = get_posts( $args );
+        $bills = array();
+
+        foreach ( $posts as $post ) {
+            $bills[] = array(
+                'id' => $post->ID,
+                'name' => $post->post_title,
+                'category' => get_post_meta( $post->ID, 'category', true ),
+                'amount' => (float) get_post_meta( $post->ID, 'amount', true ),
+                'due_date' => get_post_meta( $post->ID, 'due_date', true ),
+                'frequency' => get_post_meta( $post->ID, 'frequency', true ),
+                'status' => get_post_meta( $post->ID, 'status', true )
+            );
+        }
+
+        return new WP_REST_Response( $bills, 200 );
+    }
+
+    /**
+     * Get user's goals
+     *
+     * @param WP_REST_Request $request
+     * @return WP_REST_Response
+     */
+    public static function get_goals( $request ) {
+        $user_id = get_current_user_id();
+
+        $args = array(
+            'post_type' => 'dd_goal',
+            'author' => $user_id,
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        );
+
+        $posts = get_posts( $args );
+        $goals = array();
+
+        foreach ( $posts as $post ) {
+            $goals[] = array(
+                'id' => $post->ID,
+                'name' => $post->post_title,
+                'type' => get_post_meta( $post->ID, 'type', true ),
+                'target_amount' => (float) get_post_meta( $post->ID, 'target_amount', true ),
+                'current_amount' => (float) get_post_meta( $post->ID, 'current_amount', true ),
+                'target_date' => get_post_meta( $post->ID, 'target_date', true ),
+                'status' => get_post_meta( $post->ID, 'status', true )
+            );
+        }
+
+        return new WP_REST_Response( $goals, 200 );
+    }
+
+    /**
+     * Calculate credit utilization
+     *
+     * @param float $balance
+     * @param float $limit
+     * @return float
+     */
+    private static function calculate_utilization( $balance, $limit ) {
+        if ( empty( $limit ) || $limit == 0 ) {
+            return 0;
+        }
+        return ( $balance / $limit ) * 100;
     }
 
     /**

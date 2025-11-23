@@ -32,6 +32,7 @@ define( 'DEDEBTIFY_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
  * Load plugin core classes
  */
 require_once DEDEBTIFY_PLUGIN_DIR . 'includes/class-dedebtify-helpers.php';
+require_once DEDEBTIFY_PLUGIN_DIR . 'includes/class-dedebtify-cpt.php';
 
 /**
  * Load Plaid integration
@@ -130,15 +131,6 @@ function dedebtify_enqueue_scripts() {
     wp_enqueue_script(
         'dedebtify-managers',
         DEDEBTIFY_PLUGIN_URL . 'assets/js/dedebtify-managers.js',
-        array( 'jquery' ),
-        DEDEBTIFY_VERSION,
-        true
-    );
-
-    // Enqueue AI Coach JavaScript
-    wp_enqueue_script(
-        'dedebtify-ai-coach',
-        DEDEBTIFY_PLUGIN_URL . 'assets/js/dedebtify-ai-coach.js',
         array( 'jquery' ),
         DEDEBTIFY_VERSION,
         true
