@@ -90,6 +90,10 @@ class Dedebtify_Helpers {
                 'title' => __( 'Progress', 'dedebtify' ),
                 'icon' => 'chart-line'
             ),
+            'account_sync' => array(
+                'title' => __( 'Account Sync', 'dedebtify' ),
+                'icon' => 'update'
+            ),
         );
 
         ?>
