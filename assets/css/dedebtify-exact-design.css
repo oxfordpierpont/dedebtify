@@ -1,0 +1,699 @@
+/**
+ * DeDebtify Dashboard - Exact Design Match
+ * Based on React dashboard source code
+ * Uses Tailwind-inspired utility classes converted to custom CSS
+ */
+
+/* ===== LAYOUT ===== */
+.dd-app-container {
+    display: flex;
+    height: 100vh;
+    background: #101010;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ===== SIDEBAR ===== */
+.dd-sidebar-exact {
+    display: none;
+    flex-direction: column;
+    width: 256px;
+    height: 100%;
+    background: #101010;
+    color: #9ca3af;
+    padding: 24px;
+    flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+    .dd-sidebar-exact {
+        display: flex;
+    }
+}
+
+.dd-sidebar-profile {
+    margin-bottom: 40px;
+    padding-top: 16px;
+}
+
+.dd-profile-image-wrapper {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.dd-profile-image {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    object-fit: cover;
+    border: 2px solid #1e1e1e;
+}
+
+.dd-profile-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ef4444;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid #101010;
+}
+
+.dd-profile-name {
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    margin: 0 0 4px 0;
+}
+
+.dd-profile-email {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0;
+}
+
+.dd-sidebar-nav {
+    flex: 1;
+    margin-bottom: 24px;
+}
+
+.dd-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.dd-nav-item:hover {
+    color: white;
+}
+
+.dd-nav-item.active {
+    color: white;
+}
+
+.dd-nav-item-icon {
+    width: 20px;
+    height: 20px;
+    position: relative;
+}
+
+.dd-nav-item.active .dd-nav-item-icon::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: -4px;
+    width: 6px;
+    height: 6px;
+    background: #ff69b4;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #ff69b4;
+}
+
+.dd-nav-item-label {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.dd-nav-item.active .dd-nav-item-label {
+    font-weight: 600;
+}
+
+.dd-nav-active-indicator {
+    margin-left: auto;
+    width: 4px;
+    height: 20px;
+    background: linear-gradient(to bottom, #ff69b4, #a855f7);
+    border-radius: 4px;
+}
+
+.dd-sidebar-logout {
+    padding-top: 24px;
+    border-top: 1px solid #374151;
+}
+
+.dd-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    transition: color 0.2s;
+    cursor: pointer;
+}
+
+.dd-logout-btn:hover {
+    color: white;
+}
+
+/* ===== MAIN CONTENT ===== */
+.dd-main-wrapper {
+    flex: 1;
+    margin: 12px 12px 12px 0;
+    background: #f3f4f6;
+    border-radius: 32px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+@media (max-width: 1024px) {
+    .dd-main-wrapper {
+        margin: 0;
+        border-radius: 0;
+    }
+}
+
+.dd-main-content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* Custom Scrollbar */
+.dd-main-content-area::-webkit-scrollbar {
+    width: 8px;
+}
+
+.dd-main-content-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dd-main-content-area::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.dd-main-content-area::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ===== HEADER ===== */
+.dd-header {
+    padding: 32px;
+    padding-bottom: 24px;
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.dd-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.dd-header-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 4px 0;
+}
+
+.dd-header-subtitle {
+    color: #6b7280;
+    font-size: 14px;
+    margin: 0;
+}
+
+.dd-header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.dd-header-icon-btn {
+    padding: 10px;
+    border-radius: 12px;
+    background: #f9fafb;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.dd-header-icon-btn:hover {
+    background: #f3f4f6;
+}
+
+.dd-notification-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.dd-toolbar {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+}
+
+.dd-toolbar::-webkit-scrollbar {
+    display: none;
+}
+
+.dd-btn-primary-exact {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #3b82f6;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.dd-btn-primary-exact:hover {
+    background: #2563eb;
+}
+
+.dd-btn-secondary-exact {
+    padding: 10px 20px;
+    border-radius: 12px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    font-size: 14px;
+    font-weight: 600;
+    color: #4b5563;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.dd-btn-secondary-exact:hover {
+    background: #f9fafb;
+    color: #111827;
+    border-color: #d1d5db;
+}
+
+/* ===== CONTENT SECTIONS ===== */
+.dd-content-padding {
+    padding: 32px;
+}
+
+.dd-section-card {
+    background: white;
+    padding: 24px;
+    border-radius: 24px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f3f4f6;
+    margin-bottom: 32px;
+}
+
+.dd-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.dd-section-title {
+    font-weight: 700;
+    color: #111827;
+    font-size: 18px;
+    margin: 0;
+}
+
+.dd-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+.dd-badge-blue {
+    color: #3b82f6;
+    background: #eff6ff;
+}
+
+.dd-badge-orange {
+    color: #f59e0b;
+    background: #fef3c7;
+}
+
+/* ===== DEBT BREAKDOWN CHART ===== */
+.dd-debt-chart-bar {
+    height: 56px;
+    width: 100%;
+    display: flex;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.dd-debt-segment {
+    height: 100%;
+    position: relative;
+    transition: all 0.3s;
+}
+
+.dd-debt-segment:hover {
+    opacity: 0.9;
+}
+
+.dd-debt-segment-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.dd-debt-legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.dd-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f9fafb;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #f3f4f6;
+}
+
+.dd-legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.dd-legend-category {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+    margin: 0 0 2px 0;
+}
+
+.dd-legend-amount {
+    font-weight: 700;
+    color: #111827;
+    font-size: 15px;
+}
+
+.dd-legend-percentage {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-left: 4px;
+}
+
+/* ===== CREDIT CARD ITEM ===== */
+.dd-credit-card {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background: white;
+    border: 1px solid #f3f4f6;
+    border-radius: 16px;
+    transition: all 0.3s;
+    margin-bottom: 16px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.dd-credit-card:hover {
+    border-color: #dbeafe;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.dd-card-accent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.dd-credit-card:hover .dd-card-accent {
+    opacity: 1;
+}
+
+.dd-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.dd-card-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.dd-card-icon {
+    height: 48px;
+    width: 48px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.dd-card-icon.blue {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.dd-card-icon.orange {
+    background: #fff7ed;
+    color: #f59e0b;
+}
+
+.dd-card-icon.gray {
+    background: #f9fafb;
+    color: #6b7280;
+}
+
+.dd-card-name {
+    font-weight: 700;
+    color: #111827;
+    font-size: 18px;
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+}
+
+.dd-card-meta {
+    font-size: 12px;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dd-card-apr {
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.dd-card-status {
+    color: #10b981;
+    font-weight: 500;
+}
+
+.dd-card-balance {
+    text-align: right;
+}
+
+.dd-card-balance-amount {
+    font-weight: 700;
+    font-size: 20px;
+    color: #111827;
+    margin: 0 0 2px 0;
+}
+
+.dd-card-balance-limit {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.dd-card-utilization {
+    margin-bottom: 16px;
+}
+
+.dd-util-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+.dd-util-label {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.dd-util-value {
+    font-weight: 700;
+}
+
+.dd-util-value.high {
+    color: #ef4444;
+}
+
+.dd-util-value.normal {
+    color: #4b5563;
+}
+
+.dd-progress-bar {
+    height: 10px;
+    width: 100%;
+    background: #f3f4f6;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.dd-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: all 1s ease-out;
+}
+
+.dd-progress-fill.green {
+    background: #10b981;
+}
+
+.dd-progress-fill.yellow {
+    background: #f59e0b;
+}
+
+.dd-progress-fill.red {
+    background: #ef4444;
+}
+
+.dd-card-details {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid #f3f4f6;
+}
+
+.dd-card-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dd-detail-icon {
+    padding: 6px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.dd-detail-icon.blue {
+    color: #3b82f6;
+}
+
+.dd-detail-icon.red {
+    color: #f87171;
+}
+
+.dd-detail-label {
+    font-size: 10px;
+    color: #9ca3af;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin: 0 0 2px 0;
+}
+
+.dd-detail-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: #4b5563;
+    margin: 0;
+}
+
+.dd-detail-divider {
+    width: 1px;
+    height: 32px;
+    background: #e5e7eb;
+    margin: 0 8px;
+}
+
+/* ===== RIGHT SIDEBAR ===== */
+.dd-right-sidebar {
+    width: 100%;
+    background: white;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid #f3f4f6;
+    overflow-y: auto;
+    z-index: 10;
+}
+
+@media (min-width: 768px) {
+    .dd-right-sidebar {
+        width: 320px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .dd-right-sidebar {
+        width: 380px;
+    }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .dd-main-wrapper {
+        flex-direction: column;
+    }
+    
+    .dd-right-sidebar {
+        border-left: none;
+        border-top: 1px solid #f3f4f6;
+    }
+}

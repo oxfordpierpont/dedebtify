@@ -269,11 +269,20 @@ class Dedebtify {
             'all'
         );
 
+        // Enqueue exact design styles (from React source)
+        wp_enqueue_style(
+            $this->plugin_name . '-exact-design',
+            DEDEBTIFY_PLUGIN_URL . 'assets/css/dedebtify-exact-design.css',
+            array( $this->plugin_name . '-sidebar' ),
+            $this->version,
+            'all'
+        );
+
         // Enqueue AI Coach styles
         wp_enqueue_style(
             $this->plugin_name . '-ai-coach',
             DEDEBTIFY_PLUGIN_URL . 'assets/css/dedebtify-ai-coach.css',
-            array( $this->plugin_name . '-sidebar' ),
+            array( $this->plugin_name . '-exact-design' ),
             $this->version,
             'all'
         );
