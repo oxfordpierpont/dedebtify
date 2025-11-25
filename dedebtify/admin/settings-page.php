@@ -102,6 +102,9 @@ $plaid_secret = get_option( 'dedebtify_plaid_secret', '' );
 $plaid_environment = get_option( 'dedebtify_plaid_environment', 'sandbox' );
 $plaid_auto_sync = get_option( 'dedebtify_plaid_auto_sync', 0 );
 $plaid_sync_frequency = get_option( 'dedebtify_plaid_sync_frequency', 'daily' );
+$ai_provider = get_option( 'dedebtify_ai_provider', 'openai' );
+$ai_api_key = get_option( 'dedebtify_ai_api_key', '' );
+$ai_model = get_option( 'dedebtify_ai_model', 'gpt-4o' );
 
 // Check if user has dummy data
 $has_dummy_data = get_user_meta( get_current_user_id(), 'dd_has_dummy_data', true );
@@ -376,6 +379,7 @@ $has_dummy_data = get_user_meta( get_current_user_id(), 'dd_has_dummy_data', tru
                         <option value="openai" <?php selected( $ai_provider, 'openai' ); ?>>OpenAI (ChatGPT)</option>
                         <option value="anthropic" <?php selected( $ai_provider, 'anthropic' ); ?>>Anthropic (Claude)</option>
                         <option value="openrouter" <?php selected( $ai_provider, 'openrouter' ); ?>>OpenRouter (Multi-Provider - Recommended)</option>
+                        <option value="openrouter" <?php selected( $ai_provider, 'openrouter' ); ?>>OpenRouter (Multi-Provider)</option>
                     </select>
                     <p class="description">
                         <?php _e( 'Choose your preferred AI provider. OpenRouter provides access to multiple AI models through a single API key.', 'dedebtify' ); ?>
@@ -490,6 +494,7 @@ $has_dummy_data = get_user_meta( get_current_user_id(), 'dd_has_dummy_data', tru
                     <input type="number" id="ai_max_tokens" name="ai_max_tokens" value="<?php echo esc_attr( $ai_max_tokens ); ?>" min="100" max="16000" step="100" class="regular-text">
                     <p class="description">
                         <?php _e( 'Maximum length of AI responses. Higher values allow longer responses but increase costs. Default: 2000', 'dedebtify' ); ?>
+                        <?php _e( 'Select which AI model to use. OpenRouter provides access to models from multiple providers through a single API key. More advanced models provide better responses but may cost more.', 'dedebtify' ); ?>
                     </p>
                 </td>
             </tr>

@@ -1,0 +1,630 @@
+/**
+ * DeDebtify AI Coach Chat Interface
+ * Modern LLM-style chat UI
+ *
+ * @since      1.0.0
+ * @package    Dedebtify
+ */
+
+/* ============================================
+   Chat Container
+   ============================================ */
+
+.dedebtify-ai-coach {
+    max-width: 900px;
+    margin: 0 auto;
+    height: calc(100vh - 180px);
+    display: flex;
+    flex-direction: column;
+}
+
+.dd-chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: hsl(var(--dd-card));
+    border: 1px solid hsl(var(--dd-border));
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* ============================================
+   Welcome Screen
+   ============================================ */
+
+.dd-chat-welcome {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow-y: auto;
+}
+
+.dd-chat-welcome-content {
+    max-width: 600px;
+    text-align: center;
+}
+
+.dd-chat-welcome-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    background: linear-gradient(135deg, hsl(var(--dd-primary)), hsl(var(--dd-primary) / 0.7));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px hsl(var(--dd-primary) / 0.3);
+}
+
+.dd-chat-welcome-icon .dashicons {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: white;
+}
+
+.dd-chat-welcome h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: hsl(var(--dd-foreground));
+    margin: 0 0 12px 0;
+}
+
+.dd-chat-welcome > p {
+    font-size: 16px;
+    color: hsl(var(--dd-muted-foreground));
+    margin-bottom: 32px;
+}
+
+/* ============================================
+   Capabilities Cards
+   ============================================ */
+
+.dd-coach-capabilities {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.dd-capability-card {
+    padding: 20px 16px;
+    background: hsl(var(--dd-accent));
+    border: 1px solid hsl(var(--dd-border));
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.dd-capability-card:hover {
+    background: hsl(var(--dd-primary) / 0.05);
+    border-color: hsl(var(--dd-primary) / 0.3);
+    transform: translateY(-2px);
+}
+
+.dd-capability-card .dashicons {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: hsl(var(--dd-primary));
+    margin-bottom: 8px;
+}
+
+.dd-capability-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: hsl(var(--dd-foreground));
+    margin: 0 0 4px 0;
+}
+
+.dd-capability-card p {
+    font-size: 12px;
+    color: hsl(var(--dd-muted-foreground));
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* ============================================
+   Suggested Prompts
+   ============================================ */
+
+.dd-suggested-prompts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.dd-suggested-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: hsl(var(--dd-muted-foreground));
+    margin-bottom: 4px;
+}
+
+.dd-suggested-prompt {
+    padding: 12px 20px;
+    background: hsl(var(--dd-background));
+    border: 1px solid hsl(var(--dd-border));
+    border-radius: 8px;
+    font-size: 14px;
+    color: hsl(var(--dd-foreground));
+    cursor: pointer;
+    transition: all 0.2s ease;
+    max-width: 400px;
+    width: 100%;
+    text-align: left;
+}
+
+.dd-suggested-prompt:hover {
+    background: hsl(var(--dd-accent));
+    border-color: hsl(var(--dd-primary));
+    transform: translateX(4px);
+}
+
+/* ============================================
+   Messages Area
+   ============================================ */
+
+.dd-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scroll-behavior: smooth;
+}
+
+.dd-chat-messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+.dd-chat-messages::-webkit-scrollbar-track {
+    background: hsl(var(--dd-background));
+}
+
+.dd-chat-messages::-webkit-scrollbar-thumb {
+    background: hsl(var(--dd-border));
+    border-radius: 4px;
+}
+
+.dd-chat-messages::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--dd-muted-foreground));
+}
+
+/* ============================================
+   Chat Messages
+   ============================================ */
+
+.dd-chat-message {
+    display: flex;
+    gap: 12px;
+    animation: messageSlideIn 0.3s ease;
+}
+
+@keyframes messageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dd-chat-message-user {
+    flex-direction: row-reverse;
+}
+
+.dd-chat-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dd-chat-message-assistant .dd-chat-avatar {
+    background: linear-gradient(135deg, hsl(var(--dd-primary)), hsl(var(--dd-primary) / 0.7));
+}
+
+.dd-chat-message-user .dd-chat-avatar {
+    background: hsl(var(--dd-secondary));
+}
+
+.dd-chat-avatar .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: white;
+}
+
+.dd-chat-bubble {
+    max-width: 70%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    position: relative;
+}
+
+.dd-chat-message-assistant .dd-chat-bubble {
+    background: hsl(var(--dd-accent));
+    color: hsl(var(--dd-foreground));
+    border-bottom-left-radius: 4px;
+}
+
+.dd-chat-message-user .dd-chat-bubble {
+    background: hsl(var(--dd-primary));
+    color: hsl(var(--dd-primary-foreground));
+    border-bottom-right-radius: 4px;
+}
+
+.dd-chat-bubble p {
+    margin: 0 0 8px 0;
+}
+
+.dd-chat-bubble p:last-child {
+    margin-bottom: 0;
+}
+
+.dd-chat-bubble ul,
+.dd-chat-bubble ol {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.dd-chat-bubble li {
+    margin: 4px 0;
+}
+
+.dd-chat-bubble strong {
+    font-weight: 600;
+}
+
+.dd-chat-bubble code {
+    background: hsl(var(--dd-background));
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+}
+
+.dd-chat-bubble pre {
+    background: hsl(var(--dd-background));
+    padding: 12px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 8px 0;
+}
+
+.dd-chat-bubble pre code {
+    background: none;
+    padding: 0;
+}
+
+.dd-chat-timestamp {
+    font-size: 11px;
+    color: hsl(var(--dd-muted-foreground));
+    margin-top: 4px;
+}
+
+/* ============================================
+   Typing Indicator
+   ============================================ */
+
+.dd-typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 4px 0;
+}
+
+.dd-typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background: hsl(var(--dd-muted-foreground));
+    border-radius: 50%;
+    animation: typingBounce 1.4s infinite;
+}
+
+.dd-typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dd-typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+    0%, 60%, 100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-8px);
+    }
+}
+
+/* ============================================
+   Chat Input
+   ============================================ */
+
+.dd-chat-input-container {
+    border-top: 1px solid hsl(var(--dd-border));
+    background: hsl(var(--dd-background));
+    padding: 16px;
+}
+
+.dd-chat-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.dd-chat-attach-btn {
+    padding: 12px;
+    background: hsl(var(--dd-accent));
+    border: 1px solid hsl(var(--dd-border));
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.dd-chat-attach-btn:hover {
+    background: hsl(var(--dd-primary) / 0.1);
+    border-color: hsl(var(--dd-primary));
+}
+
+.dd-chat-attach-btn.active {
+    background: hsl(var(--dd-primary) / 0.15);
+    border-color: hsl(var(--dd-primary));
+}
+
+.dd-chat-attach-btn .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: hsl(var(--dd-foreground));
+}
+
+.dd-context-indicator {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: hsl(var(--dd-success));
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.dd-chat-input-wrapper {
+    flex: 1;
+    display: flex;
+    gap: 8px;
+    background: hsl(var(--dd-card));
+    border: 1px solid hsl(var(--dd-border));
+    border-radius: 8px;
+    padding: 8px;
+    transition: all 0.2s ease;
+}
+
+.dd-chat-input-wrapper:focus-within {
+    border-color: hsl(var(--dd-primary));
+    box-shadow: 0 0 0 3px hsl(var(--dd-primary) / 0.1);
+}
+
+.dd-chat-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    color: hsl(var(--dd-foreground));
+    resize: none;
+    max-height: 120px;
+    min-height: 24px;
+    outline: none;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+.dd-chat-input::placeholder {
+    color: hsl(var(--dd-muted-foreground));
+}
+
+.dd-chat-submit {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    border: none;
+    background: hsl(var(--dd-primary));
+    color: hsl(var(--dd-primary-foreground));
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.dd-chat-submit:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.dd-chat-submit:not(:disabled):hover {
+    background: hsl(var(--dd-primary) / 0.9);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px hsl(var(--dd-primary) / 0.3);
+}
+
+.dd-chat-submit .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.dd-chat-disclaimer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: hsl(var(--dd-muted-foreground));
+    padding: 8px 12px;
+    background: hsl(var(--dd-accent));
+    border-radius: 6px;
+}
+
+.dd-chat-disclaimer .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   Settings
+   ============================================ */
+
+.dd-chat-settings {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    border-top: 1px solid hsl(var(--dd-border));
+    background: hsl(var(--dd-accent));
+}
+
+.dd-chat-settings button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ============================================
+   Loading State
+   ============================================ */
+
+.dd-chat-loading {
+    padding: 0 24px 16px;
+}
+
+/* ============================================
+   Financial Data Card
+   ============================================ */
+
+.dd-financial-context {
+    background: hsl(var(--dd-accent));
+    border: 1px solid hsl(var(--dd-border));
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 8px;
+    font-size: 12px;
+}
+
+.dd-financial-context-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: hsl(var(--dd-primary));
+}
+
+.dd-financial-context-header .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.dd-financial-context-data {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    font-size: 11px;
+}
+
+.dd-context-item {
+    display: flex;
+    justify-content: space-between;
+}
+
+.dd-context-label {
+    color: hsl(var(--dd-muted-foreground));
+}
+
+.dd-context-value {
+    font-weight: 600;
+    color: hsl(var(--dd-foreground));
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+@media (max-width: 768px) {
+    .dedebtify-ai-coach {
+        height: calc(100vh - 220px);
+    }
+
+    .dd-chat-bubble {
+        max-width: 85%;
+    }
+
+    .dd-coach-capabilities {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dd-suggested-prompt {
+        font-size: 13px;
+        padding: 10px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dd-chat-messages {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .dd-chat-bubble {
+        max-width: 90%;
+        font-size: 13px;
+    }
+
+    .dd-coach-capabilities {
+        grid-template-columns: 1fr;
+    }
+
+    .dd-capability-card {
+        padding: 16px 12px;
+    }
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+    .dd-chat-input-container,
+    .dd-chat-settings {
+        display: none;
+    }
+
+    .dedebtify-ai-coach {
+        height: auto;
+    }
+
+    .dd-chat-container {
+        border: none;
+        box-shadow: none;
+    }
+}
