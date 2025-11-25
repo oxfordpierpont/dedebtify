@@ -38,69 +38,69 @@ $loans = get_posts(array('post_type' => 'dd_loan', 'author' => $user_id, 'posts_
 
         <!-- Navigation -->
         <nav class="dd-sidebar-nav">
-            <div class="dd-nav-item active">
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('dashboard')); ?>" class="dd-nav-item active">
                 <div class="dd-nav-item-icon">
                     <span class="dashicons dashicons-dashboard"></span>
                 </div>
                 <span class="dd-nav-item-label"><?php _e('Dashboard', 'dedebtify'); ?></span>
                 <div class="dd-nav-active-indicator"></div>
-            </div>
-            <div class="dd-nav-item">
+            </a>
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('credit_cards')); ?>" class="dd-nav-item">
                 <div class="dd-nav-item-icon">
                     <span class="dashicons dashicons-money-alt"></span>
                 </div>
                 <span class="dd-nav-item-label"><?php _e('Credit Cards', 'dedebtify'); ?></span>
-            </div>
-            <div class="dd-nav-item">
+            </a>
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('loans')); ?>" class="dd-nav-item">
                 <div class="dd-nav-item-icon">
                     <span class="dashicons dashicons-admin-site-alt3"></span>
                 </div>
                 <span class="dd-nav-item-label"><?php _e('Loans', 'dedebtify'); ?></span>
-            </div>
-            <div class="dd-nav-item">
+            </a>
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('mortgages')); ?>" class="dd-nav-item">
                 <div class="dd-nav-item-icon">
                     <span class="dashicons dashicons-admin-home"></span>
                 </div>
                 <span class="dd-nav-item-label"><?php _e('Mortgage', 'dedebtify'); ?></span>
-            </div>
-            <div class="dd-nav-item">
+            </a>
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('bills')); ?>" class="dd-nav-item">
                 <div class="dd-nav-item-icon">
                     <span class="dashicons dashicons-list-view"></span>
                 </div>
                 <span class="dd-nav-item-label"><?php _e('Bills', 'dedebtify'); ?></span>
-            </div>
-            <div class="dd-nav-item">
+            </a>
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('goals')); ?>" class="dd-nav-item">
                 <div class="dd-nav-item-icon">
                     <span class="dashicons dashicons-star-filled"></span>
                 </div>
                 <span class="dd-nav-item-label"><?php _e('Goals', 'dedebtify'); ?></span>
-            </div>
-            <div class="dd-nav-item">
+            </a>
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('snapshots')); ?>" class="dd-nav-item">
                 <div class="dd-nav-item-icon">
                     <span class="dashicons dashicons-chart-line"></span>
                 </div>
                 <span class="dd-nav-item-label"><?php _e('Progress', 'dedebtify'); ?></span>
-            </div>
-            <div class="dd-nav-item">
+            </a>
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('ai_coach')); ?>" class="dd-nav-item">
                 <div class="dd-nav-item-icon">
                     <span class="dashicons dashicons-welcome-learn-more"></span>
                 </div>
                 <span class="dd-nav-item-label"><?php _e('AI Coach', 'dedebtify'); ?></span>
-            </div>
-            <div class="dd-nav-item">
+            </a>
+            <a href="#" class="dd-nav-item">
                 <div class="dd-nav-item-icon">
                     <span class="dashicons dashicons-admin-generic"></span>
                 </div>
                 <span class="dd-nav-item-label"><?php _e('Settings', 'dedebtify'); ?></span>
-            </div>
+            </a>
         </nav>
 
         <!-- Logout -->
         <div class="dd-sidebar-logout">
-            <div class="dd-logout-btn">
+            <a href="<?php echo wp_logout_url(home_url()); ?>" class="dd-logout-btn">
                 <span class="dashicons dashicons-exit"></span>
                 <span class="dd-nav-item-label"><?php _e('Logout', 'dedebtify'); ?></span>
-            </div>
+            </a>
         </div>
     </aside>
 
@@ -130,14 +130,14 @@ $loans = get_posts(array('post_type' => 'dd_loan', 'author' => $user_id, 'posts_
 
                 <!-- Quick Actions Toolbar -->
                 <div class="dd-toolbar">
-                    <button class="dd-btn-primary-exact">
+                    <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('snapshots')); ?>" class="dd-btn-primary-exact">
                         <span class="dashicons dashicons-plus"></span>
                         <?php _e('Create Snapshot', 'dedebtify'); ?>
-                    </button>
-                    <button class="dd-btn-secondary-exact"><?php _e('View Cards', 'dedebtify'); ?></button>
-                    <button class="dd-btn-secondary-exact"><?php _e('View Loans', 'dedebtify'); ?></button>
-                    <button class="dd-btn-secondary-exact"><?php _e('View Bills', 'dedebtify'); ?></button>
-                    <button class="dd-btn-secondary-exact"><?php _e('View Goals', 'dedebtify'); ?></button>
+                    </a>
+                    <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('credit_cards')); ?>" class="dd-btn-secondary-exact"><?php _e('View Cards', 'dedebtify'); ?></a>
+                    <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('loans')); ?>" class="dd-btn-secondary-exact"><?php _e('View Loans', 'dedebtify'); ?></a>
+                    <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('bills')); ?>" class="dd-btn-secondary-exact"><?php _e('View Bills', 'dedebtify'); ?></a>
+                    <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('goals')); ?>" class="dd-btn-secondary-exact"><?php _e('View Goals', 'dedebtify'); ?></a>
                 </div>
             </header>
 
@@ -200,7 +200,7 @@ $loans = get_posts(array('post_type' => 'dd_loan', 'author' => $user_id, 'posts_
                 </section>
 
                 <!-- Two Column Grid -->
-                <div style="display: grid; grid-template-columns: 1fr; gap: 32px;">
+                <div class="dd-two-column-grid">
                     
                     <!-- Credit Cards Column -->
                     <section>

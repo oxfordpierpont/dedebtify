@@ -95,6 +95,8 @@
     transition: all 0.3s;
     position: relative;
     margin-bottom: 8px;
+    text-decoration: none;
+    color: inherit;
 }
 
 .dd-nav-item:hover {
@@ -152,10 +154,25 @@
     padding: 12px;
     transition: color 0.2s;
     cursor: pointer;
+    text-decoration: none;
+    color: inherit;
 }
 
 .dd-logout-btn:hover {
     color: white;
+}
+
+/* ===== TWO COLUMN GRID ===== */
+.dd-two-column-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+}
+
+@media (min-width: 1280px) {
+    .dd-two-column-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 /* ===== MAIN CONTENT ===== */
@@ -691,7 +708,7 @@
     .dd-main-wrapper {
         flex-direction: column;
     }
-    
+
     .dd-right-sidebar {
         border-left: none;
         border-top: 1px solid #f3f4f6;
