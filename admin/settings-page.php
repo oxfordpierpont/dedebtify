@@ -326,41 +326,6 @@ $has_dummy_data = get_user_meta( get_current_user_id(), 'dd_has_dummy_data', tru
                 <?php _e( 'Save Settings', 'dedebtify' ); ?>
             </button>
         </p>
-    </form>
-
-    <!-- Dummy Data Management -->
-    <div class="dedebtify-settings-section" style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 30px;">
-        <h3><?php _e( 'Dummy Data Management', 'dedebtify' ); ?></h3>
-        <p class="description"><?php _e( 'Use dummy data to test the plugin or demo it to potential users. All dummy data is user-specific and can be completely removed.', 'dedebtify' ); ?></p>
-
-        <?php if ( $has_dummy_data ) : ?>
-            <div class="notice notice-info inline">
-                <p><strong><?php _e( 'You currently have dummy data installed.', 'dedebtify' ); ?></strong></p>
-                <p><?php _e( 'Dummy data includes: 3 credit cards, 2 loans, 1 mortgage, 6 bills, 3 goals, and 3 historical snapshots.', 'dedebtify' ); ?></p>
-            </div>
-
-            <form method="post" action="" style="margin-top: 20px;">
-                <?php wp_nonce_field( 'dedebtify_dummy_data_nonce' ); ?>
-                <button type="submit" name="dedebtify_wipe_dummy_data" class="button button-secondary" onclick="return confirm('<?php _e( 'Are you sure you want to delete all dummy data? This cannot be undone.', 'dedebtify' ); ?>');">
-                    <?php _e( 'Wipe All Dummy Data', 'dedebtify' ); ?>
-                </button>
-            </form>
-        <?php else : ?>
-            <div class="notice notice-warning inline">
-                <p><?php _e( 'No dummy data found. Generate sample data to see how the plugin works.', 'dedebtify' ); ?></p>
-            </div>
-
-            <form method="post" action="" style="margin-top: 20px;">
-                <?php wp_nonce_field( 'dedebtify_dummy_data_nonce' ); ?>
-                <button type="submit" name="dedebtify_generate_dummy_data" class="button button-primary">
-                    <?php _e( 'Generate Dummy Data', 'dedebtify' ); ?>
-                </button>
-                <p class="description" style="margin-top: 10px;">
-                    <?php _e( 'This will create realistic sample data including credit cards, loans, mortgage, bills, goals, and historical snapshots.', 'dedebtify' ); ?>
-                </p>
-            </form>
-        <?php endif; ?>
-    </div>
 
     <!-- AI Coach Settings -->
     <div class="dedebtify-settings-section" id="ai-coach">
@@ -521,6 +486,13 @@ $has_dummy_data = get_user_meta( get_current_user_id(), 'dd_has_dummy_data', tru
                 <?php _e( 'When users attach their financial data to conversations, it is sent to the selected AI provider for analysis. Ensure your privacy policy reflects this. No data is stored by DeDebtify beyond the user\'s browser.', 'dedebtify' ); ?>
             </p>
         </div>
+
+        <!-- Save Button -->
+        <p class="submit">
+            <button type="submit" name="dedebtify_settings_submit" class="button button-primary">
+                <?php _e( 'Save AI Settings', 'dedebtify' ); ?>
+            </button>
+        </p>
     </div>
 
     <!-- Plaid Integration Settings -->
@@ -633,19 +605,55 @@ $has_dummy_data = get_user_meta( get_current_user_id(), 'dd_has_dummy_data', tru
             <?php endif; ?>
         </div>
 
-        <div class="dedebtify-info-box" style="background: #e7f5fe; border-left: 4px solid #2271b1; padding: 12px; margin-top: 20px;">
-            <p style="margin: 0;">
-                <strong><?php _e( 'About Plaid:', 'dedebtify' ); ?></strong>
-                <?php _e( 'Plaid is a secure financial data network that connects over 11,000 financial institutions. When users link accounts, Plaid handles all authentication and data retrieval. DeDebtify never sees user credentials. Supported data includes: credit card balances, loan balances, account transactions, and more.', 'dedebtify' ); ?>
-            </p>
-        </div>
-
         <div class="dedebtify-info-box" style="background: #fef9e7; border-left: 4px solid #f59e0b; padding: 12px; margin-top: 10px;">
             <p style="margin: 0;">
                 <strong><?php _e( 'Privacy & Security:', 'dedebtify' ); ?></strong>
                 <?php _e( 'All financial data retrieved via Plaid is encrypted in transit and at rest. Access tokens are stored securely in the WordPress database with proper sanitization. Users can disconnect their accounts at any time from their account settings page.', 'dedebtify' ); ?>
             </p>
         </div>
+
+        <!-- Save Button -->
+        <p class="submit">
+            <button type="submit" name="dedebtify_settings_submit" class="button button-primary">
+                <?php _e( 'Save Plaid Settings', 'dedebtify' ); ?>
+            </button>
+        </p>
+    </div>
+
+    </form>
+
+    <!-- Dummy Data Management -->
+    <div class="dedebtify-settings-section" style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 30px;">
+        <h3><?php _e( 'Dummy Data Management', 'dedebtify' ); ?></h3>
+        <p class="description"><?php _e( 'Use dummy data to test the plugin or demo it to potential users. All dummy data is user-specific and can be completely removed.', 'dedebtify' ); ?></p>
+
+        <?php if ( $has_dummy_data ) : ?>
+            <div class="notice notice-info inline">
+                <p><strong><?php _e( 'You currently have dummy data installed.', 'dedebtify' ); ?></strong></p>
+                <p><?php _e( 'Dummy data includes: 3 credit cards, 2 loans, 1 mortgage, 6 bills, 3 goals, and 3 historical snapshots.', 'dedebtify' ); ?></p>
+            </div>
+
+            <form method="post" action="" style="margin-top: 20px;">
+                <?php wp_nonce_field( 'dedebtify_dummy_data_nonce' ); ?>
+                <button type="submit" name="dedebtify_wipe_dummy_data" class="button button-secondary" onclick="return confirm('<?php _e( 'Are you sure you want to delete all dummy data? This cannot be undone.', 'dedebtify' ); ?>');">
+                    <?php _e( 'Wipe All Dummy Data', 'dedebtify' ); ?>
+                </button>
+            </form>
+        <?php else : ?>
+            <div class="notice notice-warning inline">
+                <p><?php _e( 'No dummy data found. Generate sample data to see how the plugin works.', 'dedebtify' ); ?></p>
+            </div>
+
+            <form method="post" action="" style="margin-top: 20px;">
+                <?php wp_nonce_field( 'dedebtify_dummy_data_nonce' ); ?>
+                <button type="submit" name="dedebtify_generate_dummy_data" class="button button-primary">
+                    <?php _e( 'Generate Dummy Data', 'dedebtify' ); ?>
+                </button>
+                <p class="description" style="margin-top: 10px;">
+                    <?php _e( 'This will create realistic sample data including credit cards, loans, mortgage, bills, goals, and historical snapshots.', 'dedebtify' ); ?>
+                </p>
+            </form>
+        <?php endif; ?>
     </div>
 
     <!-- System Information -->
