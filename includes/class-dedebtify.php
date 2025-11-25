@@ -260,11 +260,20 @@ class Dedebtify {
             'all'
         );
 
+        // Enqueue sidebar navigation styles
+        wp_enqueue_style(
+            $this->plugin_name . '-sidebar',
+            DEDEBTIFY_PLUGIN_URL . 'assets/css/dedebtify-sidebar.css',
+            array( $this->plugin_name . '-mobile-app' ),
+            $this->version,
+            'all'
+        );
+
         // Enqueue AI Coach styles
         wp_enqueue_style(
             $this->plugin_name . '-ai-coach',
             DEDEBTIFY_PLUGIN_URL . 'assets/css/dedebtify-ai-coach.css',
-            array( $this->plugin_name . '-mobile-app' ),
+            array( $this->plugin_name . '-sidebar' ),
             $this->version,
             'all'
         );
