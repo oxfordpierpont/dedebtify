@@ -188,6 +188,9 @@
          * Load credit card data for editing
          */
         function loadCreditCardData(postId) {
+            // Ensure postId is a number for comparison
+            const numericPostId = parseInt(postId, 10);
+
             $.ajax({
                 url: dedebtify.restUrl + 'credit-cards',
                 method: 'GET',
@@ -195,6 +198,11 @@
                     xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
                 },
                 success: function(response) {
+                    const card = response.find(c => parseInt(c.id, 10) === numericPostId);
+                    if (card) {
+                        populateCreditCardForm(card);
+                    } else {
+                        console.error('Credit card not found with ID:', numericPostId);
                     const card = response.find(c => c.id === postId);
                     if (card) {
                         populateCreditCardForm(card);
@@ -600,6 +608,9 @@ var dedebtifyL10n = dedebtifyL10n || {
         }
 
         function loadLoanData(postId) {
+            // Ensure postId is a number for comparison
+            const numericPostId = parseInt(postId, 10);
+
             $.ajax({
                 url: dedebtify.restUrl + 'loans',
                 method: 'GET',
@@ -607,6 +618,15 @@ var dedebtifyL10n = dedebtifyL10n || {
                     xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
                 },
                 success: function(response) {
+                    const loan = response.find(l => parseInt(l.id, 10) === numericPostId);
+                    if (loan) {
+                        populateLoanForm(loan);
+                    } else {
+                        console.error('Loan not found with ID:', numericPostId);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to load loan data:', error);
                     const loan = response.find(l => l.id === postId);
                     if (loan) {
                         populateLoanForm(loan);
@@ -878,6 +898,9 @@ var dedebtifyL10n = dedebtifyL10n || {
         }
 
         function loadBillData(postId) {
+            // Ensure postId is a number for comparison
+            const numericPostId = parseInt(postId, 10);
+
             $.ajax({
                 url: dedebtify.restUrl + 'bills',
                 method: 'GET',
@@ -885,6 +908,15 @@ var dedebtifyL10n = dedebtifyL10n || {
                     xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
                 },
                 success: function(response) {
+                    const bill = response.find(b => parseInt(b.id, 10) === numericPostId);
+                    if (bill) {
+                        populateBillForm(bill);
+                    } else {
+                        console.error('Bill not found with ID:', numericPostId);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to load bill data:', error);
                     const bill = response.find(b => b.id === postId);
                     if (bill) {
                         populateBillForm(bill);
@@ -1150,6 +1182,9 @@ var dedebtifyL10n = dedebtifyL10n || {
         }
 
         function loadGoalData(postId) {
+            // Ensure postId is a number for comparison
+            const numericPostId = parseInt(postId, 10);
+
             $.ajax({
                 url: dedebtify.restUrl + 'goals',
                 method: 'GET',
@@ -1157,6 +1192,15 @@ var dedebtifyL10n = dedebtifyL10n || {
                     xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
                 },
                 success: function(response) {
+                    const goal = response.find(g => parseInt(g.id, 10) === numericPostId);
+                    if (goal) {
+                        populateGoalForm(goal);
+                    } else {
+                        console.error('Goal not found with ID:', numericPostId);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to load goal data:', error);
                     const goal = response.find(g => g.id === postId);
                     if (goal) {
                         populateGoalForm(goal);
@@ -2208,3 +2252,14 @@ var dedebtifyL10n = dedebtifyL10n || {
         initActionPlanManager();
         initSnapshotsManager();
 
+
+    });
+
+})(jQuery);
+
+// Localization object (will be populated by wp_localize_script)
+var dedebtifyL10n = dedebtifyL10n || {
+    edit: 'Edit',
+    delete: 'Delete',
+    confirm_delete: 'Are you sure you want to delete this item?'
+};

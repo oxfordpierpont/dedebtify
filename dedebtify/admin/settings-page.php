@@ -34,6 +34,18 @@ if ( isset( $_POST['dedebtify_settings_submit'] ) && check_admin_referer( 'dedeb
     update_option( 'dedebtify_ai_provider', sanitize_text_field( $_POST['ai_provider'] ) );
     update_option( 'dedebtify_ai_api_key', sanitize_text_field( $_POST['ai_api_key'] ) );
     update_option( 'dedebtify_ai_model', sanitize_text_field( $_POST['ai_model'] ) );
+    update_option( 'dedebtify_ai_custom_model', sanitize_text_field( $_POST['ai_custom_model'] ) );
+    update_option( 'dedebtify_ai_fallback_model', sanitize_text_field( $_POST['ai_fallback_model'] ) );
+    update_option( 'dedebtify_ai_temperature', floatval( $_POST['ai_temperature'] ) );
+    update_option( 'dedebtify_ai_max_tokens', intval( $_POST['ai_max_tokens'] ) );
+
+    // Save Plaid settings
+    update_option( 'dedebtify_plaid_enabled', isset( $_POST['plaid_enabled'] ) ? 1 : 0 );
+    update_option( 'dedebtify_plaid_client_id', sanitize_text_field( $_POST['plaid_client_id'] ) );
+    update_option( 'dedebtify_plaid_secret', sanitize_text_field( $_POST['plaid_secret'] ) );
+    update_option( 'dedebtify_plaid_environment', sanitize_text_field( $_POST['plaid_environment'] ) );
+    update_option( 'dedebtify_plaid_auto_sync', isset( $_POST['plaid_auto_sync'] ) ? 1 : 0 );
+    update_option( 'dedebtify_plaid_sync_frequency', sanitize_text_field( $_POST['plaid_sync_frequency'] ) );
 
     // Save PWA settings
     update_option( 'dedebtify_pwa_enabled', isset( $_POST['pwa_enabled'] ) ? 1 : 0 );
@@ -75,6 +87,21 @@ $font_family = get_option( 'dedebtify_font_family', 'System Default' );
 $border_radius = get_option( 'dedebtify_border_radius', 8 );
 
 // Get AI settings
+$ai_provider = get_option( 'dedebtify_ai_provider', 'openrouter' );
+$ai_api_key = get_option( 'dedebtify_ai_api_key', '' );
+$ai_model = get_option( 'dedebtify_ai_model', 'minimax/minimax-m2' );
+$ai_custom_model = get_option( 'dedebtify_ai_custom_model', '' );
+$ai_fallback_model = get_option( 'dedebtify_ai_fallback_model', '' );
+$ai_temperature = get_option( 'dedebtify_ai_temperature', 0.7 );
+$ai_max_tokens = get_option( 'dedebtify_ai_max_tokens', 2000 );
+
+// Get Plaid settings
+$plaid_enabled = get_option( 'dedebtify_plaid_enabled', 0 );
+$plaid_client_id = get_option( 'dedebtify_plaid_client_id', '' );
+$plaid_secret = get_option( 'dedebtify_plaid_secret', '' );
+$plaid_environment = get_option( 'dedebtify_plaid_environment', 'sandbox' );
+$plaid_auto_sync = get_option( 'dedebtify_plaid_auto_sync', 0 );
+$plaid_sync_frequency = get_option( 'dedebtify_plaid_sync_frequency', 'daily' );
 $ai_provider = get_option( 'dedebtify_ai_provider', 'openai' );
 $ai_api_key = get_option( 'dedebtify_ai_api_key', '' );
 $ai_model = get_option( 'dedebtify_ai_model', 'gpt-4o' );
@@ -351,6 +378,7 @@ $has_dummy_data = get_user_meta( get_current_user_id(), 'dd_has_dummy_data', tru
                     <select name="ai_provider" id="ai_provider" class="regular-text">
                         <option value="openai" <?php selected( $ai_provider, 'openai' ); ?>>OpenAI (ChatGPT)</option>
                         <option value="anthropic" <?php selected( $ai_provider, 'anthropic' ); ?>>Anthropic (Claude)</option>
+                        <option value="openrouter" <?php selected( $ai_provider, 'openrouter' ); ?>>OpenRouter (Multi-Provider - Recommended)</option>
                         <option value="openrouter" <?php selected( $ai_provider, 'openrouter' ); ?>>OpenRouter (Multi-Provider)</option>
                     </select>
                     <p class="description">
@@ -393,6 +421,9 @@ $has_dummy_data = get_user_meta( get_current_user_id(), 'dd_has_dummy_data', tru
                             <option value="claude-3-opus-20240229" <?php selected( $ai_model, 'claude-3-opus-20240229' ); ?>>Claude 3 Opus</option>
                         </optgroup>
                         <!-- OpenRouter Models -->
+                        <optgroup label="OpenRouter - Minimax" id="openrouter-minimax-models">
+                            <option value="minimax/minimax-m2" <?php selected( $ai_model, 'minimax/minimax-m2' ); ?>>Minimax M2 (Default - Cost Effective)</option>
+                        </optgroup>
                         <optgroup label="OpenRouter - Claude" id="openrouter-anthropic-models">
                             <option value="anthropic/claude-3.5-sonnet" <?php selected( $ai_model, 'anthropic/claude-3.5-sonnet' ); ?>>Claude 3.5 Sonnet (Recommended)</option>
                             <option value="anthropic/claude-3.5-haiku" <?php selected( $ai_model, 'anthropic/claude-3.5-haiku' ); ?>>Claude 3.5 Haiku</option>
@@ -413,6 +444,56 @@ $has_dummy_data = get_user_meta( get_current_user_id(), 'dd_has_dummy_data', tru
                         </optgroup>
                     </select>
                     <p class="description">
+                        <?php _e( 'Select a predefined AI model, or use the custom model field below for any OpenRouter model.', 'dedebtify' ); ?>
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="ai_custom_model"><?php _e( 'Custom Model Path (OpenRouter)', 'dedebtify' ); ?></label>
+                </th>
+                <td>
+                    <input type="text" id="ai_custom_model" name="ai_custom_model" value="<?php echo esc_attr( $ai_custom_model ); ?>" class="regular-text" placeholder="e.g., provider/model-name">
+                    <p class="description">
+                        <?php _e( 'Enter any OpenRouter model path (e.g., "minimax/minimax-m2", "anthropic/claude-3.5-sonnet"). This overrides the dropdown selection above. Leave blank to use dropdown selection. Browse available models at:', 'dedebtify' ); ?>
+                        <a href="https://openrouter.ai/models" target="_blank">openrouter.ai/models</a>
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="ai_fallback_model"><?php _e( 'Fallback Model', 'dedebtify' ); ?></label>
+                </th>
+                <td>
+                    <input type="text" id="ai_fallback_model" name="ai_fallback_model" value="<?php echo esc_attr( $ai_fallback_model ); ?>" class="regular-text" placeholder="e.g., anthropic/claude-3.5-haiku">
+                    <p class="description">
+                        <?php _e( 'Optional: Model to use if the primary model fails or is unavailable (OpenRouter format: provider/model-name).', 'dedebtify' ); ?>
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="ai_temperature"><?php _e( 'Temperature', 'dedebtify' ); ?></label>
+                </th>
+                <td>
+                    <input type="number" id="ai_temperature" name="ai_temperature" value="<?php echo esc_attr( $ai_temperature ); ?>" min="0" max="2" step="0.1" class="small-text">
+                    <p class="description">
+                        <?php _e( 'Controls randomness in responses (0 = focused and deterministic, 2 = creative and varied). Default: 0.7', 'dedebtify' ); ?>
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="ai_max_tokens"><?php _e( 'Max Tokens', 'dedebtify' ); ?></label>
+                </th>
+                <td>
+                    <input type="number" id="ai_max_tokens" name="ai_max_tokens" value="<?php echo esc_attr( $ai_max_tokens ); ?>" min="100" max="16000" step="100" class="regular-text">
+                    <p class="description">
+                        <?php _e( 'Maximum length of AI responses. Higher values allow longer responses but increase costs. Default: 2000', 'dedebtify' ); ?>
                         <?php _e( 'Select which AI model to use. OpenRouter provides access to models from multiple providers through a single API key. More advanced models provide better responses but may cost more.', 'dedebtify' ); ?>
                     </p>
                 </td>
@@ -438,6 +519,131 @@ $has_dummy_data = get_user_meta( get_current_user_id(), 'dd_has_dummy_data', tru
             <p style="margin: 0;">
                 <strong><?php _e( 'Privacy Note:', 'dedebtify' ); ?></strong>
                 <?php _e( 'When users attach their financial data to conversations, it is sent to the selected AI provider for analysis. Ensure your privacy policy reflects this. No data is stored by DeDebtify beyond the user\'s browser.', 'dedebtify' ); ?>
+            </p>
+        </div>
+    </div>
+
+    <!-- Plaid Integration Settings -->
+    <div class="dedebtify-settings-section" id="plaid">
+        <h3><?php _e( 'Plaid Financial Data Integration', 'dedebtify' ); ?></h3>
+        <p class="description">
+            <?php _e( 'Connect DeDebtify with real financial institutions using Plaid. Users can automatically sync their account balances, transactions, and debt information.', 'dedebtify' ); ?>
+        </p>
+
+        <table class="form-table">
+            <tr>
+                <th scope="row">
+                    <label for="plaid_enabled"><?php _e( 'Enable Plaid Integration', 'dedebtify' ); ?></label>
+                </th>
+                <td>
+                    <label>
+                        <input type="checkbox" id="plaid_enabled" name="plaid_enabled" value="1" <?php checked( $plaid_enabled, 1 ); ?>>
+                        <?php _e( 'Allow users to connect their bank accounts via Plaid', 'dedebtify' ); ?>
+                    </label>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="plaid_client_id"><?php _e( 'Plaid Client ID', 'dedebtify' ); ?></label>
+                </th>
+                <td>
+                    <input type="text" id="plaid_client_id" name="plaid_client_id" value="<?php echo esc_attr( $plaid_client_id ); ?>" class="regular-text" autocomplete="off">
+                    <p class="description">
+                        <?php _e( 'Get your credentials from:', 'dedebtify' ); ?>
+                        <a href="https://dashboard.plaid.com" target="_blank">dashboard.plaid.com</a>
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="plaid_secret"><?php _e( 'Plaid Secret', 'dedebtify' ); ?></label>
+                </th>
+                <td>
+                    <input type="password" id="plaid_secret" name="plaid_secret" value="<?php echo esc_attr( $plaid_secret ); ?>" class="regular-text" autocomplete="off">
+                    <p class="description">
+                        <?php _e( 'Your Plaid API secret key (stored securely)', 'dedebtify' ); ?>
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="plaid_environment"><?php _e( 'Environment', 'dedebtify' ); ?></label>
+                </th>
+                <td>
+                    <select name="plaid_environment" id="plaid_environment" class="regular-text">
+                        <option value="sandbox" <?php selected( $plaid_environment, 'sandbox' ); ?>><?php _e( 'Sandbox (Testing)', 'dedebtify' ); ?></option>
+                        <option value="development" <?php selected( $plaid_environment, 'development' ); ?>><?php _e( 'Development', 'dedebtify' ); ?></option>
+                        <option value="production" <?php selected( $plaid_environment, 'production' ); ?>><?php _e( 'Production (Live)', 'dedebtify' ); ?></option>
+                    </select>
+                    <p class="description">
+                        <?php _e( 'Use Sandbox for testing, Production for live sites', 'dedebtify' ); ?>
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="plaid_auto_sync"><?php _e( 'Automatic Sync', 'dedebtify' ); ?></label>
+                </th>
+                <td>
+                    <label>
+                        <input type="checkbox" id="plaid_auto_sync" name="plaid_auto_sync" value="1" <?php checked( $plaid_auto_sync, 1 ); ?>>
+                        <?php _e( 'Automatically sync account data at scheduled intervals', 'dedebtify' ); ?>
+                    </label>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="plaid_sync_frequency"><?php _e( 'Sync Frequency', 'dedebtify' ); ?></label>
+                </th>
+                <td>
+                    <select name="plaid_sync_frequency" id="plaid_sync_frequency" class="regular-text">
+                        <option value="hourly" <?php selected( $plaid_sync_frequency, 'hourly' ); ?>><?php _e( 'Every Hour', 'dedebtify' ); ?></option>
+                        <option value="daily" <?php selected( $plaid_sync_frequency, 'daily' ); ?>><?php _e( 'Daily (Recommended)', 'dedebtify' ); ?></option>
+                        <option value="weekly" <?php selected( $plaid_sync_frequency, 'weekly' ); ?>><?php _e( 'Weekly', 'dedebtify' ); ?></option>
+                    </select>
+                    <p class="description">
+                        <?php _e( 'How often to refresh account balances and transactions. Users can also manually sync anytime.', 'dedebtify' ); ?>
+                    </p>
+                </td>
+            </tr>
+        </table>
+
+        <div class="dedebtify-plaid-status" style="background: #f0f0f1; padding: 15px; margin: 20px 0; border-radius: 4px;">
+            <h4 style="margin-top: 0;"><?php _e( 'Plaid Integration Status', 'dedebtify' ); ?></h4>
+            <?php if ( $plaid_enabled && !empty( $plaid_client_id ) && !empty( $plaid_secret ) ) : ?>
+                <p>
+                    <span class="dashicons dashicons-yes-alt" style="color: #00a32a;"></span>
+                    <?php printf( __( 'Plaid is configured and running in %s mode. Users can connect their financial accounts!', 'dedebtify' ), '<strong>' . esc_html( $plaid_environment ) . '</strong>' ); ?>
+                </p>
+            <?php elseif ( $plaid_enabled ) : ?>
+                <p>
+                    <span class="dashicons dashicons-warning" style="color: #dba617;"></span>
+                    <?php _e( 'Plaid is enabled but credentials are missing. Add your Client ID and Secret above.', 'dedebtify' ); ?>
+                </p>
+            <?php else : ?>
+                <p>
+                    <span class="dashicons dashicons-info" style="color: #2271b1;"></span>
+                    <?php _e( 'Plaid integration is disabled. Enable it to allow automatic account syncing.', 'dedebtify' ); ?>
+                </p>
+            <?php endif; ?>
+        </div>
+
+        <div class="dedebtify-info-box" style="background: #e7f5fe; border-left: 4px solid #2271b1; padding: 12px; margin-top: 20px;">
+            <p style="margin: 0;">
+                <strong><?php _e( 'About Plaid:', 'dedebtify' ); ?></strong>
+                <?php _e( 'Plaid is a secure financial data network that connects over 11,000 financial institutions. When users link accounts, Plaid handles all authentication and data retrieval. DeDebtify never sees user credentials. Supported data includes: credit card balances, loan balances, account transactions, and more.', 'dedebtify' ); ?>
+            </p>
+        </div>
+
+        <div class="dedebtify-info-box" style="background: #fef9e7; border-left: 4px solid #f59e0b; padding: 12px; margin-top: 10px;">
+            <p style="margin: 0;">
+                <strong><?php _e( 'Privacy & Security:', 'dedebtify' ); ?></strong>
+                <?php _e( 'All financial data retrieved via Plaid is encrypted in transit and at rest. Access tokens are stored securely in the WordPress database with proper sanitization. Users can disconnect their accounts at any time from their account settings page.', 'dedebtify' ); ?>
             </p>
         </div>
     </div>

@@ -64,6 +64,7 @@ class Dedebtify_Helpers {
             ),
             'credit_cards' => array(
                 'title' => __( 'Credit Cards', 'dedebtify' ),
+                'icon' => 'money-alt'
                 'icon' => 'credit-card'
             ),
             'loans' => array(
@@ -89,6 +90,10 @@ class Dedebtify_Helpers {
             'snapshots' => array(
                 'title' => __( 'Progress', 'dedebtify' ),
                 'icon' => 'chart-line'
+            ),
+            'account_sync' => array(
+                'title' => __( 'Account Sync', 'dedebtify' ),
+                'icon' => 'update'
             ),
         );
 
