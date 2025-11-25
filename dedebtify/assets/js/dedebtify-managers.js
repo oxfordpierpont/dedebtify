@@ -203,6 +203,9 @@
                         populateCreditCardForm(card);
                     } else {
                         console.error('Credit card not found with ID:', numericPostId);
+                    const card = response.find(c => c.id === postId);
+                    if (card) {
+                        populateCreditCardForm(card);
                     }
                 },
                 error: function(xhr, status, error) {
@@ -451,6 +454,20 @@
             }, 5000);
         }
 
+        // Initialize
+        initCreditCardManager();
+
+    });
+
+})(jQuery);
+
+// Localization object (will be populated by wp_localize_script)
+var dedebtifyL10n = dedebtifyL10n || {
+    edit: 'Edit',
+    delete: 'Delete',
+    confirm_delete: 'Are you sure you want to delete this item?'
+};
+
         // ===========================
         // LOANS MANAGER
         // ===========================
@@ -610,6 +627,10 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Failed to load loan data:', error);
+                    const loan = response.find(l => l.id === postId);
+                    if (loan) {
+                        populateLoanForm(loan);
+                    }
                 }
             });
         }
@@ -896,6 +917,10 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Failed to load bill data:', error);
+                    const bill = response.find(b => b.id === postId);
+                    if (bill) {
+                        populateBillForm(bill);
+                    }
                 }
             });
         }
@@ -1176,6 +1201,10 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Failed to load goal data:', error);
+                    const goal = response.find(g => g.id === postId);
+                    if (goal) {
+                        populateGoalForm(goal);
+                    }
                 }
             });
         }

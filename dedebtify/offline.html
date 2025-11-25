@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - DeDebtify</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .offline-container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .offline-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 16px;
+            color: #1a1a1a;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .offline-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .offline-info {
+            margin-top: 30px;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon pulse">
+            📡
+        </div>
+
+        <h1>You're Offline</h1>
+
+        <p>
+            It looks like you've lost your internet connection. Don't worry, your data is safe!
+            Some features may be limited until you're back online.
+        </p>
+
+        <div class="offline-actions">
+            <button class="btn btn-primary" onclick="window.location.reload()">
+                Try Again
+            </button>
+            <button class="btn btn-secondary" onclick="history.back()">
+                Go Back
+            </button>
+        </div>
+
+        <div class="offline-info">
+            <strong>💡 Tip:</strong> When you're back online, DeDebtify will automatically sync any changes you made offline.
+        </div>
+    </div>
+
+    <script>
+        // Auto-reload when back online
+        window.addEventListener('online', function() {
+            setTimeout(function() {
+                window.location.reload();
+            }, 1000);
+        });
+
+        // Update UI when connection status changes
+        function updateConnectionStatus() {
+            if (navigator.onLine) {
+                document.querySelector('.offline-info').innerHTML =
+                    '<strong>✅ Connection Restored!</strong> Reloading...';
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1000);
+            }
+        }
+
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('load', function() {
+            if (navigator.onLine) {
+                updateConnectionStatus();
+            }
+        });
+    </script>
+</body>
+</html>

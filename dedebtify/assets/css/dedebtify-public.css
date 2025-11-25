@@ -1,0 +1,1917 @@
+/**
+ * DeDebtify Public Styles
+ *
+ * @since      1.0.0
+ * @package    Dedebtify
+ */
+
+/* Dashboard Container */
+.dedebtify-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+/* Dashboard Header */
+.dedebtify-dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.dedebtify-dashboard-header h1 {
+    font-size: 2.5rem;
+    margin: 0 0 10px 0;
+    color: #1d2327;
+}
+
+.dedebtify-dashboard-header p {
+    font-size: 1.1rem;
+    color: #666;
+    margin: 0;
+}
+
+/* Stats Grid */
+.dedebtify-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.dedebtify-stat-card {
+    background: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-top: 4px solid #2271b1;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dedebtify-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.dedebtify-stat-card.warning {
+    border-top-color: #f0b849;
+}
+
+.dedebtify-stat-card.danger {
+    border-top-color: #dc3232;
+}
+
+.dedebtify-stat-card.success {
+    border-top-color: #46b450;
+}
+
+.dedebtify-stat-label {
+    font-size: 0.875rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.dedebtify-stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #1d2327;
+    margin: 10px 0;
+    line-height: 1;
+}
+
+.dedebtify-stat-subtext {
+    font-size: 0.875rem;
+    color: #999;
+    margin-top: 10px;
+}
+
+/* Progress Bars */
+.dedebtify-progress {
+    width: 100%;
+    height: 8px;
+    background: #e5e5e5;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 15px 0;
+}
+
+.dedebtify-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #2271b1, #135e96);
+    transition: width 0.3s ease;
+}
+
+.dedebtify-progress-bar.warning {
+    background: linear-gradient(90deg, #f0b849, #c99425);
+}
+
+.dedebtify-progress-bar.danger {
+    background: linear-gradient(90deg, #dc3232, #a02020);
+}
+
+.dedebtify-progress-bar.success {
+    background: linear-gradient(90deg, #46b450, #2d8c34);
+}
+
+/* Credit Card List */
+.dedebtify-card-list {
+    margin-bottom: 40px;
+}
+
+.dedebtify-card-item {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-left: 4px solid #2271b1;
+}
+
+.dedebtify-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.dedebtify-card-name {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #1d2327;
+    margin: 0;
+}
+
+.dedebtify-card-badge {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.dedebtify-card-badge.active {
+    background: #e5f5e7;
+    color: #2d8c34;
+}
+
+.dedebtify-card-badge.paid-off {
+    background: #e5f3ff;
+    color: #135e96;
+}
+
+.dedebtify-card-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.dedebtify-card-detail {
+    font-size: 0.875rem;
+}
+
+.dedebtify-card-detail-label {
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.dedebtify-card-detail-value {
+    font-size: 1.125rem;
+    font-weight: bold;
+    color: #1d2327;
+}
+
+/* Buttons */
+.dedebtify-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #2271b1;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.2s;
+    text-align: center;
+}
+
+.dedebtify-btn:hover {
+    background: #135e96;
+    color: #fff;
+}
+
+.dedebtify-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.3);
+}
+
+.dedebtify-btn-secondary {
+    background: #f0f0f1;
+    color: #1d2327;
+}
+
+.dedebtify-btn-secondary:hover {
+    background: #dcdcde;
+    color: #1d2327;
+}
+
+.dedebtify-btn-success {
+    background: #46b450;
+}
+
+.dedebtify-btn-success:hover {
+    background: #2d8c34;
+}
+
+.dedebtify-btn-danger {
+    background: #dc3232;
+}
+
+.dedebtify-btn-danger:hover {
+    background: #a02020;
+}
+
+.dedebtify-btn-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Forms */
+.dedebtify-form {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.dedebtify-form-group {
+    margin-bottom: 20px;
+}
+
+.dedebtify-form-label {
+    display: block;
+    font-weight: 600;
+    color: #1d2327;
+    margin-bottom: 8px;
+}
+
+.dedebtify-form-input,
+.dedebtify-form-select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.dedebtify-form-input:focus,
+.dedebtify-form-select:focus {
+    outline: none;
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+.dedebtify-form-help {
+    font-size: 0.875rem;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Loading State */
+.dedebtify-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+}
+
+.dedebtify-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #e5e5e5;
+    border-top-color: #2271b1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Messages */
+.dedebtify-message {
+    padding: 15px 20px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.dedebtify-message.success {
+    background: #e5f5e7;
+    color: #2d8c34;
+    border-left: 4px solid #46b450;
+}
+
+.dedebtify-message.error {
+    background: #ffe5e5;
+    color: #a02020;
+    border-left: 4px solid #dc3232;
+}
+
+.dedebtify-message.info {
+    background: #e5f3ff;
+    color: #135e96;
+    border-left: 4px solid #2271b1;
+}
+
+.dedebtify-message.warning {
+    background: #fff8e5;
+    color: #c99425;
+    border-left: 4px solid #f0b849;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 782px) {
+    .dedebtify-dashboard {
+        padding: 15px;
+    }
+
+    .dedebtify-dashboard-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .dedebtify-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dedebtify-stat-value {
+        font-size: 2rem;
+    }
+
+    .dedebtify-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .dedebtify-card-details {
+        grid-template-columns: 1fr;
+    }
+
+    .dedebtify-btn-group {
+        flex-direction: column;
+    }
+
+    .dedebtify-btn {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .dedebtify-form {
+        padding: 20px 15px;
+    }
+
+    .dedebtify-stat-card {
+        padding: 20px 15px;
+    }
+}
+
+/* Manager-Specific Styles */
+
+/* Manager Header */
+.dedebtify-manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dedebtify-manager-stats {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.dedebtify-stat-summary {
+    display: flex;
+    flex-direction: column;
+}
+
+.dedebtify-stat-summary .stat-label {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.dedebtify-stat-summary .stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1d2327;
+}
+
+/* Manager Controls */
+.dedebtify-manager-controls {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dedebtify-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dedebtify-filter-group label {
+    font-weight: 600;
+    color: #1d2327;
+}
+
+/* Form Container */
+.dedebtify-form-container {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.dedebtify-form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e5e5e5;
+}
+
+.dedebtify-form-header h2 {
+    margin: 0;
+    font-size: 1.75rem;
+    color: #1d2327;
+}
+
+/* Form Rows */
+.dedebtify-form-row {
+    margin-bottom: 25px;
+}
+
+.dedebtify-form-row-2col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.dedebtify-form-row-3col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+/* Required indicator */
+.required {
+    color: #dc3232;
+    font-weight: bold;
+}
+
+/* Form Actions */
+.dedebtify-form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #e5e5e5;
+}
+
+/* Payoff Preview */
+.dedebtify-payoff-preview {
+    margin-top: 30px;
+    padding: 25px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border-left: 4px solid #2271b1;
+}
+
+.dedebtify-payoff-preview h3 {
+    margin: 0 0 20px 0;
+    font-size: 1.25rem;
+    color: #1d2327;
+}
+
+/* Items List */
+.dedebtify-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Card Actions */
+.dedebtify-card-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.dedebtify-btn-small {
+    padding: 8px 16px;
+    font-size: 0.875rem;
+}
+
+/* Card Payoff Info */
+.dedebtify-card-payoff {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f0f9ff;
+    border-radius: 4px;
+    border-left: 4px solid #2271b1;
+}
+
+.dedebtify-card-payoff.warning {
+    background: #fff8e5;
+    border-left-color: #f0b849;
+}
+
+.dedebtify-payoff-info {
+    margin: 5px 0;
+    font-size: 0.9375rem;
+}
+
+/* Empty State */
+.dedebtify-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dedebtify-empty-state h3 {
+    font-size: 1.5rem;
+    margin: 0 0 10px 0;
+    color: #1d2327;
+}
+
+.dedebtify-empty-state p {
+    font-size: 1.1rem;
+    color: #666;
+    margin: 0 0 25px 0;
+}
+
+/* Color coding for values */
+.dedebtify-card-detail-value.success {
+    color: #46b450;
+}
+
+.dedebtify-card-detail-value.warning {
+    color: #f0b849;
+}
+
+.dedebtify-card-detail-value.danger {
+    color: #dc3232;
+}
+
+/* Status badges */
+.dedebtify-card-badge.paid-off {
+    background: #e5f5e7;
+    color: #2d8c34;
+}
+
+.dedebtify-card-badge.closed {
+    background: #f0f0f1;
+    color: #666;
+}
+
+/* Responsive adjustments for managers */
+/* ========================================
+   ACTION PLAN STYLES
+   ======================================== */
+
+/* Section Styling */
+.dedebtify-section {
+    margin-bottom: 40px;
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dedebtify-section h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    color: #1d2327;
+    border-bottom: 2px solid #2271b1;
+    padding-bottom: 10px;
+}
+
+.dedebtify-section-description {
+    color: #666;
+    margin-bottom: 25px;
+    font-size: 1rem;
+}
+
+.dedebtify-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.dedebtify-section-header h2 {
+    margin: 0;
+    border: none;
+    padding: 0;
+}
+
+/* Comparison Cards */
+.dedebtify-comparison-card {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.dedebtify-comparison-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    color: #1d2327;
+}
+
+.dedebtify-comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.dedebtify-comparison-item {
+    background: #fff;
+    padding: 20px;
+    border-radius: 6px;
+    border-left: 4px solid #2271b1;
+}
+
+.dedebtify-comparison-item strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    color: #1d2327;
+}
+
+.dedebtify-comparison-item p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+.dedebtify-comparison-item .success {
+    color: #00a32a;
+    font-weight: 500;
+}
+
+.dedebtify-comparison-item .info {
+    color: #2271b1;
+    font-weight: 500;
+}
+
+/* Timeline Styles */
+.dedebtify-timeline-list {
+    position: relative;
+    padding-left: 0;
+}
+
+.dedebtify-timeline-item {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+    position: relative;
+    padding-bottom: 30px;
+}
+
+.dedebtify-timeline-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 50px;
+    bottom: -30px;
+    width: 2px;
+    background: #e0e0e0;
+}
+
+.dedebtify-timeline-number {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #2271b1 0%, #135e96 100%);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(34, 113, 177, 0.3);
+    z-index: 1;
+}
+
+.dedebtify-timeline-content {
+    flex: 1;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 3px solid #2271b1;
+}
+
+.dedebtify-timeline-content h4 {
+    margin: 0 0 15px 0;
+    font-size: 1.3rem;
+    color: #1d2327;
+}
+
+.dedebtify-timeline-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.dedebtify-timeline-details span {
+    font-size: 0.95rem;
+    color: #666;
+}
+
+.dedebtify-timeline-payoff {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.payoff-badge {
+    background: linear-gradient(135deg, #00a32a 0%, #007d21 100%);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.payoff-date {
+    color: #2271b1;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* Payment Schedule Table */
+.dedebtify-table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.dedebtify-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.dedebtify-table thead {
+    background: #f8f9fa;
+}
+
+.dedebtify-table th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #1d2327;
+    border-bottom: 2px solid #2271b1;
+    white-space: nowrap;
+}
+
+.dedebtify-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.dedebtify-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.dedebtify-table .schedule-gap {
+    background: #f0f0f0;
+    text-align: center;
+    font-style: italic;
+    color: #666;
+}
+
+/* Action Items List */
+.dedebtify-action-list {
+    display: grid;
+    gap: 20px;
+}
+
+.dedebtify-action-item {
+    display: flex;
+    gap: 20px;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #2271b1;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dedebtify-action-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.dedebtify-action-number {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #2271b1 0%, #135e96 100%);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.dedebtify-action-content h4 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+    color: #1d2327;
+}
+
+.dedebtify-action-content p {
+    margin: 0;
+    color: #666;
+    line-height: 1.6;
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 782px) {
+    .dedebtify-manager-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .dedebtify-manager-stats {
+        width: 100%;
+    }
+
+    .dedebtify-manager-controls {
+        flex-direction: column;
+    }
+
+    .dedebtify-form-row-2col,
+    .dedebtify-form-row-3col {
+        grid-template-columns: 1fr;
+    }
+
+    .dedebtify-form-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .dedebtify-card-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .dedebtify-card-actions .dedebtify-btn {
+        width: 100%;
+    }
+
+    /* Action Plan Responsive */
+    .dedebtify-section {
+        padding: 20px;
+    }
+
+    .dedebtify-comparison-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dedebtify-timeline-item {
+        gap: 15px;
+    }
+
+    .dedebtify-timeline-number {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .dedebtify-timeline-item:not(:last-child)::after {
+        left: 19px;
+    }
+
+    .dedebtify-timeline-details {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .dedebtify-action-item {
+        gap: 15px;
+    }
+
+    .dedebtify-action-number {
+        width: 35px;
+        height: 35px;
+        font-size: 1.1rem;
+    }
+
+    .dedebtify-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .dedebtify-table {
+        font-size: 0.9rem;
+    }
+
+    .dedebtify-table th,
+    .dedebtify-table td {
+        padding: 8px;
+    }
+
+    /* Snapshots Responsive */
+    .dedebtify-snapshots-timeline {
+        padding-left: 20px;
+    }
+
+    .dedebtify-snapshot-card {
+        min-width: 100%;
+    }
+
+    .dedebtify-comparison-selector {
+        flex-direction: column;
+    }
+
+    .dedebtify-comparison-vs {
+        transform: rotate(90deg);
+        margin: 10px 0;
+    }
+
+    .chart-bars {
+        gap: 15px;
+    }
+
+    .chart-bar-value {
+        font-size: 0.7rem;
+    }
+}
+
+/* ========================================
+   SNAPSHOTS STYLES
+   ======================================== */
+
+/* Snapshot Actions */
+.dedebtify-snapshot-actions {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.dedebtify-snapshot-actions .dedebtify-help-text {
+    margin-top: 10px;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+/* Snapshots Timeline */
+.dedebtify-snapshots-timeline {
+    position: relative;
+    padding-left: 40px;
+}
+
+.dedebtify-snapshots-timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, #2271b1 0%, #e0e0e0 100%);
+}
+
+.dedebtify-snapshot-item {
+    position: relative;
+    margin-bottom: 30px;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.snapshot-marker {
+    position: absolute;
+    left: -33px;
+    top: 10px;
+    width: 16px;
+    height: 16px;
+    background: #2271b1;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px #2271b1;
+    z-index: 1;
+}
+
+.dedebtify-snapshot-item.latest .snapshot-marker {
+    width: 20px;
+    height: 20px;
+    left: -35px;
+    background: linear-gradient(135deg, #00a32a 0%, #007d21 100%);
+    box-shadow: 0 0 0 3px #00a32a;
+}
+
+.snapshot-content {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 3px solid #2271b1;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.snapshot-content:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.snapshot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.snapshot-header h4 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #1d2327;
+}
+
+.snapshot-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.snapshot-badge.latest {
+    background: linear-gradient(135deg, #00a32a 0%, #007d21 100%);
+    color: #fff;
+}
+
+.snapshot-badge.first {
+    background: #2271b1;
+    color: #fff;
+}
+
+.snapshot-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.snapshot-metric {
+    display: flex;
+    flex-direction: column;
+}
+
+.snapshot-metric .metric-label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.snapshot-metric .metric-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.snapshot-change {
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.snapshot-change.positive {
+    background: #d4edda;
+    color: #155724;
+}
+
+.snapshot-change.negative {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.snapshot-change .change-icon {
+    font-size: 1.2rem;
+}
+
+/* Comparison Selector */
+.dedebtify-comparison-selector {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.dedebtify-comparison-selector .dedebtify-form-group {
+    flex: 1;
+}
+
+.dedebtify-comparison-vs {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #2271b1 0%, #135e96 100%);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+}
+
+/* Comparison Header */
+.dedebtify-comparison-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.dedebtify-comparison-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #1d2327;
+}
+
+/* Snapshot Cards in Comparison */
+.dedebtify-snapshot-card {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 8px;
+    border-top: 4px solid #2271b1;
+}
+
+.dedebtify-snapshot-header h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.3rem;
+    color: #1d2327;
+}
+
+.dedebtify-snapshot-date {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.dedebtify-snapshot-metrics {
+    margin-top: 20px;
+    display: grid;
+    gap: 15px;
+}
+
+.dedebtify-metric {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: #fff;
+    border-radius: 6px;
+}
+
+.dedebtify-metric .metric-label {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.dedebtify-metric .metric-value {
+    font-weight: 600;
+    color: #1d2327;
+}
+
+/* Change Indicators */
+.dedebtify-snapshot-changes {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 40px;
+    padding: 20px;
+}
+
+.dedebtify-change-item {
+    text-align: center;
+    padding: 15px;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.dedebtify-change-item.positive {
+    background: #d4edda;
+    border-left: 4px solid #00a32a;
+}
+
+.dedebtify-change-item.negative {
+    background: #f8d7da;
+    border-left: 4px solid #dc3232;
+}
+
+.dedebtify-change-item.neutral {
+    background: #e8f0fe;
+    border-left: 4px solid #2271b1;
+}
+
+.dedebtify-change-item .change-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.dedebtify-change-item .change-value {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.dedebtify-change-item .change-icon {
+    font-size: 1.5rem;
+}
+
+.dedebtify-change-item.positive .change-icon {
+    color: #00a32a;
+}
+
+.dedebtify-change-item.negative .change-icon {
+    color: #dc3232;
+}
+
+/* Comparison Summary */
+.dedebtify-comparison-summary {
+    background: #e8f0fe;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #2271b1;
+    margin-top: 30px;
+}
+
+.dedebtify-comparison-summary h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    color: #1d2327;
+}
+
+.dedebtify-comparison-summary p {
+    margin: 0;
+    line-height: 1.6;
+    color: #1d2327;
+}
+
+.dedebtify-comparison-summary .success {
+    color: #00a32a;
+}
+
+.dedebtify-comparison-summary .warning {
+    color: #dba617;
+}
+
+/* Chart Styles */
+.dedebtify-chart-container {
+    margin-top: 30px;
+}
+
+.dedebtify-chart-container h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    color: #1d2327;
+}
+
+.dedebtify-chart {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.chart-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    height: 300px;
+    padding: 20px 0;
+}
+
+.chart-bar-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.chart-bar {
+    width: 100%;
+    max-width: 80px;
+    background: linear-gradient(to top, #2271b1 0%, #72aee6 100%);
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 10px;
+}
+
+.chart-bar:hover {
+    background: linear-gradient(to top, #135e96 0%, #2271b1 100%);
+    transform: translateY(-5px);
+}
+
+.chart-bar-value {
+    position: absolute;
+    top: -25px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1d2327;
+    white-space: nowrap;
+}
+
+.chart-label {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: #666;
+    text-align: center;
+}
+
+/* ======================================
+   CREDIT CARD MANAGER STYLES
+   ====================================== */
+
+/* Manager Header */
+.dedebtify-manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dedebtify-manager-stats {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.dedebtify-stat-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.dedebtify-stat-summary .stat-label {
+    font-size: 0.8rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dedebtify-stat-summary .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1d2327;
+}
+
+/* Manager Controls */
+.dedebtify-manager-controls {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 15px 20px;
+    background: #f6f7f7;
+    border-radius: 8px;
+}
+
+.dedebtify-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dedebtify-filter-group label {
+    font-weight: 600;
+    color: #1d2327;
+    font-size: 0.9rem;
+}
+
+/* Form Container */
+.dedebtify-form-container {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dedebtify-form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e5e5e5;
+}
+
+.dedebtify-form-header h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #1d2327;
+}
+
+/* Form Styles */
+.dedebtify-form {
+    max-width: 900px;
+}
+
+.dedebtify-form-row {
+    margin-bottom: 25px;
+}
+
+.dedebtify-form-row-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.dedebtify-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.dedebtify-form-label {
+    font-weight: 600;
+    color: #1d2327;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.dedebtify-form-label .required {
+    color: #dc3232;
+}
+
+.dedebtify-form-input,
+.dedebtify-form-select {
+    padding: 10px 12px;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.dedebtify-form-input:focus,
+.dedebtify-form-select:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.dedebtify-form-help {
+    font-size: 0.85rem;
+    color: #757575;
+    margin-top: 5px;
+}
+
+.dedebtify-form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e5e5;
+}
+
+/* Payoff Preview */
+.dedebtify-payoff-preview {
+    background: #f0f6fc;
+    padding: 25px;
+    border-radius: 8px;
+    margin-top: 30px;
+    border: 2px solid #2271b1;
+}
+
+.dedebtify-payoff-preview h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #1d2327;
+    font-size: 1.3rem;
+}
+
+/* Card Items List */
+.dedebtify-items-list {
+    display: grid;
+    gap: 20px;
+}
+
+.dedebtify-card-item {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid #e5e5e5;
+    padding: 25px;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.dedebtify-card-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+.dedebtify-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e5e5e5;
+}
+
+.dedebtify-card-name {
+    margin: 0;
+    font-size: 1.4rem;
+    color: #1d2327;
+    font-weight: 600;
+}
+
+.dedebtify-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Badges */
+.dedebtify-badge {
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dedebtify-badge-success {
+    background: #d5f4dd;
+    color: #1a7f37;
+}
+
+.dedebtify-badge-info {
+    background: #ddf4ff;
+    color: #0969da;
+}
+
+.dedebtify-badge-secondary {
+    background: #e5e5e5;
+    color: #666;
+}
+
+/* Icon Buttons */
+.dedebtify-btn-icon {
+    background: transparent;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dedebtify-btn-icon:hover {
+    background: #f6f7f7;
+    border-color: #999;
+}
+
+.dedebtify-btn-icon .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.dedebtify-btn-edit:hover {
+    background: #f0f6fc;
+    border-color: #2271b1;
+    color: #2271b1;
+}
+
+.dedebtify-btn-delete:hover {
+    background: #fcf0f1;
+    border-color: #dc3232;
+    color: #dc3232;
+}
+
+/* Card Details Grid */
+.dedebtify-card-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.dedebtify-card-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.dedebtify-card-detail-label {
+    font-size: 0.8rem;
+    color: #757575;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.dedebtify-card-detail-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1d2327;
+}
+
+/* Card Utilization */
+.dedebtify-card-utilization {
+    margin-bottom: 20px;
+}
+
+.dedebtify-card-utilization-label {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.dedebtify-progress-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.dedebtify-progress-success {
+    background: linear-gradient(to right, #46b450, #00a32a);
+}
+
+.dedebtify-progress-warning {
+    background: linear-gradient(to right, #f0b849, #dba617);
+}
+
+.dedebtify-progress-danger {
+    background: linear-gradient(to right, #dc3232, #b32d2e);
+}
+
+/* Payoff Scenarios */
+.dedebtify-card-payoff {
+    background: #f6f7f7;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.dedebtify-card-payoff h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    color: #1d2327;
+}
+
+.dedebtify-payoff-scenarios {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dedebtify-payoff-scenario {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #fff;
+    border-radius: 6px;
+    border-left: 4px solid #2271b1;
+}
+
+.dedebtify-payoff-scenario .scenario-label {
+    font-weight: 600;
+    color: #1d2327;
+    font-size: 0.95rem;
+}
+
+.dedebtify-payoff-scenario .scenario-value {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.dedebtify-payoff-savings {
+    padding: 12px;
+    background: #d5f4dd;
+    border-radius: 6px;
+    border-left: 4px solid #00a32a;
+    color: #1a7f37;
+    font-size: 0.95rem;
+}
+
+/* Empty State */
+.dedebtify-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.dedebtify-empty-state h3 {
+    font-size: 1.5rem;
+    color: #1d2327;
+    margin-bottom: 15px;
+}
+
+.dedebtify-empty-state p {
+    color: #666;
+    font-size: 1.05rem;
+    margin-bottom: 25px;
+}
+
+/* Buttons */
+.dedebtify-btn {
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.dedebtify-btn-success {
+    background: #00a32a;
+    color: #fff;
+}
+
+.dedebtify-btn-success:hover {
+    background: #008a20;
+    color: #fff;
+}
+
+.dedebtify-btn-secondary {
+    background: #f6f7f7;
+    color: #1d2327;
+    border: 1px solid #ccd0d4;
+}
+
+.dedebtify-btn-secondary:hover {
+    background: #e5e5e5;
+    color: #1d2327;
+}
+
+.dedebtify-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Loading Spinner */
+.dedebtify-loading {
+    text-align: center;
+    padding: 40px;
+}
+
+.dedebtify-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #2271b1;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Messages */
+.dedebtify-message {
+    padding: 15px 20px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.dedebtify-message.success {
+    background: #d5f4dd;
+    color: #1a7f37;
+    border-left: 4px solid #00a32a;
+}
+
+.dedebtify-message.error {
+    background: #fcf0f1;
+    color: #b32d2e;
+    border-left: 4px solid #dc3232;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .dedebtify-manager-header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .dedebtify-manager-stats {
+        width: 100%;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .dedebtify-manager-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .dedebtify-form-row-2col {
+        grid-template-columns: 1fr;
+    }
+
+    .dedebtify-card-details {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .dedebtify-form-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .dedebtify-form-actions {
+        flex-direction: column;
+    }
+
+    .dedebtify-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .dedebtify-card-details {
+        grid-template-columns: 1fr;
+    }
+
+    .dedebtify-payoff-scenario {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+

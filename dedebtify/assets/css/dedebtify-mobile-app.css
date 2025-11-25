@@ -1,0 +1,796 @@
+/**
+ * DeDebtify Mobile App Styling
+ * Modern Shadcn-inspired design system
+ *
+ * @since      1.0.0
+ * @package    Dedebtify
+ */
+
+/* ============================================
+   Mobile App Navigation
+   ============================================ */
+
+.dd-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: hsl(var(--dd-card));
+    border-top: 1px solid hsl(var(--dd-border));
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    padding: env(safe-area-inset-bottom, 0);
+}
+
+.dd-nav-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.dd-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    text-decoration: none;
+    color: hsl(var(--dd-muted-foreground));
+    transition: all 0.2s ease;
+    position: relative;
+    gap: 4px;
+}
+
+.dd-nav-item .dashicons {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.dd-nav-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.dd-nav-item:hover,
+.dd-nav-item:focus {
+    color: hsl(var(--dd-primary));
+    background: hsl(var(--dd-accent));
+}
+
+.dd-nav-item.active {
+    color: hsl(var(--dd-primary));
+}
+
+.dd-nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 3px;
+    background: hsl(var(--dd-primary));
+    border-radius: 0 0 3px 3px;
+}
+
+/* Desktop navigation */
+@media (min-width: 768px) {
+    .dd-nav {
+        position: sticky;
+        top: 0;
+        bottom: auto;
+        border-top: none;
+        border-bottom: 1px solid hsl(var(--dd-border));
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .dd-nav-container {
+        max-width: 1200px;
+        padding: 0 20px;
+    }
+
+    .dd-nav-item {
+        flex-direction: row;
+        gap: 8px;
+        padding: 16px 20px;
+    }
+
+    .dd-nav-label {
+        font-size: 14px;
+    }
+
+    .dd-nav-item.active::before {
+        top: auto;
+        bottom: 0;
+        height: 3px;
+        border-radius: 3px 3px 0 0;
+    }
+}
+
+/* ============================================
+   Modern Container & Layout
+   ============================================ */
+
+.dedebtify-dashboard {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 16px 16px 80px;
+    min-height: 100vh;
+    background: hsl(var(--dd-background));
+}
+
+@media (min-width: 768px) {
+    .dedebtify-dashboard {
+        max-width: 1200px;
+        padding: 24px 24px 40px;
+    }
+}
+
+/* Dashboard Header */
+.dedebtify-dashboard-header {
+    margin-bottom: 24px;
+}
+
+.dedebtify-dashboard-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: hsl(var(--dd-foreground));
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
+}
+
+.dedebtify-dashboard-header p {
+    font-size: 14px;
+    color: hsl(var(--dd-muted-foreground));
+    margin: 0;
+}
+
+/* ============================================
+   Modern Cards
+   ============================================ */
+
+.dedebtify-stat-card,
+.dd-card,
+.dedebtify-card-item {
+    background: hsl(var(--dd-card));
+    border: 1px solid hsl(var(--dd-border));
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.dedebtify-card-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Stats Grid */
+.dedebtify-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+    .dedebtify-stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+}
+
+.dedebtify-stat-card {
+    padding: 16px;
+}
+
+.dedebtify-stat-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: hsl(var(--dd-muted-foreground));
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.dedebtify-stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: hsl(var(--dd-foreground));
+    margin-bottom: 4px;
+    font-variant-numeric: tabular-nums;
+}
+
+.dedebtify-stat-subtext {
+    font-size: 11px;
+    color: hsl(var(--dd-muted-foreground));
+    margin-top: 4px;
+}
+
+/* ============================================
+   Modern Buttons
+   ============================================ */
+
+.dedebtify-btn,
+.dedebtify-btn-primary,
+.dedebtify-btn-success,
+.dedebtify-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.dedebtify-btn,
+.dedebtify-btn-primary {
+    background: hsl(var(--dd-primary));
+    color: hsl(var(--dd-primary-foreground));
+}
+
+.dedebtify-btn:hover,
+.dedebtify-btn-primary:hover {
+    background: hsl(var(--dd-primary) / 0.9);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px hsl(var(--dd-primary) / 0.3);
+}
+
+.dedebtify-btn-secondary {
+    background: hsl(var(--dd-secondary));
+    color: hsl(var(--dd-secondary-foreground));
+}
+
+.dedebtify-btn-secondary:hover {
+    background: hsl(var(--dd-secondary) / 0.8);
+}
+
+.dedebtify-btn-success {
+    background: hsl(var(--dd-success));
+    color: white;
+}
+
+.dedebtify-btn-success:hover {
+    background: hsl(var(--dd-success) / 0.9);
+    box-shadow: 0 4px 12px hsl(var(--dd-success) / 0.3);
+}
+
+.dedebtify-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.dedebtify-btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.dedebtify-btn-small {
+    padding: 8px 16px;
+    font-size: 13px;
+}
+
+/* Icon Buttons */
+.dedebtify-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 8px;
+    border: 1px solid hsl(var(--dd-border));
+    background: hsl(var(--dd-card));
+    color: hsl(var(--dd-foreground));
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dedebtify-btn-icon:hover {
+    background: hsl(var(--dd-accent));
+    border-color: hsl(var(--dd-primary));
+    color: hsl(var(--dd-primary));
+}
+
+.dedebtify-btn-icon .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+/* ============================================
+   Progress Bars
+   ============================================ */
+
+.dedebtify-progress {
+    height: 8px;
+    background: hsl(var(--dd-secondary));
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.dedebtify-progress-bar {
+    height: 100%;
+    background: hsl(var(--dd-primary));
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+.dedebtify-progress-bar.dedebtify-progress-success {
+    background: hsl(var(--dd-success));
+}
+
+.dedebtify-progress-bar.dedebtify-progress-warning {
+    background: hsl(var(--dd-warning));
+}
+
+.dedebtify-progress-bar.dedebtify-progress-danger {
+    background: hsl(var(--dd-danger));
+}
+
+/* ============================================
+   Badges
+   ============================================ */
+
+.dedebtify-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dedebtify-badge-success {
+    background: hsl(var(--dd-success) / 0.1);
+    color: hsl(var(--dd-success));
+}
+
+.dedebtify-badge-info {
+    background: hsl(var(--dd-primary) / 0.1);
+    color: hsl(var(--dd-primary));
+}
+
+.dedebtify-badge-warning {
+    background: hsl(var(--dd-warning) / 0.1);
+    color: hsl(var(--dd-warning));
+}
+
+.dedebtify-badge-danger {
+    background: hsl(var(--dd-danger) / 0.1);
+    color: hsl(var(--dd-danger));
+}
+
+.dedebtify-badge-secondary {
+    background: hsl(var(--dd-secondary));
+    color: hsl(var(--dd-secondary-foreground));
+}
+
+/* ============================================
+   Card Details
+   ============================================ */
+
+.dedebtify-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+.dedebtify-card-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: hsl(var(--dd-foreground));
+    margin: 0;
+    flex: 1;
+}
+
+.dedebtify-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dedebtify-card-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (min-width: 768px) {
+    .dedebtify-card-details {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.dedebtify-card-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dedebtify-card-detail-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: hsl(var(--dd-muted-foreground));
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dedebtify-card-detail-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: hsl(var(--dd-foreground));
+    font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   Sections
+   ============================================ */
+
+.dedebtify-section {
+    margin-bottom: 32px;
+}
+
+.dedebtify-section h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: hsl(var(--dd-foreground));
+    margin: 0 0 16px 0;
+    letter-spacing: -0.3px;
+}
+
+.dedebtify-items-list,
+.dedebtify-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ============================================
+   Forms
+   ============================================ */
+
+.dedebtify-form {
+    background: hsl(var(--dd-card));
+    border: 1px solid hsl(var(--dd-border));
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.dedebtify-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid hsl(var(--dd-border));
+}
+
+.dedebtify-form-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.dedebtify-form-row {
+    margin-bottom: 20px;
+}
+
+.dedebtify-form-row-2col {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+@media (min-width: 768px) {
+    .dedebtify-form-row-2col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.dedebtify-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dedebtify-form-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: hsl(var(--dd-foreground));
+}
+
+.dedebtify-form-label .required {
+    color: hsl(var(--dd-danger));
+}
+
+.dedebtify-form-input,
+.dedebtify-form-select {
+    padding: 12px 16px;
+    font-size: 14px;
+    border: 1px solid hsl(var(--dd-border));
+    border-radius: 8px;
+    background: hsl(var(--dd-background));
+    color: hsl(var(--dd-foreground));
+    transition: all 0.2s ease;
+}
+
+.dedebtify-form-input:focus,
+.dedebtify-form-select:focus {
+    outline: none;
+    border-color: hsl(var(--dd-primary));
+    box-shadow: 0 0 0 3px hsl(var(--dd-primary) / 0.1);
+}
+
+.dedebtify-form-help {
+    font-size: 12px;
+    color: hsl(var(--dd-muted-foreground));
+}
+
+.dedebtify-form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid hsl(var(--dd-border));
+}
+
+/* ============================================
+   Loading & Empty States
+   ============================================ */
+
+.dedebtify-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.dedebtify-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid hsl(var(--dd-border));
+    border-top-color: hsl(var(--dd-primary));
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.dedebtify-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: hsl(var(--dd-card));
+    border: 1px dashed hsl(var(--dd-border));
+    border-radius: 12px;
+}
+
+.dedebtify-empty-state h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: hsl(var(--dd-foreground));
+    margin: 0 0 8px 0;
+}
+
+.dedebtify-empty-state p {
+    font-size: 14px;
+    color: hsl(var(--dd-muted-foreground));
+    margin: 0 0 20px 0;
+}
+
+/* ============================================
+   Messages
+   ============================================ */
+
+.dedebtify-message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.dedebtify-message.success {
+    background: hsl(var(--dd-success) / 0.1);
+    color: hsl(var(--dd-success));
+    border: 1px solid hsl(var(--dd-success) / 0.2);
+}
+
+.dedebtify-message.error {
+    background: hsl(var(--dd-danger) / 0.1);
+    color: hsl(var(--dd-danger));
+    border: 1px solid hsl(var(--dd-danger) / 0.2);
+}
+
+.dedebtify-message.warning {
+    background: hsl(var(--dd-warning) / 0.1);
+    color: hsl(var(--dd-warning));
+    border: 1px solid hsl(var(--dd-warning) / 0.2);
+}
+
+/* ============================================
+   Manager Specific
+   ============================================ */
+
+.dedebtify-manager-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.dedebtify-manager-stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.dedebtify-stat-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dedebtify-stat-summary .stat-label {
+    font-size: 12px;
+    color: hsl(var(--dd-muted-foreground));
+    font-weight: 500;
+}
+
+.dedebtify-stat-summary .stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: hsl(var(--dd-foreground));
+    font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   Debt Breakdown Visualization
+   ============================================ */
+
+.dedebtify-debt-breakdown {
+    margin-top: 16px;
+}
+
+.debt-breakdown-chart {
+    margin-bottom: 20px;
+}
+
+.debt-breakdown-bars {
+    display: flex;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.debt-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.debt-bar:hover {
+    filter: brightness(1.1);
+}
+
+.debt-color-credit-cards {
+    background: hsl(var(--dd-danger));
+}
+
+.debt-color-loans {
+    background: hsl(var(--dd-warning));
+}
+
+.debt-color-mortgage {
+    background: hsl(var(--dd-primary));
+}
+
+.debt-breakdown-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    background: hsl(var(--dd-accent));
+    border-radius: 8px;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    margin-right: 12px;
+}
+
+.legend-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: hsl(var(--dd-foreground));
+}
+
+.legend-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: hsl(var(--dd-foreground));
+    margin-right: 8px;
+}
+
+.legend-percentage {
+    font-size: 12px;
+    color: hsl(var(--dd-muted-foreground));
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dedebtify-stat-card,
+.dedebtify-card-item {
+    animation: fadeIn 0.3s ease;
+}
+
+/* ============================================
+   Utilities
+   ============================================ */
+
+.print-hide {
+    display: none !important;
+}
+
+@media print {
+    .dd-nav,
+    .dedebtify-btn-group {
+        display: none !important;
+    }
+}
