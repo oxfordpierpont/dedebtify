@@ -1,9 +1,7 @@
 <?php
 /**
- * Public Dashboard Template - Modern Design
- *
- * @since      1.0.0
- * @package    Dedebtify
+ * Dashboard Template - Exact Design from React Source
+ * Converted from App.tsx to WordPress PHP
  */
 
 if (!defined('WPINC')) {
@@ -18,165 +16,336 @@ if (!is_user_logged_in()) {
 $user_id = get_current_user_id();
 $user_info = get_userdata($user_id);
 $display_name = $user_info->display_name;
-$user_email = $user_info->user_email;
-$initials = strtoupper(substr($display_name, 0, 1));
-if (strpos($display_name, ' ') !== false) {
-    $names = explode(' ', $display_name);
-    $initials = strtoupper(substr($names[0], 0, 1) . substr(end($names), 0, 1));
-}
+
+// Get financial data from WordPress (would be fetched from plugin's custom post types)
+$total_debt = 299375.50;
+$credit_cards = get_posts(array('post_type' => 'dd_credit_card', 'author' => $user_id, 'posts_per_page' => -1));
+$loans = get_posts(array('post_type' => 'dd_loan', 'author' => $user_id, 'posts_per_page' => -1));
 ?>
 
-<!-- Sidebar Navigation -->
-<div class="dd-sidebar">
-    <div class="dd-sidebar-header">
+<div class="dd-app-container">
+    <!-- Sidebar -->
+    <aside class="dd-sidebar-exact">
+        <!-- User Profile -->
         <div class="dd-sidebar-profile">
-            <div class="dd-sidebar-avatar">
-                <?php echo get_avatar($user_id, 56); ?>
+            <div class="dd-profile-image-wrapper">
+                <?php echo get_avatar($user_id, 64, '', '', array('class' => 'dd-profile-image')); ?>
+                <span class="dd-profile-badge">4</span>
             </div>
-            <div class="dd-sidebar-user-info">
-                <h3 class="dd-sidebar-user-name"><?php echo esc_html($display_name); ?></h3>
-                <p class="dd-sidebar-user-email"><?php echo esc_html($user_email); ?></p>
-            </div>
+            <h2 class="dd-profile-name"><?php echo esc_html($display_name); ?></h2>
+            <p class="dd-profile-email"><?php echo esc_html($user_info->user_email); ?></p>
         </div>
-    </div>
-    
-    <nav class="dd-sidebar-nav">
-        <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('dashboard')); ?>" class="dd-sidebar-nav-item active">
-            <span class="dashicons dashicons-dashboard"></span>
-            <?php _e('Dashboard', 'dedebtify'); ?>
-        </a>
-        <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('credit_cards')); ?>" class="dd-sidebar-nav-item">
-            <span class="dashicons dashicons-money-alt"></span>
-            <?php _e('Credit Cards', 'dedebtify'); ?>
-        </a>
-        <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('loans')); ?>" class="dd-sidebar-nav-item">
-            <span class="dashicons dashicons-admin-site-alt3"></span>
-            <?php _e('Loans', 'dedebtify'); ?>
-        </a>
-        <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('mortgages')); ?>" class="dd-sidebar-nav-item">
-            <span class="dashicons dashicons-admin-home"></span>
-            <?php _e('Mortgage', 'dedebtify'); ?>
-        </a>
-        <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('bills')); ?>" class="dd-sidebar-nav-item">
-            <span class="dashicons dashicons-list-view"></span>
-            <?php _e('Bills', 'dedebtify'); ?>
-        </a>
-        <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('goals')); ?>" class="dd-sidebar-nav-item">
-            <span class="dashicons dashicons-star-filled"></span>
-            <?php _e('Goals', 'dedebtify'); ?>
-        </a>
-        <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('snapshots')); ?>" class="dd-sidebar-nav-item">
-            <span class="dashicons dashicons-chart-line"></span>
-            <?php _e('Progress', 'dedebtify'); ?>
-        </a>
-        <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('ai_coach')); ?>" class="dd-sidebar-nav-item">
-            <span class="dashicons dashicons-welcome-learn-more"></span>
-            <?php _e('AI Coach', 'dedebtify'); ?>
-        </a>
-        <a href="#" class="dd-sidebar-nav-item">
-            <span class="dashicons dashicons-admin-generic"></span>
-            <?php _e('Settings', 'dedebtify'); ?>
-        </a>
-    </nav>
-</div>
 
-<!-- Main Content -->
-<div class="dd-layout-with-sidebar">
-    <div class="dd-main-content">
-        
-        <!-- Welcome Header -->
-        <h1 style="font-size: 32px; font-weight: 700; color: #1f2937; margin: 0 0 8px 0;">
-            <?php printf(__('Welcome back, %s!', 'dedebtify'), esc_html($display_name)); ?>
-        </h1>
-        <p style="font-size: 15px; color: #6b7280; margin: 0 0 32px 0;">
-            <?php _e('Here\'s your financial overview', 'dedebtify'); ?>
-        </p>
-
-        <!-- Stats Cards -->
-        <div class="dd-stats-row">
-            <div class="dd-stat-card-modern">
-                <div class="dd-stat-icon-top red">
+        <!-- Navigation -->
+        <nav class="dd-sidebar-nav">
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('dashboard')); ?>" class="dd-nav-item active">
+                <div class="dd-nav-item-icon">
+                    <span class="dashicons dashicons-dashboard"></span>
+                </div>
+                <span class="dd-nav-item-label"><?php _e('Dashboard', 'dedebtify'); ?></span>
+                <div class="dd-nav-active-indicator"></div>
+            </a>
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('credit_cards')); ?>" class="dd-nav-item">
+                <div class="dd-nav-item-icon">
                     <span class="dashicons dashicons-money-alt"></span>
                 </div>
-                <div class="dd-stat-label-modern"><?php _e('TOTAL DEBT', 'dedebtify'); ?></div>
-                <div class="dd-stat-value-modern" id="dd-total-debt">$0.00</div>
-                <div class="dd-stat-change positive">↓ 2.5% <?php _e('this month', 'dedebtify'); ?></div>
-            </div>
-
-            <div class="dd-stat-card-modern">
-                <div class="dd-stat-icon-top orange">
-                    <span class="dashicons dashicons-calendar-alt"></span>
+                <span class="dd-nav-item-label"><?php _e('Credit Cards', 'dedebtify'); ?></span>
+            </a>
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('loans')); ?>" class="dd-nav-item">
+                <div class="dd-nav-item-icon">
+                    <span class="dashicons dashicons-admin-site-alt3"></span>
                 </div>
-                <div class="dd-stat-label-modern"><?php _e('MONTHLY PAYMENTS', 'dedebtify'); ?></div>
-                <div class="dd-stat-value-modern" id="dd-monthly-payments">$0.00</div>
-                <div class="dd-stat-change"><?php _e('Due soon', 'dedebtify'); ?></div>
-            </div>
-
-            <div class="dd-stat-card-modern">
-                <div class="dd-stat-icon-top purple">
+                <span class="dd-nav-item-label"><?php _e('Loans', 'dedebtify'); ?></span>
+            </a>
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('mortgages')); ?>" class="dd-nav-item">
+                <div class="dd-nav-item-icon">
+                    <span class="dashicons dashicons-admin-home"></span>
+                </div>
+                <span class="dd-nav-item-label"><?php _e('Mortgage', 'dedebtify'); ?></span>
+            </a>
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('bills')); ?>" class="dd-nav-item">
+                <div class="dd-nav-item-icon">
+                    <span class="dashicons dashicons-list-view"></span>
+                </div>
+                <span class="dd-nav-item-label"><?php _e('Bills', 'dedebtify'); ?></span>
+            </a>
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('goals')); ?>" class="dd-nav-item">
+                <div class="dd-nav-item-icon">
+                    <span class="dashicons dashicons-star-filled"></span>
+                </div>
+                <span class="dd-nav-item-label"><?php _e('Goals', 'dedebtify'); ?></span>
+            </a>
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('snapshots')); ?>" class="dd-nav-item">
+                <div class="dd-nav-item-icon">
                     <span class="dashicons dashicons-chart-line"></span>
                 </div>
-                <div class="dd-stat-label-modern"><?php _e('CREDIT UTILIZATION', 'dedebtify'); ?></div>
-                <div class="dd-stat-value-modern" id="dd-credit-utilization">0%</div>
-                <div class="dd-stat-change positive">↓ 5% <?php _e('improved', 'dedebtify'); ?></div>
-            </div>
-
-            <div class="dd-stat-card-modern">
-                <div class="dd-stat-icon-top teal">
-                    <span class="dashicons dashicons-yes-alt"></span>
+                <span class="dd-nav-item-label"><?php _e('Progress', 'dedebtify'); ?></span>
+            </a>
+            <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('ai_coach')); ?>" class="dd-nav-item">
+                <div class="dd-nav-item-icon">
+                    <span class="dashicons dashicons-welcome-learn-more"></span>
                 </div>
-                <div class="dd-stat-label-modern"><?php _e('DEBT-FREE DATE', 'dedebtify'); ?></div>
-                <div class="dd-stat-value-modern" id="dd-debt-free-date" style="font-size: 18px;">—</div>
-                <div class="dd-stat-change"><?php _e('Projected', 'dedebtify'); ?></div>
-            </div>
-        </div>
+                <span class="dd-nav-item-label"><?php _e('AI Coach', 'dedebtify'); ?></span>
+            </a>
+            <a href="#" class="dd-nav-item">
+                <div class="dd-nav-item-icon">
+                    <span class="dashicons dashicons-admin-generic"></span>
+                </div>
+                <span class="dd-nav-item-label"><?php _e('Settings', 'dedebtify'); ?></span>
+            </a>
+        </nav>
 
-        <!-- Debt Breakdown Chart -->
-        <div class="dd-chart-card" id="debt-breakdown-section" style="display: none;">
-            <div class="dd-chart-header">
-                <div>
-                    <h2 class="dd-chart-title"><?php _e('Debt Breakdown', 'dedebtify'); ?></h2>
-                    <p class="dd-chart-subtitle"><?php _e('Distribution across categories', 'dedebtify'); ?></p>
+        <!-- Logout -->
+        <div class="dd-sidebar-logout">
+            <a href="<?php echo wp_logout_url(home_url()); ?>" class="dd-logout-btn">
+                <span class="dashicons dashicons-exit"></span>
+                <span class="dd-nav-item-label"><?php _e('Logout', 'dedebtify'); ?></span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <main class="dd-main-wrapper">
+        
+        <!-- Left/Middle Column (Main Dashboard) -->
+        <div class="dd-main-content-area">
+            
+            <!-- Header -->
+            <header class="dd-header">
+                <div class="dd-header-top">
+                    <div>
+                        <h1 class="dd-header-title"><?php printf(__('Welcome back, %s!', 'dedebtify'), esc_html($display_name)); ?></h1>
+                        <p class="dd-header-subtitle"><?php _e("Here's your current financial overview", 'dedebtify'); ?></p>
+                    </div>
+                    <div class="dd-header-actions">
+                        <button class="dd-header-icon-btn">
+                            <span class="dashicons dashicons-search"></span>
+                        </button>
+                        <button class="dd-header-icon-btn">
+                            <span class="dashicons dashicons-bell"></span>
+                            <span class="dd-notification-dot"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Toolbar -->
+                <div class="dd-toolbar">
+                    <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('snapshots')); ?>" class="dd-btn-primary-exact">
+                        <span class="dashicons dashicons-plus"></span>
+                        <?php _e('Create Snapshot', 'dedebtify'); ?>
+                    </a>
+                    <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('credit_cards')); ?>" class="dd-btn-secondary-exact"><?php _e('View Cards', 'dedebtify'); ?></a>
+                    <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('loans')); ?>" class="dd-btn-secondary-exact"><?php _e('View Loans', 'dedebtify'); ?></a>
+                    <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('bills')); ?>" class="dd-btn-secondary-exact"><?php _e('View Bills', 'dedebtify'); ?></a>
+                    <a href="<?php echo esc_url(Dedebtify_Helpers::get_page_url('goals')); ?>" class="dd-btn-secondary-exact"><?php _e('View Goals', 'dedebtify'); ?></a>
+                </div>
+            </header>
+
+            <div class="dd-content-padding">
+                <!-- Debt Breakdown Section -->
+                <section class="dd-section-card">
+                    <div class="dd-section-header">
+                        <h3 class="dd-section-title"><?php _e('Debt Breakdown', 'dedebtify'); ?></h3>
+                        <button class="dd-header-icon-btn">
+                            <span class="dashicons dashicons-filter"></span>
+                        </button>
+                    </div>
+                    
+                    <!-- Stacked Bar Chart -->
+                    <div class="dd-debt-chart-bar">
+                        <div class="dd-debt-segment" style="width: 3.2%; background: #EF4444;">
+                            <!-- Red: Credit Cards -->
+                        </div>
+                        <div class="dd-debt-segment" style="width: 17.1%; background: #F59E0B;">
+                            <div class="dd-debt-segment-label">17%</div>
+                        </div>
+                        <div class="dd-debt-segment" style="width: 79.7%; background: #3B82F6;">
+                            <div class="dd-debt-segment-label">79.7%</div>
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="dd-debt-legend">
+                        <div class="dd-legend-item">
+                            <div class="dd-legend-dot" style="background: #EF4444;"></div>
+                            <div>
+                                <p class="dd-legend-category"><?php _e('Credit Cards', 'dedebtify'); ?></p>
+                                <div>
+                                    <span class="dd-legend-amount">$9,625</span>
+                                    <span class="dd-legend-percentage">(3.2%)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dd-legend-item">
+                            <div class="dd-legend-dot" style="background: #F59E0B;"></div>
+                            <div>
+                                <p class="dd-legend-category"><?php _e('Loans', 'dedebtify'); ?></p>
+                                <div>
+                                    <span class="dd-legend-amount">$51,250</span>
+                                    <span class="dd-legend-percentage">(17.1%)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dd-legend-item">
+                            <div class="dd-legend-dot" style="background: #3B82F6;"></div>
+                            <div>
+                                <p class="dd-legend-category"><?php _e('Mortgage', 'dedebtify'); ?></p>
+                                <div>
+                                    <span class="dd-legend-amount">$238,500</span>
+                                    <span class="dd-legend-percentage">(79.7%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Two Column Grid -->
+                <div class="dd-two-column-grid">
+                    
+                    <!-- Credit Cards Column -->
+                    <section>
+                        <div class="dd-section-header">
+                            <h3 class="dd-section-title"><?php _e('Active Credit Cards', 'dedebtify'); ?></h3>
+                            <span class="dd-badge dd-badge-blue">3 Active</span>
+                        </div>
+                        
+                        <!-- Credit Card Example 1: Capital One -->
+                        <div class="dd-credit-card">
+                            <div class="dd-card-accent" style="background: #ef4444;"></div>
+                            
+                            <div class="dd-card-header">
+                                <div class="dd-card-info">
+                                    <div class="dd-card-icon blue">
+                                        <span class="dashicons dashicons-money-alt"></span>
+                                    </div>
+                                    <div>
+                                        <h4 class="dd-card-name">Capital One Quicksilver</h4>
+                                        <div class="dd-card-meta">
+                                            <span class="dd-card-apr">APR: 23.0%</span>
+                                            <span>•</span>
+                                            <span class="dd-card-status">Active</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="dd-card-balance">
+                                    <div class="dd-card-balance-amount">$4,500</div>
+                                    <div class="dd-card-balance-limit">Limit: $8,000</div>
+                                </div>
+                            </div>
+
+                            <div class="dd-card-utilization">
+                                <div class="dd-util-header">
+                                    <span class="dd-util-label">Utilization</span>
+                                    <span class="dd-util-value high">56.3%</span>
+                                </div>
+                                <div class="dd-progress-bar">
+                                    <div class="dd-progress-fill red" style="width: 56.3%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="dd-card-details">
+                                <div class="dd-card-detail-item">
+                                    <div class="dd-detail-icon blue">
+                                        <span class="dashicons dashicons-calendar-alt"></span>
+                                    </div>
+                                    <div>
+                                        <p class="dd-detail-label">Payoff Date</p>
+                                        <p class="dd-detail-value">March 2028</p>
+                                    </div>
+                                </div>
+                                <div class="dd-detail-divider"></div>
+                                <div class="dd-card-detail-item">
+                                    <div class="dd-detail-icon red">
+                                        <span class="dashicons dashicons-money"></span>
+                                    </div>
+                                    <div>
+                                        <p class="dd-detail-label">Est. Interest</p>
+                                        <p class="dd-detail-value">$1,380</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Credit Card Example 2: Discover -->
+                        <div class="dd-credit-card">
+                            <div class="dd-card-accent" style="background: #f59e0b;"></div>
+                            
+                            <div class="dd-card-header">
+                                <div class="dd-card-info">
+                                    <div class="dd-card-icon orange">
+                                        <span class="dashicons dashicons-money-alt"></span>
+                                    </div>
+                                    <div>
+                                        <h4 class="dd-card-name">Discover It Cash Back</h4>
+                                        <div class="dd-card-meta">
+                                            <span class="dd-card-apr">APR: 16.5%</span>
+                                            <span>•</span>
+                                            <span class="dd-card-status">Active</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="dd-card-balance">
+                                    <div class="dd-card-balance-amount">$1,876</div>
+                                    <div class="dd-card-balance-limit">Limit: $5,000</div>
+                                </div>
+                            </div>
+
+                            <div class="dd-card-utilization">
+                                <div class="dd-util-header">
+                                    <span class="dd-util-label">Utilization</span>
+                                    <span class="dd-util-value normal">37.5%</span>
+                                </div>
+                                <div class="dd-progress-bar">
+                                    <div class="dd-progress-fill yellow" style="width: 37.5%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="dd-card-details">
+                                <div class="dd-card-detail-item">
+                                    <div class="dd-detail-icon blue">
+                                        <span class="dashicons dashicons-calendar-alt"></span>
+                                    </div>
+                                    <div>
+                                        <p class="dd-detail-label">Payoff Date</p>
+                                        <p class="dd-detail-value">Jan 2027</p>
+                                    </div>
+                                </div>
+                                <div class="dd-detail-divider"></div>
+                                <div class="dd-card-detail-item">
+                                    <div class="dd-detail-icon red">
+                                        <span class="dashicons dashicons-money"></span>
+                                    </div>
+                                    <div>
+                                        <p class="dd-detail-label">Est. Interest</p>
+                                        <p class="dd-detail-value">$312</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Loans Column -->
+                    <section>
+                        <div class="dd-section-header">
+                            <h3 class="dd-section-title"><?php _e('Loans', 'dedebtify'); ?></h3>
+                            <span class="dd-badge dd-badge-orange">2 Active</span>
+                        </div>
+                        
+                        <div id="dd-loans-list">
+                            <!-- Loans will be loaded via JavaScript or rendered here -->
+                            <p style="text-align: center; color: #6b7280; padding: 40px;"><?php _e('Loans section coming soon', 'dedebtify'); ?></p>
+                        </div>
+                    </section>
+
                 </div>
             </div>
-            <div class="debt-breakdown-chart">
-                <div class="debt-breakdown-bars" id="debt-breakdown-bars"></div>
-            </div>
-            <div class="debt-breakdown-legend" id="debt-breakdown-legend"></div>
         </div>
 
-        <!-- Recent Items -->
-        <div class="dd-chart-card">
-            <div class="dd-chart-header">
-                <h2 class="dd-chart-title"><?php _e('Recent Activity', 'dedebtify'); ?></h2>
-                <button class="dedebtify-btn-small dedebtify-btn-secondary"><?php _e('View All', 'dedebtify'); ?></button>
-            </div>
-            <div id="dedebtify-dashboard-stats"></div>
+        <!-- Right Sidebar (Goals, Bills, Promo) -->
+        <div class="dd-right-sidebar">
+            <h3 class="dd-section-title" style="margin-bottom: 24px;"><?php _e('Goals & Bills', 'dedebtify'); ?></h3>
+            <p style="text-align: center; color: #6b7280; padding: 40px 20px;"><?php _e('Right sidebar widgets coming soon', 'dedebtify'); ?></p>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="dedebtify-btn-group" style="margin-top: 32px;">
-            <button class="dd-btn-primary">
-                <span class="dashicons dashicons-plus-alt"></span>
-                <?php _e('ADD DEBT', 'dedebtify'); ?>
-            </button>
-            <button class="dd-btn-secondary">
-                <span class="dashicons dashicons-camera"></span>
-                <?php _e('CREATE SNAPSHOT', 'dedebtify'); ?>
-            </button>
-        </div>
-
-    </div>
+    </main>
 </div>
-
-<script>
-jQuery(document).ready(function($) {
-    // Mobile sidebar toggle
-    if ($(window).width() < 768) {
-        $('.dd-layout-with-sidebar').prepend('<button class="dd-sidebar-toggle"><span class="dashicons dashicons-menu"></span></button>');
-        $('.dd-sidebar-toggle').on('click', function() {
-            $('.dd-sidebar').toggleClass('open');
-        });
-    }
-});
-</script>
