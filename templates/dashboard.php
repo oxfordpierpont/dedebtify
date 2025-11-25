@@ -95,55 +95,39 @@ if (strpos($display_name, ' ') !== false) {
         <!-- Stats Cards -->
         <div class="dd-stats-row">
             <div class="dd-stat-card-modern">
-                <div class="dd-stat-card-header">
-                    <div class="dd-stat-icon danger">
-                        <span class="dashicons dashicons-money-alt"></span>
-                    </div>
+                <div class="dd-stat-icon-top red">
+                    <span class="dashicons dashicons-money-alt"></span>
                 </div>
-                <div class="dd-stat-content">
-                    <div class="dd-stat-label-modern"><?php _e('Total Debt', 'dedebtify'); ?></div>
-                    <div class="dd-stat-value-modern" id="dd-total-debt">$0.00</div>
-                    <div class="dd-stat-change positive">↓ 2.5% <?php _e('this month', 'dedebtify'); ?></div>
-                </div>
+                <div class="dd-stat-label-modern"><?php _e('TOTAL DEBT', 'dedebtify'); ?></div>
+                <div class="dd-stat-value-modern" id="dd-total-debt">$0.00</div>
+                <div class="dd-stat-change positive">↓ 2.5% <?php _e('this month', 'dedebtify'); ?></div>
             </div>
 
             <div class="dd-stat-card-modern">
-                <div class="dd-stat-card-header">
-                    <div class="dd-stat-icon warning">
-                        <span class="dashicons dashicons-calendar-alt"></span>
-                    </div>
+                <div class="dd-stat-icon-top orange">
+                    <span class="dashicons dashicons-calendar-alt"></span>
                 </div>
-                <div class="dd-stat-content">
-                    <div class="dd-stat-label-modern"><?php _e('Monthly Payments', 'dedebtify'); ?></div>
-                    <div class="dd-stat-value-modern" id="dd-monthly-payments">$0.00</div>
-                    <div class="dd-stat-change"><?php _e('Due soon', 'dedebtify'); ?></div>
-                </div>
+                <div class="dd-stat-label-modern"><?php _e('MONTHLY PAYMENTS', 'dedebtify'); ?></div>
+                <div class="dd-stat-value-modern" id="dd-monthly-payments">$0.00</div>
+                <div class="dd-stat-change"><?php _e('Due soon', 'dedebtify'); ?></div>
             </div>
 
             <div class="dd-stat-card-modern">
-                <div class="dd-stat-card-header">
-                    <div class="dd-stat-icon primary">
-                        <span class="dashicons dashicons-chart-line"></span>
-                    </div>
+                <div class="dd-stat-icon-top purple">
+                    <span class="dashicons dashicons-chart-line"></span>
                 </div>
-                <div class="dd-stat-content">
-                    <div class="dd-stat-label-modern"><?php _e('Credit Utilization', 'dedebtify'); ?></div>
-                    <div class="dd-stat-value-modern" id="dd-credit-utilization">0%</div>
-                    <div class="dd-stat-change positive">↓ 5% <?php _e('improved', 'dedebtify'); ?></div>
-                </div>
+                <div class="dd-stat-label-modern"><?php _e('CREDIT UTILIZATION', 'dedebtify'); ?></div>
+                <div class="dd-stat-value-modern" id="dd-credit-utilization">0%</div>
+                <div class="dd-stat-change positive">↓ 5% <?php _e('improved', 'dedebtify'); ?></div>
             </div>
 
             <div class="dd-stat-card-modern">
-                <div class="dd-stat-card-header">
-                    <div class="dd-stat-icon success">
-                        <span class="dashicons dashicons-yes-alt"></span>
-                    </div>
+                <div class="dd-stat-icon-top teal">
+                    <span class="dashicons dashicons-yes-alt"></span>
                 </div>
-                <div class="dd-stat-content">
-                    <div class="dd-stat-label-modern"><?php _e('Debt-Free Date', 'dedebtify'); ?></div>
-                    <div class="dd-stat-value-modern" id="dd-debt-free-date" style="font-size: 20px;">—</div>
-                    <div class="dd-stat-change"><?php _e('Projected', 'dedebtify'); ?></div>
-                </div>
+                <div class="dd-stat-label-modern"><?php _e('DEBT-FREE DATE', 'dedebtify'); ?></div>
+                <div class="dd-stat-value-modern" id="dd-debt-free-date" style="font-size: 18px;">—</div>
+                <div class="dd-stat-change"><?php _e('Projected', 'dedebtify'); ?></div>
             </div>
         </div>
 
@@ -172,20 +156,14 @@ if (strpos($display_name, ' ') !== false) {
 
         <!-- Quick Actions -->
         <div class="dedebtify-btn-group" style="margin-top: 32px;">
-            <button class="dedebtify-btn dedebtify-btn-primary">
+            <button class="dd-btn-primary">
                 <span class="dashicons dashicons-plus-alt"></span>
-                <?php _e('Add Debt', 'dedebtify'); ?>
+                <?php _e('ADD DEBT', 'dedebtify'); ?>
             </button>
-            <button class="dedebtify-btn dedebtify-btn-secondary">
+            <button class="dd-btn-secondary">
                 <span class="dashicons dashicons-camera"></span>
-                <?php _e('Create Snapshot', 'dedebtify'); ?>
+                <?php _e('CREATE SNAPSHOT', 'dedebtify'); ?>
             </button>
-            <?php if ($ai_coach_url = Dedebtify_Helpers::get_page_url('ai_coach')) : ?>
-                <a href="<?php echo esc_url($ai_coach_url); ?>" class="dedebtify-btn dedebtify-btn-success">
-                    <span class="dashicons dashicons-welcome-learn-more"></span>
-                    <?php _e('Talk to AI Coach', 'dedebtify'); ?>
-                </a>
-            <?php endif; ?>
         </div>
 
     </div>
