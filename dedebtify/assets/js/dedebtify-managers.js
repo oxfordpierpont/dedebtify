@@ -1,0 +1,2236 @@
+/**
+ * DeDebtify Managers JavaScript
+ *
+ * Handles all CRUD operations for financial items
+ *
+ * @since      1.0.0
+ * @package    Dedebtify
+ */
+
+(function($) {
+    'use strict';
+
+    $(document).ready(function() {
+
+        // ===========================
+        // CREDIT CARD MANAGER
+        // ===========================
+
+        /**
+         * Initialize Credit Card Manager
+         */
+        function initCreditCardManager() {
+            if ($('.dedebtify-credit-cards-manager').length) {
+                loadCreditCardsList();
+                initCreditCardForm();
+                initCreditCardControls();
+            }
+        }
+
+        /**
+         * Load credit cards list
+         */
+        function loadCreditCardsList() {
+            const $list = $('#dedebtify-credit-cards-list');
+            if (!$list.length) return;
+
+            $.ajax({
+                url: dedebtify.restUrl + 'credit-cards',
+                method: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    renderCreditCardsList(response);
+                    updateCreditCardStats(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to load credit cards:', error);
+                    $list.html('<div class="dedebtify-message error">Failed to load credit cards</div>');
+                }
+            });
+        }
+
+        /**
+         * Render credit cards list
+         */
+        function renderCreditCardsList(cards) {
+            const $list = $('#dedebtify-credit-cards-list');
+            const $emptyState = $('#empty-state');
+
+            if (cards.length === 0) {
+                $list.hide();
+                $emptyState.show();
+                return;
+            }
+
+            $emptyState.hide();
+            $list.show();
+
+            let html = '';
+            cards.forEach(function(card) {
+                const utilClass = getUtilizationClass(card.utilization);
+                const statusClass = card.status.replace('_', '-');
+
+                html += '<div class="dedebtify-card-item" data-id="' + card.id + '" data-status="' + card.status + '">';
+                html += '  <div class="dedebtify-card-header">';
+                html += '    <div>';
+                html += '      <h3 class="dedebtify-card-name">' + escapeHtml(card.name) + '</h3>';
+                html += '      <span class="dedebtify-card-badge ' + statusClass + '">' + card.status.replace('_', ' ') + '</span>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-actions">';
+                html += '      <button class="dedebtify-btn dedebtify-btn-small" onclick="window.location=\'?action=edit&edit=' + card.id + '\'">' + dedebtifyL10n.edit + '</button>';
+                html += '      <button class="dedebtify-btn dedebtify-btn-small dedebtify-btn-danger dedebtify-delete-card" data-id="' + card.id + '">' + dedebtifyL10n.delete + '</button>';
+                html += '    </div>';
+                html += '  </div>';
+
+                html += '  <div class="dedebtify-card-details">';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">Balance</div>';
+                html += '      <div class="dedebtify-card-detail-value">' + formatCurrency(card.balance) + '</div>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">Limit</div>';
+                html += '      <div class="dedebtify-card-detail-value">' + formatCurrency(card.credit_limit) + '</div>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">Utilization</div>';
+                html += '      <div class="dedebtify-card-detail-value ' + utilClass + '">' + formatPercentage(card.utilization) + '</div>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">APR</div>';
+                html += '      <div class="dedebtify-card-detail-value">' + formatPercentage(card.interest_rate) + '</div>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">Monthly Payment</div>';
+                html += '      <div class="dedebtify-card-detail-value">' + formatCurrency(card.minimum_payment + card.extra_payment) + '</div>';
+                html += '    </div>';
+                html += '  </div>';
+
+                // Utilization progress bar
+                html += '  <div class="dedebtify-progress">';
+                html += '    <div class="dedebtify-progress-bar ' + utilClass + '" style="width: ' + Math.min(card.utilization, 100) + '%"></div>';
+                html += '  </div>';
+
+                // Payoff info
+                if (card.status === 'active' && card.months_to_payoff !== Infinity) {
+                    html += '  <div class="dedebtify-card-payoff">';
+                    html += '    <div class="dedebtify-payoff-info">';
+                    html += '      <strong>Payoff Timeline:</strong> ' + card.months_to_payoff + ' months (' + escapeHtml(card.payoff_date) + ')';
+                    html += '    </div>';
+                    html += '    <div class="dedebtify-payoff-info">';
+                    html += '      <strong>Total Interest:</strong> ' + formatCurrency(card.total_interest);
+                    html += '    </div>';
+                    html += '  </div>';
+                } else if (card.months_to_payoff === Infinity) {
+                    html += '  <div class="dedebtify-card-payoff warning">';
+                    html += '    <strong>⚠️ Warning:</strong> Payment doesn\'t cover interest. Increase your payment.';
+                    html += '  </div>';
+                }
+
+                html += '</div>';
+            });
+
+            $list.html(html);
+        }
+
+        /**
+         * Update credit card stats
+         */
+        function updateCreditCardStats(cards) {
+            let totalDebt = 0;
+            let totalBalance = 0;
+            let totalLimit = 0;
+            let totalPayment = 0;
+
+            cards.forEach(function(card) {
+                if (card.status === 'active') {
+                    totalDebt += parseFloat(card.balance);
+                    totalBalance += parseFloat(card.balance);
+                    totalLimit += parseFloat(card.credit_limit);
+                    totalPayment += parseFloat(card.minimum_payment) + parseFloat(card.extra_payment);
+                }
+            });
+
+            const utilization = totalLimit > 0 ? (totalBalance / totalLimit) * 100 : 0;
+
+            $('#cc-total-debt').text(formatCurrency(totalDebt));
+            $('#cc-utilization').text(formatPercentage(utilization));
+            $('#cc-monthly-payment').text(formatCurrency(totalPayment));
+        }
+
+        /**
+         * Initialize credit card form
+         */
+        function initCreditCardForm() {
+            const $form = $('#dedebtify-credit-card-form');
+            if (!$form.length) return;
+
+            // Load existing data if editing
+            const postId = $form.data('post-id');
+            if (postId > 0) {
+                loadCreditCardData(postId);
+            }
+
+            // Real-time payoff calculation
+            $('#balance, #interest_rate, #minimum_payment, #extra_payment, #credit_limit').on('input', function() {
+                calculatePayoffPreview();
+            });
+
+            // Form submission
+            $form.on('submit', function(e) {
+                e.preventDefault();
+                saveCreditCard();
+            });
+        }
+
+        /**
+         * Load credit card data for editing
+         */
+        function loadCreditCardData(postId) {
+            // Ensure postId is a number for comparison
+            const numericPostId = parseInt(postId, 10);
+
+            $.ajax({
+                url: dedebtify.restUrl + 'credit-cards',
+                method: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    const card = response.find(c => parseInt(c.id, 10) === numericPostId);
+                    if (card) {
+                        populateCreditCardForm(card);
+                    } else {
+                        console.error('Credit card not found with ID:', numericPostId);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to load card data:', error);
+                    showMessage('Failed to load card data', 'error');
+                }
+            });
+        }
+
+        /**
+         * Populate form with card data
+         */
+        function populateCreditCardForm(card) {
+            $('#card_name').val(card.name);
+            $('#balance').val(card.balance);
+            $('#credit_limit').val(card.credit_limit);
+            $('#interest_rate').val(card.interest_rate);
+            $('#minimum_payment').val(card.minimum_payment);
+            $('#extra_payment').val(card.extra_payment);
+            $('#due_date').val(card.due_date);
+            $('#status').val(card.status);
+            $('#auto_pay').prop('checked', card.auto_pay == 1);
+
+            calculatePayoffPreview();
+        }
+
+        /**
+         * Calculate and display payoff preview
+         */
+        function calculatePayoffPreview() {
+            const balance = parseFloat($('#balance').val()) || 0;
+            const creditLimit = parseFloat($('#credit_limit').val()) || 0;
+            const interestRate = parseFloat($('#interest_rate').val()) || 0;
+            const minPayment = parseFloat($('#minimum_payment').val()) || 0;
+            const extraPayment = parseFloat($('#extra_payment').val()) || 0;
+            const totalPayment = minPayment + extraPayment;
+
+            if (balance > 0 && totalPayment > 0) {
+                // Calculate utilization
+                const utilization = DedebtifyCalculator.calculateUtilization(balance, creditLimit);
+
+                // Calculate payoff
+                const months = DedebtifyCalculator.calculateMonthsToPayoff(balance, interestRate, totalPayment);
+                const totalInterest = DedebtifyCalculator.calculateTotalInterest(balance, totalPayment, months);
+                const payoffDate = DedebtifyCalculator.calculatePayoffDate(months);
+
+                // Update preview
+                $('#preview-utilization').text(DedebtifyCalculator.formatPercentage(utilization));
+                $('#preview-months').text(months === Infinity ? '∞' : months);
+                $('#preview-interest').text(DedebtifyCalculator.formatCurrency(totalInterest));
+                $('#preview-date').text(payoffDate);
+
+                $('#dedebtify-payoff-preview').slideDown();
+            } else {
+                $('#dedebtify-payoff-preview').slideUp();
+            }
+        }
+
+        /**
+         * Save credit card
+         */
+        function saveCreditCard() {
+            const $form = $('#dedebtify-credit-card-form');
+            const $submitBtn = $form.find('button[type="submit"]');
+            const originalText = $submitBtn.text();
+            const postId = $form.data('post-id');
+
+            // Validate
+            if (!$form[0].checkValidity()) {
+                $form[0].reportValidity();
+                return;
+            }
+
+            // Get form data
+            const formData = {
+                title: $('#card_name').val(),
+                status: 'publish',
+                author: dedebtify.userId,
+                meta: {
+                    balance: $('#balance').val(),
+                    credit_limit: $('#credit_limit').val(),
+                    interest_rate: $('#interest_rate').val(),
+                    minimum_payment: $('#minimum_payment').val(),
+                    extra_payment: $('#extra_payment').val() || 0,
+                    due_date: $('#due_date').val() || '',
+                    status: $('#status').val(),
+                    auto_pay: $('#auto_pay').is(':checked') ? '1' : '0'
+                }
+            };
+
+            $submitBtn.prop('disabled', true).text('Saving...');
+
+            // Determine method and URL
+            const method = postId > 0 ? 'PUT' : 'POST';
+            const url = dedebtify.restUrl.replace('/dedebtify/v1/', '/wp/v2/') + 'dd_credit_card' + (postId > 0 ? '/' + postId : '');
+
+            $.ajax({
+                url: url,
+                method: method,
+                data: JSON.stringify(formData),
+                contentType: 'application/json',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    showMessage(postId > 0 ? 'Card updated successfully!' : 'Card added successfully!', 'success');
+                    setTimeout(function() {
+                        window.location.href = '?action=list';
+                    }, 1500);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to save card:', error);
+                    showMessage('Failed to save card. Please try again.', 'error');
+                    $submitBtn.prop('disabled', false).text(originalText);
+                }
+            });
+        }
+
+        /**
+         * Initialize credit card controls (sort, filter)
+         */
+        function initCreditCardControls() {
+            $('#sort-by, #filter-status').on('change', function() {
+                filterAndSortCards();
+            });
+        }
+
+        /**
+         * Filter and sort cards
+         */
+        function filterAndSortCards() {
+            const sortBy = $('#sort-by').val();
+            const filterStatus = $('#filter-status').val();
+            const $cards = $('.dedebtify-card-item');
+
+            // Filter
+            $cards.each(function() {
+                const status = $(this).data('status');
+                if (filterStatus === 'all' || filterStatus === status) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            // Sort
+            const $list = $('#dedebtify-credit-cards-list');
+            const $visibleCards = $cards.filter(':visible');
+
+            $visibleCards.sort(function(a, b) {
+                const $a = $(a);
+                const $b = $(b);
+
+                // Extract values based on sort criteria
+                let aVal, bVal;
+
+                if (sortBy.includes('balance')) {
+                    aVal = parseFloat($a.find('.dedebtify-card-detail-value').first().text().replace(/[^0-9.-]+/g,""));
+                    bVal = parseFloat($b.find('.dedebtify-card-detail-value').first().text().replace(/[^0-9.-]+/g,""));
+                }
+
+                if (sortBy.includes('high')) {
+                    return bVal - aVal;
+                } else {
+                    return aVal - bVal;
+                }
+            });
+
+            $list.html($visibleCards);
+        }
+
+        /**
+         * Delete credit card
+         */
+        $(document).on('click', '.dedebtify-delete-card', function(e) {
+            e.preventDefault();
+
+            if (!confirm('Are you sure you want to delete this credit card? This action cannot be undone.')) {
+                return;
+            }
+
+            const cardId = $(this).data('id');
+            const $cardItem = $(this).closest('.dedebtify-card-item');
+
+            $.ajax({
+                url: dedebtify.restUrl.replace('/dedebtify/v1/', '/wp/v2/') + 'dd_credit_card/' + cardId,
+                method: 'DELETE',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    $cardItem.fadeOut(function() {
+                        $(this).remove();
+                        // Check if list is empty
+                        if ($('.dedebtify-card-item').length === 0) {
+                            $('#dedebtify-credit-cards-list').hide();
+                            $('#empty-state').show();
+                        }
+                    });
+                    showMessage('Credit card deleted successfully', 'success');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to delete card:', error);
+                    showMessage('Failed to delete card. Please try again.', 'error');
+                }
+            });
+        });
+
+        // ===========================
+        // HELPER FUNCTIONS
+        // ===========================
+
+        function formatCurrency(amount) {
+            return '$' + parseFloat(amount).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+
+        function formatPercentage(value) {
+            return parseFloat(value).toFixed(1) + '%';
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function getUtilizationClass(util) {
+            if (util < 30) return 'success';
+            if (util < 50) return 'warning';
+            return 'danger';
+        }
+
+        function showMessage(message, type) {
+            const $message = $('<div class="dedebtify-message ' + type + '">' + message + '</div>');
+            $('.dedebtify-dashboard').prepend($message);
+
+            setTimeout(function() {
+                $message.fadeOut(function() {
+                    $(this).remove();
+                });
+            }, 5000);
+        }
+
+        // ===========================
+        // LOANS MANAGER
+        // ===========================
+
+        function initLoansManager() {
+            if ($('.dedebtify-loans-manager').length) {
+                loadLoansList();
+                initLoanForm();
+                initLoanControls();
+            }
+        }
+
+        function loadLoansList() {
+            const $list = $('#dedebtify-loans-list');
+            if (!$list.length) return;
+
+            $.ajax({
+                url: dedebtify.restUrl + 'loans',
+                method: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    renderLoansList(response);
+                    updateLoanStats(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to load loans:', error);
+                    $list.html('<div class="dedebtify-message error">Failed to load loans</div>');
+                }
+            });
+        }
+
+        function renderLoansList(loans) {
+            const $list = $('#dedebtify-loans-list');
+            const $emptyState = $('#loans-empty-state');
+
+            if (loans.length === 0) {
+                $list.hide();
+                $emptyState.show();
+                return;
+            }
+
+            $emptyState.hide();
+            $list.show();
+
+            let html = '';
+            loans.forEach(function(loan) {
+                html += '<div class="dedebtify-card-item" data-id="' + loan.id + '" data-type="' + loan.type + '">';
+                html += '  <div class="dedebtify-card-header">';
+                html += '    <div>';
+                html += '      <h3 class="dedebtify-card-name">' + escapeHtml(loan.name) + '</h3>';
+                html += '      <span class="dedebtify-card-badge">' + loan.type + '</span>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-actions">';
+                html += '      <button class="dedebtify-btn dedebtify-btn-small" onclick="window.location=\'?action=edit&edit=' + loan.id + '\'">' + dedebtifyL10n.edit + '</button>';
+                html += '      <button class="dedebtify-btn dedebtify-btn-small dedebtify-btn-danger dedebtify-delete-loan" data-id="' + loan.id + '">' + dedebtifyL10n.delete + '</button>';
+                html += '    </div>';
+                html += '  </div>';
+
+                html += '  <div class="dedebtify-card-details">';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">Balance</div>';
+                html += '      <div class="dedebtify-card-detail-value">' + formatCurrency(loan.balance) + '</div>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">Monthly Payment</div>';
+                html += '      <div class="dedebtify-card-detail-value">' + formatCurrency(loan.monthly_payment + loan.extra_payment) + '</div>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">Interest Rate</div>';
+                html += '      <div class="dedebtify-card-detail-value">' + formatPercentage(loan.interest_rate) + '</div>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">Payoff Date</div>';
+                html += '      <div class="dedebtify-card-detail-value">' + escapeHtml(loan.payoff_date) + '</div>';
+                html += '    </div>';
+                html += '  </div>';
+
+                if (loan.months_to_payoff !== Infinity) {
+                    html += '  <div class="dedebtify-card-payoff">';
+                    html += '    <div class="dedebtify-payoff-info">';
+                    html += '      <strong>Remaining:</strong> ' + loan.months_to_payoff + ' months';
+                    html += '    </div>';
+                    html += '  </div>';
+                }
+
+                html += '</div>';
+            });
+
+            $list.html(html);
+        }
+
+        function updateLoanStats(loans) {
+            let totalDebt = 0;
+            let totalPayment = 0;
+
+            loans.forEach(function(loan) {
+                totalDebt += parseFloat(loan.balance);
+                totalPayment += parseFloat(loan.monthly_payment) + parseFloat(loan.extra_payment);
+            });
+
+            $('#loan-total-debt').text(formatCurrency(totalDebt));
+            $('#loan-monthly-payment').text(formatCurrency(totalPayment));
+            $('#loan-count').text(loans.length);
+        }
+
+        function initLoanForm() {
+            const $form = $('#dedebtify-loan-form');
+            if (!$form.length) return;
+
+            const postId = $form.data('post-id');
+            if (postId > 0) {
+                loadLoanData(postId);
+            }
+
+            // Auto-calculate payment
+            $('#calculate-loan-payment').on('click', function() {
+                const principal = parseFloat($('#principal').val()) || 0;
+                const rate = parseFloat($('#interest_rate').val()) || 0;
+                const termMonths = parseInt($('#term_months').val()) || 0;
+
+                if (principal > 0 && termMonths > 0) {
+                    const payment = DedebtifyCalculator.calculateLoanPayment(principal, rate, termMonths);
+                    $('#monthly_payment').val(payment.toFixed(2));
+                    calculateLoanPayoffPreview();
+                }
+            });
+
+            $('#current_balance, #interest_rate, #monthly_payment, #extra_payment').on('input', function() {
+                calculateLoanPayoffPreview();
+            });
+
+            $form.on('submit', function(e) {
+                e.preventDefault();
+                saveLoan();
+            });
+        }
+
+        function loadLoanData(postId) {
+            // Ensure postId is a number for comparison
+            const numericPostId = parseInt(postId, 10);
+
+            $.ajax({
+                url: dedebtify.restUrl + 'loans',
+                method: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    const loan = response.find(l => parseInt(l.id, 10) === numericPostId);
+                    if (loan) {
+                        populateLoanForm(loan);
+                    } else {
+                        console.error('Loan not found with ID:', numericPostId);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to load loan data:', error);
+                }
+            });
+        }
+
+        function populateLoanForm(loan) {
+            $('#loan_name').val(loan.name);
+            $('#loan_type').val(loan.type);
+            $('#principal').val(loan.principal || loan.balance);
+            $('#current_balance').val(loan.balance);
+            $('#interest_rate').val(loan.interest_rate);
+            $('#term_months').val(loan.term_months || 60);
+            $('#monthly_payment').val(loan.monthly_payment);
+            $('#start_date').val(loan.start_date);
+            $('#extra_payment').val(loan.extra_payment);
+
+            calculateLoanPayoffPreview();
+        }
+
+        function calculateLoanPayoffPreview() {
+            const balance = parseFloat($('#current_balance').val()) || 0;
+            const interestRate = parseFloat($('#interest_rate').val()) || 0;
+            const monthlyPayment = parseFloat($('#monthly_payment').val()) || 0;
+            const extraPayment = parseFloat($('#extra_payment').val()) || 0;
+            const totalPayment = monthlyPayment + extraPayment;
+
+            if (balance > 0 && totalPayment > 0) {
+                const months = DedebtifyCalculator.calculateMonthsToPayoff(balance, interestRate, totalPayment);
+                const totalInterest = DedebtifyCalculator.calculateTotalInterest(balance, totalPayment, months);
+                const payoffDate = DedebtifyCalculator.calculatePayoffDate(months);
+                const totalPaid = totalPayment * months;
+
+                $('#preview-months').text(months === Infinity ? '∞' : months);
+                $('#preview-interest').text(DedebtifyCalculator.formatCurrency(totalInterest));
+                $('#preview-date').text(payoffDate);
+                $('#preview-total').text(DedebtifyCalculator.formatCurrency(totalPaid));
+
+                $('#dedebtify-loan-payoff-preview').slideDown();
+            } else {
+                $('#dedebtify-loan-payoff-preview').slideUp();
+            }
+        }
+
+        function saveLoan() {
+            const $form = $('#dedebtify-loan-form');
+            const $submitBtn = $form.find('button[type="submit"]');
+            const originalText = $submitBtn.text();
+            const postId = $form.data('post-id');
+
+            if (!$form[0].checkValidity()) {
+                $form[0].reportValidity();
+                return;
+            }
+
+            const formData = {
+                title: $('#loan_name').val(),
+                status: 'publish',
+                author: dedebtify.userId,
+                meta: {
+                    loan_type: $('#loan_type').val(),
+                    principal: $('#principal').val(),
+                    current_balance: $('#current_balance').val(),
+                    interest_rate: $('#interest_rate').val(),
+                    term_months: $('#term_months').val(),
+                    monthly_payment: $('#monthly_payment').val(),
+                    start_date: $('#start_date').val(),
+                    extra_payment: $('#extra_payment').val() || 0
+                }
+            };
+
+            $submitBtn.prop('disabled', true).text(dedebtifyL10n.saving);
+
+            const method = postId > 0 ? 'PUT' : 'POST';
+            const url = dedebtify.restUrl.replace('/dedebtify/v1/', '/wp/v2/') + 'dd_loan' + (postId > 0 ? '/' + postId : '');
+
+            $.ajax({
+                url: url,
+                method: method,
+                data: JSON.stringify(formData),
+                contentType: 'application/json',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    showMessage(postId > 0 ? 'Loan updated successfully!' : 'Loan added successfully!', 'success');
+                    setTimeout(function() {
+                        window.location.href = '?action=list';
+                    }, 1500);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to save loan:', error);
+                    showMessage('Failed to save loan. Please try again.', 'error');
+                    $submitBtn.prop('disabled', false).text(originalText);
+                }
+            });
+        }
+
+        function initLoanControls() {
+            $('#filter-loan-type, #sort-loans-by').on('change', function() {
+                filterAndSortLoans();
+            });
+        }
+
+        function filterAndSortLoans() {
+            // Implementation similar to credit cards
+        }
+
+        $(document).on('click', '.dedebtify-delete-loan', function(e) {
+            e.preventDefault();
+            if (!confirm(dedebtifyL10n.confirm_delete)) return;
+
+            const loanId = $(this).data('id');
+            const $loanItem = $(this).closest('.dedebtify-card-item');
+
+            $.ajax({
+                url: dedebtify.restUrl.replace('/dedebtify/v1/', '/wp/v2/') + 'dd_loan/' + loanId,
+                method: 'DELETE',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    $loanItem.fadeOut(function() {
+                        $(this).remove();
+                        if ($('.dedebtify-card-item').length === 0) {
+                            $('#dedebtify-loans-list').hide();
+                            $('#loans-empty-state').show();
+                        }
+                    });
+                    showMessage('Loan deleted successfully', 'success');
+                },
+                error: function(xhr, status, error) {
+                    showMessage('Failed to delete loan', 'error');
+                }
+            });
+        });
+
+        // ===========================
+        // BILLS MANAGER
+        // ===========================
+
+        function initBillsManager() {
+            if ($('.dedebtify-bills-manager').length) {
+                loadBillsList();
+                initBillForm();
+                initBillControls();
+            }
+        }
+
+        function loadBillsList() {
+            const $list = $('#dedebtify-bills-list');
+            if (!$list.length) return;
+
+            $.ajax({
+                url: dedebtify.restUrl + 'bills',
+                method: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    renderBillsList(response);
+                    updateBillStats(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to load bills:', error);
+                    $list.html('<div class="dedebtify-message error">Failed to load bills</div>');
+                }
+            });
+        }
+
+        function renderBillsList(bills) {
+            const $list = $('#dedebtify-bills-list');
+            const $emptyState = $('#bills-empty-state');
+
+            if (bills.length === 0) {
+                $list.hide();
+                $emptyState.show();
+                return;
+            }
+
+            $emptyState.hide();
+            $list.show();
+
+            let html = '';
+            bills.forEach(function(bill) {
+                html += '<div class="dedebtify-card-item" data-id="' + bill.id + '" data-category="' + bill.category + '" data-essential="' + bill.is_essential + '">';
+                html += '  <div class="dedebtify-card-header">';
+                html += '    <div>';
+                html += '      <h3 class="dedebtify-card-name">' + escapeHtml(bill.name) + '</h3>';
+                html += '      <span class="dedebtify-card-badge">' + bill.category + '</span>';
+                if (bill.is_essential == 1) {
+                    html += '      <span class="dedebtify-card-badge success">Essential</span>';
+                }
+                if (bill.auto_pay == 1) {
+                    html += '      <span class="dedebtify-card-badge">Auto-Pay</span>';
+                }
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-actions">';
+                html += '      <button class="dedebtify-btn dedebtify-btn-small" onclick="window.location=\'?action=edit&edit=' + bill.id + '\'">' + dedebtifyL10n.edit + '</button>';
+                html += '      <button class="dedebtify-btn dedebtify-btn-small dedebtify-btn-danger dedebtify-delete-bill" data-id="' + bill.id + '">' + dedebtifyL10n.delete + '</button>';
+                html += '    </div>';
+                html += '  </div>';
+
+                html += '  <div class="dedebtify-card-details">';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">Amount</div>';
+                html += '      <div class="dedebtify-card-detail-value">' + formatCurrency(bill.amount) + '</div>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">Frequency</div>';
+                html += '      <div class="dedebtify-card-detail-value">' + bill.frequency + '</div>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">Monthly Equivalent</div>';
+                html += '      <div class="dedebtify-card-detail-value">' + formatCurrency(bill.monthly_equivalent) + '</div>';
+                html += '    </div>';
+                if (bill.due_date) {
+                    html += '    <div class="dedebtify-card-detail">';
+                    html += '      <div class="dedebtify-card-detail-label">Due Date</div>';
+                    html += '      <div class="dedebtify-card-detail-value">' + bill.due_date + '</div>';
+                    html += '    </div>';
+                }
+                html += '  </div>';
+                html += '</div>';
+            });
+
+            $list.html(html);
+        }
+
+        function updateBillStats(bills) {
+            let totalMonthly = 0;
+            let essentialTotal = 0;
+            let discretionaryTotal = 0;
+
+            bills.forEach(function(bill) {
+                const monthly = parseFloat(bill.monthly_equivalent);
+                totalMonthly += monthly;
+                if (bill.is_essential == 1) {
+                    essentialTotal += monthly;
+                } else {
+                    discretionaryTotal += monthly;
+                }
+            });
+
+            $('#bill-total-monthly').text(formatCurrency(totalMonthly));
+            $('#bill-essential').text(formatCurrency(essentialTotal));
+            $('#bill-discretionary').text(formatCurrency(discretionaryTotal));
+        }
+
+        function initBillForm() {
+            const $form = $('#dedebtify-bill-form');
+            if (!$form.length) return;
+
+            const postId = $form.data('post-id');
+            if (postId > 0) {
+                loadBillData(postId);
+            }
+
+            $('#amount, #frequency').on('input change', function() {
+                calculateBillPreview();
+            });
+
+            $form.on('submit', function(e) {
+                e.preventDefault();
+                saveBill();
+            });
+        }
+
+        function loadBillData(postId) {
+            // Ensure postId is a number for comparison
+            const numericPostId = parseInt(postId, 10);
+
+            $.ajax({
+                url: dedebtify.restUrl + 'bills',
+                method: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    const bill = response.find(b => parseInt(b.id, 10) === numericPostId);
+                    if (bill) {
+                        populateBillForm(bill);
+                    } else {
+                        console.error('Bill not found with ID:', numericPostId);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to load bill data:', error);
+                }
+            });
+        }
+
+        function populateBillForm(bill) {
+            $('#bill_name').val(bill.name);
+            $('#category').val(bill.category);
+            $('#amount').val(bill.amount);
+            $('#frequency').val(bill.frequency);
+            $('#due_date').val(bill.due_date);
+            $('#auto_pay').prop('checked', bill.auto_pay == 1);
+            $('#is_essential').prop('checked', bill.is_essential == 1);
+
+            calculateBillPreview();
+        }
+
+        function calculateBillPreview() {
+            const amount = parseFloat($('#amount').val()) || 0;
+            const frequency = $('#frequency').val();
+
+            if (amount > 0) {
+                const monthly = DedebtifyCalculator.convertToMonthly(amount, frequency);
+                const annual = monthly * 12;
+
+                $('#preview-monthly').text(formatCurrency(monthly));
+                $('#preview-annual').text(formatCurrency(annual));
+
+                let calculation = '';
+                switch(frequency) {
+                    case 'weekly': calculation = amount + ' × 52 ÷ 12'; break;
+                    case 'bi-weekly': calculation = amount + ' × 26 ÷ 12'; break;
+                    case 'quarterly': calculation = amount + ' ÷ 3'; break;
+                    case 'annually': calculation = amount + ' ÷ 12'; break;
+                    default: calculation = 'Monthly amount';
+                }
+                $('#preview-calculation').text(calculation);
+
+                $('#dedebtify-bill-preview').slideDown();
+            } else {
+                $('#dedebtify-bill-preview').slideUp();
+            }
+        }
+
+        function saveBill() {
+            const $form = $('#dedebtify-bill-form');
+            const $submitBtn = $form.find('button[type="submit"]');
+            const originalText = $submitBtn.text();
+            const postId = $form.data('post-id');
+
+            if (!$form[0].checkValidity()) {
+                $form[0].reportValidity();
+                return;
+            }
+
+            const formData = {
+                title: $('#bill_name').val(),
+                status: 'publish',
+                author: dedebtify.userId,
+                meta: {
+                    category: $('#category').val(),
+                    amount: $('#amount').val(),
+                    frequency: $('#frequency').val(),
+                    due_date: $('#due_date').val() || '',
+                    auto_pay: $('#auto_pay').is(':checked') ? '1' : '0',
+                    is_essential: $('#is_essential').is(':checked') ? '1' : '0'
+                }
+            };
+
+            $submitBtn.prop('disabled', true).text(dedebtifyL10n.saving);
+
+            const method = postId > 0 ? 'PUT' : 'POST';
+            const url = dedebtify.restUrl.replace('/dedebtify/v1/', '/wp/v2/') + 'dd_bill' + (postId > 0 ? '/' + postId : '');
+
+            $.ajax({
+                url: url,
+                method: method,
+                data: JSON.stringify(formData),
+                contentType: 'application/json',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    showMessage(postId > 0 ? 'Bill updated successfully!' : 'Bill added successfully!', 'success');
+                    setTimeout(function() {
+                        window.location.href = '?action=list';
+                    }, 1500);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to save bill:', error);
+                    showMessage('Failed to save bill. Please try again.', 'error');
+                    $submitBtn.prop('disabled', false).text(originalText);
+                }
+            });
+        }
+
+        function initBillControls() {
+            $('#filter-category, #filter-essential, #sort-bills-by').on('change', function() {
+                filterAndSortBills();
+            });
+        }
+
+        function filterAndSortBills() {
+            // Implementation for bills filtering
+        }
+
+        $(document).on('click', '.dedebtify-delete-bill', function(e) {
+            e.preventDefault();
+            if (!confirm(dedebtifyL10n.confirm_delete)) return;
+
+            const billId = $(this).data('id');
+            const $billItem = $(this).closest('.dedebtify-card-item');
+
+            $.ajax({
+                url: dedebtify.restUrl.replace('/dedebtify/v1/', '/wp/v2/') + 'dd_bill/' + billId,
+                method: 'DELETE',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    $billItem.fadeOut(function() {
+                        $(this).remove();
+                        if ($('.dedebtify-card-item').length === 0) {
+                            $('#dedebtify-bills-list').hide();
+                            $('#bills-empty-state').show();
+                        }
+                    });
+                    showMessage('Bill deleted successfully', 'success');
+                },
+                error: function(xhr, status, error) {
+                    showMessage('Failed to delete bill', 'error');
+                }
+            });
+        });
+
+        // ===========================
+        // GOALS MANAGER
+        // ===========================
+
+        function initGoalsManager() {
+            if ($('.dedebtify-goals-manager').length) {
+                loadGoalsList();
+                initGoalForm();
+                initGoalControls();
+            }
+        }
+
+        function loadGoalsList() {
+            const $list = $('#dedebtify-goals-list');
+            if (!$list.length) return;
+
+            $.ajax({
+                url: dedebtify.restUrl + 'goals',
+                method: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    renderGoalsList(response);
+                    updateGoalStats(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to load goals:', error);
+                    $list.html('<div class="dedebtify-message error">Failed to load goals</div>');
+                }
+            });
+        }
+
+        function renderGoalsList(goals) {
+            const $list = $('#dedebtify-goals-list');
+            const $emptyState = $('#goals-empty-state');
+
+            if (goals.length === 0) {
+                $list.hide();
+                $emptyState.show();
+                return;
+            }
+
+            $emptyState.hide();
+            $list.show();
+
+            let html = '';
+            goals.forEach(function(goal) {
+                const progressClass = goal.progress_percentage >= 75 ? 'success' : (goal.progress_percentage >= 50 ? 'warning' : '');
+
+                html += '<div class="dedebtify-card-item" data-id="' + goal.id + '" data-type="' + goal.type + '" data-priority="' + goal.priority + '">';
+                html += '  <div class="dedebtify-card-header">';
+                html += '    <div>';
+                html += '      <h3 class="dedebtify-card-name">' + escapeHtml(goal.name) + '</h3>';
+                html += '      <span class="dedebtify-card-badge">' + goal.type.replace('_', ' ') + '</span>';
+                html += '      <span class="dedebtify-card-badge ' + goal.priority + '">' + goal.priority + '</span>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-actions">';
+                html += '      <button class="dedebtify-btn dedebtify-btn-small" onclick="window.location=\'?action=edit&edit=' + goal.id + '\'">' + dedebtifyL10n.edit + '</button>';
+                html += '      <button class="dedebtify-btn dedebtify-btn-small dedebtify-btn-danger dedebtify-delete-goal" data-id="' + goal.id + '">' + dedebtifyL10n.delete + '</button>';
+                html += '    </div>';
+                html += '  </div>';
+
+                html += '  <div class="dedebtify-progress" style="height: 25px; margin: 15px 0;">';
+                html += '    <div class="dedebtify-progress-bar ' + progressClass + '" style="width: ' + Math.min(goal.progress_percentage, 100) + '%"></div>';
+                html += '  </div>';
+
+                html += '  <div class="dedebtify-card-details">';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">Progress</div>';
+                html += '      <div class="dedebtify-card-detail-value ' + progressClass + '">' + formatPercentage(goal.progress_percentage) + '</div>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">Current / Target</div>';
+                html += '      <div class="dedebtify-card-detail-value">' + formatCurrency(goal.current_amount) + ' / ' + formatCurrency(goal.target_amount) + '</div>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">Monthly Contribution</div>';
+                html += '      <div class="dedebtify-card-detail-value">' + formatCurrency(goal.monthly_contribution) + '</div>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-card-detail">';
+                html += '      <div class="dedebtify-card-detail-label">Months to Goal</div>';
+                html += '      <div class="dedebtify-card-detail-value">' + (goal.months_to_goal === Infinity ? '∞' : goal.months_to_goal) + '</div>';
+                html += '    </div>';
+                html += '  </div>';
+                html += '</div>';
+            });
+
+            $list.html(html);
+        }
+
+        function updateGoalStats(goals) {
+            let totalTarget = 0;
+            let totalSaved = 0;
+
+            goals.forEach(function(goal) {
+                totalTarget += parseFloat(goal.target_amount);
+                totalSaved += parseFloat(goal.current_amount);
+            });
+
+            const overallProgress = totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0;
+
+            $('#goal-total-target').text(formatCurrency(totalTarget));
+            $('#goal-total-saved').text(formatCurrency(totalSaved));
+            $('#goal-overall-progress').text(formatPercentage(overallProgress));
+        }
+
+        function initGoalForm() {
+            const $form = $('#dedebtify-goal-form');
+            if (!$form.length) return;
+
+            const postId = $form.data('post-id');
+            if (postId > 0) {
+                loadGoalData(postId);
+            }
+
+            $('#target_amount, #current_amount, #monthly_contribution, #target_date').on('input change', function() {
+                calculateGoalPreview();
+            });
+
+            $form.on('submit', function(e) {
+                e.preventDefault();
+                saveGoal();
+            });
+        }
+
+        function loadGoalData(postId) {
+            // Ensure postId is a number for comparison
+            const numericPostId = parseInt(postId, 10);
+
+            $.ajax({
+                url: dedebtify.restUrl + 'goals',
+                method: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    const goal = response.find(g => parseInt(g.id, 10) === numericPostId);
+                    if (goal) {
+                        populateGoalForm(goal);
+                    } else {
+                        console.error('Goal not found with ID:', numericPostId);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to load goal data:', error);
+                }
+            });
+        }
+
+        function populateGoalForm(goal) {
+            $('#goal_name').val(goal.name);
+            $('#goal_type').val(goal.type);
+            $('#priority').val(goal.priority);
+            $('#target_amount').val(goal.target_amount);
+            $('#current_amount').val(goal.current_amount);
+            $('#monthly_contribution').val(goal.monthly_contribution);
+            $('#target_date').val(goal.target_date);
+
+            calculateGoalPreview();
+        }
+
+        function calculateGoalPreview() {
+            const targetAmount = parseFloat($('#target_amount').val()) || 0;
+            const currentAmount = parseFloat($('#current_amount').val()) || 0;
+            const monthlyContribution = parseFloat($('#monthly_contribution').val()) || 0;
+            const targetDate = $('#target_date').val();
+
+            if (targetAmount > 0) {
+                const remaining = Math.max(0, targetAmount - currentAmount);
+                const progress = DedebtifyCalculator.calculateProgress(currentAmount, targetAmount);
+                const monthsToGoal = DedebtifyCalculator.calculateMonthsToGoal(currentAmount, targetAmount, monthlyContribution);
+
+                $('#goal-progress-percent').text(formatPercentage(progress));
+                $('#goal-progress-bar').css('width', Math.min(progress, 100) + '%');
+                $('#preview-remaining').text(formatCurrency(remaining));
+                $('#preview-months').text(monthsToGoal === Infinity ? '∞' : monthsToGoal);
+
+                if (monthsToGoal !== Infinity) {
+                    const estimatedDate = new Date();
+                    estimatedDate.setMonth(estimatedDate.getMonth() + monthsToGoal);
+                    $('#preview-date').text(estimatedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long' }));
+
+                    // Check if on track
+                    if (targetDate) {
+                        const target = new Date(targetDate);
+                        const isOnTrack = estimatedDate <= target;
+                        $('#preview-status').text(isOnTrack ? '✓ On Track' : '⚠ Behind').removeClass('success warning danger').addClass(isOnTrack ? 'success' : 'warning');
+                    } else {
+                        $('#preview-status').text('—');
+                    }
+                } else {
+                    $('#preview-date').text('—');
+                    $('#preview-status').text('—');
+                }
+
+                $('#dedebtify-goal-preview').slideDown();
+            } else {
+                $('#dedebtify-goal-preview').slideUp();
+            }
+        }
+
+        function saveGoal() {
+            const $form = $('#dedebtify-goal-form');
+            const $submitBtn = $form.find('button[type="submit"]');
+            const originalText = $submitBtn.text();
+            const postId = $form.data('post-id');
+
+            if (!$form[0].checkValidity()) {
+                $form[0].reportValidity();
+                return;
+            }
+
+            const formData = {
+                title: $('#goal_name').val(),
+                status: 'publish',
+                author: dedebtify.userId,
+                meta: {
+                    goal_type: $('#goal_type').val(),
+                    priority: $('#priority').val(),
+                    target_amount: $('#target_amount').val(),
+                    current_amount: $('#current_amount').val(),
+                    monthly_contribution: $('#monthly_contribution').val() || 0,
+                    target_date: $('#target_date').val() || ''
+                }
+            };
+
+            $submitBtn.prop('disabled', true).text(dedebtifyL10n.saving);
+
+            const method = postId > 0 ? 'PUT' : 'POST';
+            const url = dedebtify.restUrl.replace('/dedebtify/v1/', '/wp/v2/') + 'dd_goal' + (postId > 0 ? '/' + postId : '');
+
+            $.ajax({
+                url: url,
+                method: method,
+                data: JSON.stringify(formData),
+                contentType: 'application/json',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    showMessage(postId > 0 ? 'Goal updated successfully!' : 'Goal added successfully!', 'success');
+                    setTimeout(function() {
+                        window.location.href = '?action=list';
+                    }, 1500);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to save goal:', error);
+                    showMessage('Failed to save goal. Please try again.', 'error');
+                    $submitBtn.prop('disabled', false).text(originalText);
+                }
+            });
+        }
+
+        function initGoalControls() {
+            $('#filter-goal-type, #filter-priority, #sort-goals-by').on('change', function() {
+                filterAndSortGoals();
+            });
+        }
+
+        function filterAndSortGoals() {
+            // Implementation for goals filtering
+        }
+
+        $(document).on('click', '.dedebtify-delete-goal', function(e) {
+            e.preventDefault();
+            if (!confirm(dedebtifyL10n.confirm_delete)) return;
+
+            const goalId = $(this).data('id');
+            const $goalItem = $(this).closest('.dedebtify-card-item');
+
+            $.ajax({
+                url: dedebtify.restUrl.replace('/dedebtify/v1/', '/wp/v2/') + 'dd_goal/' + goalId,
+                method: 'DELETE',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    $goalItem.fadeOut(function() {
+                        $(this).remove();
+                        if ($('.dedebtify-card-item').length === 0) {
+                            $('#dedebtify-goals-list').hide();
+                            $('#goals-empty-state').show();
+                        }
+                    });
+                    showMessage('Goal deleted successfully', 'success');
+                },
+                error: function(xhr, status, error) {
+                    showMessage('Failed to delete goal', 'error');
+                }
+            });
+        });
+
+        // ===========================
+        // DEBT ACTION PLAN
+        // ===========================
+
+        /**
+         * Initialize Action Plan
+         */
+        function initActionPlanManager() {
+            if ($('.dedebtify-action-plan').length) {
+                initActionPlanForm();
+            }
+        }
+
+        /**
+         * Initialize action plan form
+         */
+        function initActionPlanForm() {
+            const $form = $('#dedebtify-action-plan-form');
+            if (!$form.length) return;
+
+            // Update strategy help text
+            $('#payoff_strategy').on('change', function() {
+                const strategy = $(this).val();
+                let helpText = '';
+                if (strategy === 'avalanche') {
+                    helpText = 'Avalanche method pays highest interest rates first, saving the most money overall.';
+                } else {
+                    helpText = 'Snowball method pays smallest balances first, providing quick psychological wins.';
+                }
+                $('#strategy-help').text(helpText);
+            });
+
+            // Form submission
+            $form.on('submit', function(e) {
+                e.preventDefault();
+                generateActionPlan();
+            });
+
+            // Toggle schedule details
+            $('#toggle-schedule').on('click', function() {
+                const $details = $('#dedebtify-schedule-details');
+                const $btn = $(this);
+
+                if ($details.is(':visible')) {
+                    $details.slideUp();
+                    $btn.text('Show Details');
+                } else {
+                    $details.slideDown();
+                    $btn.text('Hide Details');
+                }
+            });
+
+            // Print plan
+            $('#print-plan').on('click', function() {
+                window.print();
+            });
+
+            // Regenerate plan
+            $('#regenerate-plan').on('click', function() {
+                hideAllPlanSections();
+                $('html, body').animate({ scrollTop: 0 }, 300);
+            });
+        }
+
+        /**
+         * Generate action plan
+         */
+        function generateActionPlan() {
+            const strategy = $('#payoff_strategy').val();
+            const extraPayment = parseFloat($('#extra_payment').val()) || 0;
+
+            showPlanLoading();
+
+            // Fetch all debts
+            Promise.all([
+                fetchAllCreditCards(),
+                fetchAllLoans()
+            ]).then(function(results) {
+                const creditCards = results[0];
+                const loans = results[1];
+                const allDebts = combineDebts(creditCards, loans);
+
+                if (allDebts.length === 0) {
+                    hidePlanLoading();
+                    $('#plan-empty-state').show();
+                    return;
+                }
+
+                // Calculate both strategies for comparison
+                const avalanchePlan = calculatePayoffPlan(allDebts, 'avalanche', extraPayment);
+                const snowballPlan = calculatePayoffPlan(allDebts, 'snowball', extraPayment);
+
+                // Use selected strategy for display
+                const selectedPlan = strategy === 'avalanche' ? avalanchePlan : snowballPlan;
+
+                // Display the plan
+                displayPlanSummary(selectedPlan, avalanchePlan, snowballPlan);
+                displayPayoffTimeline(selectedPlan);
+                displayPaymentSchedule(selectedPlan);
+                displayActionItems(selectedPlan);
+
+                hidePlanLoading();
+                showAllPlanSections();
+
+            }).catch(function(error) {
+                console.error('Failed to generate action plan:', error);
+                hidePlanLoading();
+                showMessage('Failed to generate action plan', 'error');
+            });
+        }
+
+        /**
+         * Fetch all credit cards
+         */
+        function fetchAllCreditCards() {
+            return new Promise(function(resolve, reject) {
+                $.ajax({
+                    url: dedebtify.restUrl + 'credit-cards',
+                    method: 'GET',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                    },
+                    success: function(response) {
+                        resolve(response);
+                    },
+                    error: function(xhr, status, error) {
+                        reject(error);
+                    }
+                });
+            });
+        }
+
+        /**
+         * Fetch all loans
+         */
+        function fetchAllLoans() {
+            return new Promise(function(resolve, reject) {
+                $.ajax({
+                    url: dedebtify.restUrl + 'loans',
+                    method: 'GET',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                    },
+                    success: function(response) {
+                        resolve(response);
+                    },
+                    error: function(xhr, status, error) {
+                        reject(error);
+                    }
+                });
+            });
+        }
+
+        /**
+         * Combine debts into unified format
+         */
+        function combineDebts(creditCards, loans) {
+            const debts = [];
+
+            // Add credit cards
+            creditCards.forEach(function(card) {
+                if (card.balance > 0) {
+                    debts.push({
+                        id: card.id,
+                        name: card.name,
+                        type: 'credit_card',
+                        balance: parseFloat(card.balance),
+                        interest_rate: parseFloat(card.interest_rate),
+                        minimum_payment: parseFloat(card.minimum_payment) || calculateMinimumPayment(card.balance)
+                    });
+                }
+            });
+
+            // Add loans
+            loans.forEach(function(loan) {
+                if (loan.balance > 0) {
+                    debts.push({
+                        id: loan.id,
+                        name: loan.name,
+                        type: 'loan',
+                        balance: parseFloat(loan.balance),
+                        interest_rate: parseFloat(loan.interest_rate),
+                        minimum_payment: parseFloat(loan.monthly_payment)
+                    });
+                }
+            });
+
+            return debts;
+        }
+
+        /**
+         * Calculate minimum payment for credit card
+         */
+        function calculateMinimumPayment(balance) {
+            // Typically 2-3% of balance or $25, whichever is greater
+            return Math.max(balance * 0.02, 25);
+        }
+
+        /**
+         * Calculate payoff plan
+         */
+        function calculatePayoffPlan(debts, strategy, extraPayment) {
+            // Create a copy of debts to avoid mutating original
+            const workingDebts = JSON.parse(JSON.stringify(debts));
+
+            // Sort based on strategy
+            if (strategy === 'avalanche') {
+                workingDebts.sort(function(a, b) {
+                    return b.interest_rate - a.interest_rate;
+                });
+            } else {
+                workingDebts.sort(function(a, b) {
+                    return a.balance - b.balance;
+                });
+            }
+
+            // Calculate total minimum payment
+            let totalMinimumPayment = 0;
+            workingDebts.forEach(function(debt) {
+                totalMinimumPayment += debt.minimum_payment;
+            });
+
+            const totalAvailable = totalMinimumPayment + extraPayment;
+            const schedule = [];
+            let month = 0;
+            let totalInterestPaid = 0;
+
+            // Simulate month by month
+            while (workingDebts.some(function(d) { return d.balance > 0; })) {
+                month++;
+                let remainingPayment = totalAvailable;
+                let monthlyInterest = 0;
+
+                // Pay minimum on all debts first
+                workingDebts.forEach(function(debt) {
+                    if (debt.balance > 0) {
+                        const monthlyRate = debt.interest_rate / 100 / 12;
+                        const interest = debt.balance * monthlyRate;
+                        monthlyInterest += interest;
+                        totalInterestPaid += interest;
+
+                        const minPayment = Math.min(debt.minimum_payment, debt.balance + interest);
+                        const principal = minPayment - interest;
+
+                        debt.balance = Math.max(0, debt.balance + interest - minPayment);
+                        remainingPayment -= minPayment;
+                    }
+                });
+
+                // Apply extra payment to first unpaid debt
+                for (let i = 0; i < workingDebts.length; i++) {
+                    if (workingDebts[i].balance > 0 && remainingPayment > 0) {
+                        const extraApplied = Math.min(remainingPayment, workingDebts[i].balance);
+                        workingDebts[i].balance -= extraApplied;
+                        remainingPayment -= extraApplied;
+                        break;
+                    }
+                }
+
+                // Record this month
+                schedule.push({
+                    month: month,
+                    debts: JSON.parse(JSON.stringify(workingDebts)),
+                    totalBalance: workingDebts.reduce(function(sum, d) { return sum + d.balance; }, 0),
+                    monthlyInterest: monthlyInterest
+                });
+
+                // Safety break after 600 months (50 years)
+                if (month >= 600) break;
+            }
+
+            return {
+                strategy: strategy,
+                debts: debts,
+                order: workingDebts,
+                schedule: schedule,
+                totalMonths: month,
+                totalInterest: totalInterestPaid,
+                totalDebt: debts.reduce(function(sum, d) { return sum + d.balance; }, 0),
+                monthlyPayment: totalAvailable
+            };
+        }
+
+        /**
+         * Display plan summary
+         */
+        function displayPlanSummary(plan, avalanchePlan, snowballPlan) {
+            $('#plan-total-debt').text(formatCurrency(plan.totalDebt));
+            $('#plan-total-interest').text(formatCurrency(plan.totalInterest));
+            $('#plan-time-to-freedom').text(plan.totalMonths + ' months');
+
+            // Calculate freedom date
+            const freedomDate = new Date();
+            freedomDate.setMonth(freedomDate.getMonth() + plan.totalMonths);
+            $('#plan-freedom-date').text(freedomDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short'
+            }));
+
+            // Display comparison
+            const avalancheSavings = snowballPlan.totalInterest - avalanchePlan.totalInterest;
+            const avalancheTimeSavings = snowballPlan.totalMonths - avalanchePlan.totalMonths;
+
+            $('#avalanche-summary').html(
+                avalanchePlan.totalMonths + ' months, ' + formatCurrency(avalanchePlan.totalInterest) + ' interest<br>' +
+                '<span class="success">Saves ' + formatCurrency(avalancheSavings) + ' and ' +
+                avalancheTimeSavings + ' months vs Snowball</span>'
+            );
+
+            $('#snowball-summary').html(
+                snowballPlan.totalMonths + ' months, ' + formatCurrency(snowballPlan.totalInterest) + ' interest<br>' +
+                '<span class="info">First debt paid off in ' +
+                findFirstPayoffMonth(snowballPlan) + ' months (quick win!)</span>'
+            );
+        }
+
+        /**
+         * Find when first debt is paid off
+         */
+        function findFirstPayoffMonth(plan) {
+            for (let i = 0; i < plan.schedule.length; i++) {
+                const month = plan.schedule[i];
+                const paidOffCount = month.debts.filter(function(d) { return d.balance === 0; }).length;
+                if (paidOffCount > 0) {
+                    return i + 1;
+                }
+            }
+            return plan.totalMonths;
+        }
+
+        /**
+         * Display payoff timeline
+         */
+        function displayPayoffTimeline(plan) {
+            let html = '';
+            let currentMonth = 1;
+
+            plan.order.forEach(function(debt, index) {
+                // Find when this debt gets paid off
+                let payoffMonth = currentMonth;
+                for (let i = 0; i < plan.schedule.length; i++) {
+                    const scheduleDebt = plan.schedule[i].debts.find(function(d) { return d.id === debt.id; });
+                    if (scheduleDebt && scheduleDebt.balance === 0) {
+                        payoffMonth = i + 1;
+                        break;
+                    }
+                }
+
+                const monthsToPayoff = payoffMonth - currentMonth + 1;
+                const payoffDate = new Date();
+                payoffDate.setMonth(payoffDate.getMonth() + payoffMonth);
+
+                html += '<div class="dedebtify-timeline-item">';
+                html += '  <div class="dedebtify-timeline-number">' + (index + 1) + '</div>';
+                html += '  <div class="dedebtify-timeline-content">';
+                html += '    <h4>' + escapeHtml(debt.name) + '</h4>';
+                html += '    <div class="dedebtify-timeline-details">';
+                html += '      <span><strong>Balance:</strong> ' + formatCurrency(debt.balance) + '</span>';
+                html += '      <span><strong>APR:</strong> ' + formatPercentage(debt.interest_rate) + '</span>';
+                html += '      <span><strong>Min Payment:</strong> ' + formatCurrency(debt.minimum_payment) + '</span>';
+                html += '    </div>';
+                html += '    <div class="dedebtify-timeline-payoff">';
+                html += '      <span class="payoff-badge">Paid off in ' + monthsToPayoff + ' months</span>';
+                html += '      <span class="payoff-date">' + payoffDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) + '</span>';
+                html += '    </div>';
+                html += '  </div>';
+                html += '</div>';
+
+                currentMonth = payoffMonth;
+            });
+
+            $('#dedebtify-timeline-items').html(html);
+        }
+
+        /**
+         * Display payment schedule
+         */
+        function displayPaymentSchedule(plan) {
+            let html = '';
+
+            // Show first 12 months and last month
+            const monthsToShow = plan.schedule.length > 12 ?
+                plan.schedule.slice(0, 12).concat([plan.schedule[plan.schedule.length - 1]]) :
+                plan.schedule;
+
+            monthsToShow.forEach(function(monthData, index) {
+                if (index === 12 && plan.schedule.length > 13) {
+                    html += '<tr class="schedule-gap"><td colspan="6">... (' + (plan.schedule.length - 13) + ' more months) ...</td></tr>';
+                }
+
+                // Find which debt is being focused on
+                const focusDebt = monthData.debts.find(function(d) { return d.balance > 0; }) || monthData.debts[0];
+
+                const monthDate = new Date();
+                monthDate.setMonth(monthDate.getMonth() + monthData.month);
+
+                html += '<tr>';
+                html += '  <td>' + monthData.month + ' (' + monthDate.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) + ')</td>';
+                html += '  <td>' + escapeHtml(focusDebt.name) + '</td>';
+                html += '  <td>' + formatCurrency(plan.monthlyPayment) + '</td>';
+                html += '  <td>' + formatCurrency(plan.monthlyPayment - monthData.monthlyInterest) + '</td>';
+                html += '  <td>' + formatCurrency(monthData.monthlyInterest) + '</td>';
+                html += '  <td>' + formatCurrency(monthData.totalBalance) + '</td>';
+                html += '</tr>';
+            });
+
+            $('#payment-schedule-table tbody').html(html);
+        }
+
+        /**
+         * Display action items
+         */
+        function displayActionItems(plan) {
+            const firstDebt = plan.order[0];
+            const strategy = plan.strategy;
+
+            let focusText = 'Apply all extra payments to <strong>' + escapeHtml(firstDebt.name) + '</strong>';
+            if (strategy === 'avalanche') {
+                focusText += ' (highest interest rate at ' + formatPercentage(firstDebt.interest_rate) + ')';
+            } else {
+                focusText += ' (lowest balance at ' + formatCurrency(firstDebt.balance) + ')';
+            }
+            focusText += '. Once paid off, roll that payment to the next debt.';
+
+            $('#action-focus-text').html(focusText);
+        }
+
+        /**
+         * Show/hide plan sections
+         */
+        function showAllPlanSections() {
+            $('#dedebtify-plan-summary').slideDown();
+            $('#dedebtify-payoff-timeline').slideDown();
+            $('#dedebtify-payment-schedule').slideDown();
+            $('#dedebtify-action-items').slideDown();
+            $('#dedebtify-plan-actions').slideDown();
+        }
+
+        function hideAllPlanSections() {
+            $('#dedebtify-plan-summary').hide();
+            $('#dedebtify-payoff-timeline').hide();
+            $('#dedebtify-payment-schedule').hide();
+            $('#dedebtify-action-items').hide();
+            $('#dedebtify-plan-actions').hide();
+            $('#plan-empty-state').hide();
+        }
+
+        function showPlanLoading() {
+            hideAllPlanSections();
+            $('#plan-loading').show();
+        }
+
+        function hidePlanLoading() {
+            $('#plan-loading').hide();
+        }
+
+        // ===========================
+        // SNAPSHOTS MANAGER
+        // ===========================
+
+        /**
+         * Initialize Snapshots Manager
+         */
+        function initSnapshotsManager() {
+            if ($('.dedebtify-snapshots').length) {
+                loadSnapshotsList();
+                initSnapshotsControls();
+            }
+        }
+
+        /**
+         * Initialize snapshots controls
+         */
+        function initSnapshotsControls() {
+            // Create snapshot buttons
+            $('#create-snapshot, #create-first-snapshot').on('click', function() {
+                createSnapshot();
+            });
+
+            // Snapshot selectors change
+            $('#snapshot-select-1, #snapshot-select-2').on('change', function() {
+                const snapshot1 = $('#snapshot-select-1').val();
+                const snapshot2 = $('#snapshot-select-2').val();
+
+                if (snapshot1 && snapshot2 && snapshot1 !== snapshot2) {
+                    $('#compare-snapshots').prop('disabled', false);
+                } else {
+                    $('#compare-snapshots').prop('disabled', true);
+                }
+            });
+
+            // Compare button
+            $('#compare-snapshots').on('click', function() {
+                const snapshot1Id = $('#snapshot-select-1').val();
+                const snapshot2Id = $('#snapshot-select-2').val();
+
+                if (snapshot1Id && snapshot2Id) {
+                    compareSnapshots(snapshot1Id, snapshot2Id);
+                }
+            });
+
+            // Clear comparison
+            $('#clear-comparison').on('click', function() {
+                $('#snapshot-select-1').val('');
+                $('#snapshot-select-2').val('');
+                $('#comparison-results').slideUp();
+                $('#compare-snapshots').prop('disabled', true);
+            });
+        }
+
+        /**
+         * Create new snapshot
+         */
+        function createSnapshot() {
+            if (confirm('Create a snapshot of your current financial state?')) {
+                $.ajax({
+                    url: dedebtify.restUrl + 'snapshot',
+                    method: 'POST',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                    },
+                    success: function(response) {
+                        showMessage('Snapshot created successfully!', 'success');
+                        loadSnapshotsList();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Failed to create snapshot:', error);
+                        showMessage('Failed to create snapshot', 'error');
+                    }
+                });
+            }
+        }
+
+        /**
+         * Load snapshots list
+         */
+        function loadSnapshotsList() {
+            $.ajax({
+                url: dedebtify.restUrl + 'snapshots',
+                method: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                },
+                success: function(response) {
+                    if (response.length === 0) {
+                        $('#snapshots-list-container').hide();
+                        $('#dedebtify-snapshot-comparison').hide();
+                        $('#dedebtify-progress-overview').hide();
+                        $('#snapshots-empty-state').show();
+                    } else {
+                        renderSnapshotsList(response);
+                        populateSnapshotSelectors(response);
+                        calculateProgressOverview(response);
+                        $('#snapshots-empty-state').hide();
+                        $('#snapshots-list-container').show();
+                        $('#dedebtify-snapshot-comparison').show();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to load snapshots:', error);
+                    $('#snapshots-list-container').html('<p class="dedebtify-message error">Failed to load snapshots</p>');
+                }
+            });
+        }
+
+        /**
+         * Render snapshots list
+         */
+        function renderSnapshotsList(snapshots) {
+            let html = '<div class="dedebtify-snapshots-timeline">';
+
+            snapshots.forEach(function(snapshot, index) {
+                const date = new Date(snapshot.date);
+                const isFirst = index === snapshots.length - 1;
+                const isLatest = index === 0;
+
+                html += '<div class="dedebtify-snapshot-item ' + (isLatest ? 'latest' : '') + '">';
+                html += '  <div class="snapshot-marker"></div>';
+                html += '  <div class="snapshot-content">';
+                html += '    <div class="snapshot-header">';
+                html += '      <h4>' + date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) + '</h4>';
+                if (isLatest) {
+                    html += '      <span class="snapshot-badge latest">Latest</span>';
+                } else if (isFirst) {
+                    html += '      <span class="snapshot-badge first">First</span>';
+                }
+                html += '    </div>';
+                html += '    <div class="snapshot-metrics-grid">';
+                html += '      <div class="snapshot-metric">';
+                html += '        <span class="metric-label">Total Debt</span>';
+                html += '        <span class="metric-value">' + formatCurrency(snapshot.total_debt) + '</span>';
+                html += '      </div>';
+                html += '      <div class="snapshot-metric">';
+                html += '        <span class="metric-label">Monthly Payments</span>';
+                html += '        <span class="metric-value">' + formatCurrency(snapshot.monthly_payments) + '</span>';
+                html += '      </div>';
+                html += '      <div class="snapshot-metric">';
+                html += '        <span class="metric-label">DTI Ratio</span>';
+                html += '        <span class="metric-value">' + formatPercentage(snapshot.dti_ratio) + '</span>';
+                html += '      </div>';
+                html += '      <div class="snapshot-metric">';
+                html += '        <span class="metric-label">Credit Utilization</span>';
+                html += '        <span class="metric-value">' + formatPercentage(snapshot.credit_utilization) + '</span>';
+                html += '      </div>';
+                html += '    </div>';
+
+                // Show change from previous if not first
+                if (index < snapshots.length - 1) {
+                    const previous = snapshots[index + 1];
+                    const debtChange = snapshot.total_debt - previous.total_debt;
+                    const changeClass = debtChange < 0 ? 'positive' : 'negative';
+
+                    html += '    <div class="snapshot-change ' + changeClass + '">';
+                    if (debtChange < 0) {
+                        html += '      <span class="change-icon">↓</span> Reduced debt by ' + formatCurrency(Math.abs(debtChange));
+                    } else if (debtChange > 0) {
+                        html += '      <span class="change-icon">↑</span> Debt increased by ' + formatCurrency(debtChange);
+                    } else {
+                        html += '      <span>No change</span>';
+                    }
+                    html += '    </div>';
+                }
+
+                html += '  </div>';
+                html += '</div>';
+            });
+
+            html += '</div>';
+
+            $('#snapshots-list-container').html(html);
+        }
+
+        /**
+         * Populate snapshot selectors
+         */
+        function populateSnapshotSelectors(snapshots) {
+            let options = '<option value="">Select a snapshot...</option>';
+
+            snapshots.forEach(function(snapshot) {
+                const date = new Date(snapshot.date);
+                const dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                options += '<option value="' + snapshot.id + '">' + dateStr + ' - ' + formatCurrency(snapshot.total_debt) + '</option>';
+            });
+
+            $('#snapshot-select-1, #snapshot-select-2').html(options);
+        }
+
+        /**
+         * Calculate progress overview
+         */
+        function calculateProgressOverview(snapshots) {
+            if (snapshots.length < 2) return;
+
+            const latest = snapshots[0];
+            const first = snapshots[snapshots.length - 1];
+
+            const debtReduced = first.total_debt - latest.total_debt;
+            const debtReductionPercent = (debtReduced / first.total_debt) * 100;
+            const dtiChange = latest.dti_ratio - first.dti_ratio;
+
+            // Calculate months between
+            const firstDate = new Date(first.date);
+            const latestDate = new Date(latest.date);
+            const monthsDiff = Math.round((latestDate - firstDate) / (1000 * 60 * 60 * 24 * 30));
+
+            const avgMonthlyReduction = monthsDiff > 0 ? debtReduced / monthsDiff : 0;
+
+            // Update UI
+            $('#progress-debt-reduced').text(formatCurrency(debtReduced));
+            $('#progress-debt-percent').text(formatPercentage(debtReductionPercent) + ' reduction');
+            $('#progress-dti-change').text(formatPercentage(Math.abs(dtiChange)));
+            $('#progress-dti-change').removeClass('success warning danger');
+            if (dtiChange < 0) {
+                $('#progress-dti-change').addClass('success');
+            } else if (dtiChange > 0) {
+                $('#progress-dti-change').addClass('danger');
+            }
+
+            $('#progress-months').text(monthsDiff);
+            $('#progress-date-range').text(
+                firstDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) + ' - ' +
+                latestDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+            );
+            $('#progress-avg-monthly').text(formatCurrency(avgMonthlyReduction));
+
+            // Show progress overview
+            $('#dedebtify-progress-overview').show();
+
+            // Render simple chart
+            renderDebtChart(snapshots);
+        }
+
+        /**
+         * Render simple debt progress chart
+         */
+        function renderDebtChart(snapshots) {
+            const $chart = $('#debt-progress-chart');
+            $chart.empty();
+
+            // Get min and max values
+            const values = snapshots.map(function(s) { return s.total_debt; });
+            const maxValue = Math.max.apply(null, values);
+            const minValue = Math.min.apply(null, values);
+            const range = maxValue - minValue;
+
+            // Reverse to show oldest first
+            const reversed = snapshots.slice().reverse();
+
+            let html = '<div class="chart-bars">';
+
+            reversed.forEach(function(snapshot, index) {
+                const date = new Date(snapshot.date);
+                const heightPercent = range > 0 ? ((snapshot.total_debt - minValue) / range) * 100 : 100;
+
+                html += '<div class="chart-bar-container">';
+                html += '  <div class="chart-bar" style="height: ' + heightPercent + '%">';
+                html += '    <span class="chart-bar-value">' + formatCurrency(snapshot.total_debt) + '</span>';
+                html += '  </div>';
+                html += '  <div class="chart-label">' + date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) + '</div>';
+                html += '</div>';
+            });
+
+            html += '</div>';
+
+            $chart.html(html);
+        }
+
+        /**
+         * Compare two snapshots
+         */
+        function compareSnapshots(id1, id2) {
+            Promise.all([
+                fetchSnapshot(id1),
+                fetchSnapshot(id2)
+            ]).then(function(results) {
+                const snapshot1 = results[0];
+                const snapshot2 = results[1];
+
+                displayComparison(snapshot1, snapshot2);
+            }).catch(function(error) {
+                console.error('Failed to compare snapshots:', error);
+                showMessage('Failed to load snapshots for comparison', 'error');
+            });
+        }
+
+        /**
+         * Fetch single snapshot
+         */
+        function fetchSnapshot(id) {
+            return new Promise(function(resolve, reject) {
+                $.ajax({
+                    url: dedebtify.restUrl + 'snapshots',
+                    method: 'GET',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-WP-Nonce', dedebtify.restNonce);
+                    },
+                    success: function(response) {
+                        const snapshot = response.find(function(s) { return s.id == id; });
+                        if (snapshot) {
+                            resolve(snapshot);
+                        } else {
+                            reject('Snapshot not found');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        reject(error);
+                    }
+                });
+            });
+        }
+
+        /**
+         * Display snapshot comparison
+         */
+        function displayComparison(snapshot1, snapshot2) {
+            // Determine which is older
+            const date1 = new Date(snapshot1.date);
+            const date2 = new Date(snapshot2.date);
+
+            let older, newer;
+            if (date1 < date2) {
+                older = snapshot1;
+                newer = snapshot2;
+            } else {
+                older = snapshot2;
+                newer = snapshot1;
+            }
+
+            // Update Snapshot 1 (older)
+            $('#snapshot1-title').text('Older Snapshot');
+            $('#snapshot1-date').text(new Date(older.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+            $('#snapshot1-debt').text(formatCurrency(older.total_debt));
+            $('#snapshot1-payments').text(formatCurrency(older.monthly_payments));
+            $('#snapshot1-dti').text(formatPercentage(older.dti_ratio));
+            $('#snapshot1-util').text(formatPercentage(older.credit_utilization));
+            $('#snapshot1-cards').text(older.credit_cards_count);
+            $('#snapshot1-loans').text(older.loans_count);
+
+            // Update Snapshot 2 (newer)
+            $('#snapshot2-title').text('Newer Snapshot');
+            $('#snapshot2-date').text(new Date(newer.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+            $('#snapshot2-debt').text(formatCurrency(newer.total_debt));
+            $('#snapshot2-payments').text(formatCurrency(newer.monthly_payments));
+            $('#snapshot2-dti').text(formatPercentage(newer.dti_ratio));
+            $('#snapshot2-util').text(formatPercentage(newer.credit_utilization));
+            $('#snapshot2-cards').text(newer.credit_cards_count);
+            $('#snapshot2-loans').text(newer.loans_count);
+
+            // Calculate changes
+            const debtChange = newer.total_debt - older.total_debt;
+            const paymentsChange = newer.monthly_payments - older.monthly_payments;
+            const dtiChange = newer.dti_ratio - older.dti_ratio;
+            const utilChange = newer.credit_utilization - older.credit_utilization;
+
+            // Update change indicators
+            updateChangeIndicator('#change-debt', debtChange, true);
+            updateChangeIndicator('#change-payments', paymentsChange, true);
+            updateChangeIndicator('#change-dti', dtiChange, false);
+            updateChangeIndicator('#change-util', utilChange, false);
+
+            // Generate summary
+            generateComparisonSummary(older, newer, debtChange, dtiChange);
+
+            // Show results
+            $('#comparison-results').slideDown();
+        }
+
+        /**
+         * Update change indicator
+         */
+        function updateChangeIndicator(selector, change, isCurrency) {
+            const $item = $(selector);
+            const $value = $item.find('.change-value');
+            const $icon = $item.find('.change-icon');
+
+            const formattedChange = isCurrency ? formatCurrency(Math.abs(change)) : formatPercentage(Math.abs(change));
+
+            $item.removeClass('positive negative neutral');
+
+            if (change < 0) {
+                $item.addClass('positive');
+                $value.text('↓ ' + formattedChange);
+                $icon.html('✓');
+            } else if (change > 0) {
+                $item.addClass('negative');
+                $value.text('↑ ' + formattedChange);
+                $icon.html('✗');
+            } else {
+                $item.addClass('neutral');
+                $value.text('No change');
+                $icon.html('—');
+            }
+        }
+
+        /**
+         * Generate comparison summary
+         */
+        function generateComparisonSummary(older, newer, debtChange, dtiChange) {
+            let summary = '<p>';
+
+            const date1 = new Date(older.date);
+            const date2 = new Date(newer.date);
+            const monthsDiff = Math.round((date2 - date1) / (1000 * 60 * 60 * 24 * 30));
+
+            if (debtChange < 0) {
+                const reduction = Math.abs(debtChange);
+                const reductionPercent = (reduction / older.total_debt) * 100;
+                const avgMonthly = monthsDiff > 0 ? reduction / monthsDiff : 0;
+
+                summary += '<strong class="success">Great progress!</strong> ';
+                summary += 'You reduced your debt by <strong>' + formatCurrency(reduction) + '</strong> ';
+                summary += '(' + formatPercentage(reductionPercent) + ') ';
+                summary += 'over ' + monthsDiff + ' months. ';
+                summary += 'That\'s an average of <strong>' + formatCurrency(avgMonthly) + ' per month</strong>!';
+            } else if (debtChange > 0) {
+                summary += '<strong class="warning">Debt increased</strong> by ' + formatCurrency(debtChange) + '. ';
+                summary += 'Consider reviewing your action plan and budget.';
+            } else {
+                summary += 'Your debt remained the same during this period.';
+            }
+
+            if (dtiChange < 0) {
+                summary += ' Your DTI ratio improved by ' + formatPercentage(Math.abs(dtiChange)) + '.';
+            } else if (dtiChange > 0) {
+                summary += ' Your DTI ratio increased by ' + formatPercentage(dtiChange) + '.';
+            }
+
+            summary += '</p>';
+
+            $('#comparison-summary-text').html(summary);
+        }
+
+        // Initialize all managers
+        initCreditCardManager();
+        initLoansManager();
+        initBillsManager();
+        initGoalsManager();
+        initActionPlanManager();
+        initSnapshotsManager();
+
+
+    });
+
+})(jQuery);
+
+// Localization object (will be populated by wp_localize_script)
+var dedebtifyL10n = dedebtifyL10n || {
+    edit: 'Edit',
+    delete: 'Delete',
+    confirm_delete: 'Are you sure you want to delete this item?'
+};
