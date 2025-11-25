@@ -64,7 +64,6 @@ class Dedebtify_Helpers {
             ),
             'credit_cards' => array(
                 'title' => __( 'Credit Cards', 'dedebtify' ),
-                'icon' => 'money-alt'
                 'icon' => 'credit-card'
             ),
             'loans' => array(
